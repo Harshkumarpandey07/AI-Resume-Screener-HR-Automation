@@ -6,8 +6,6 @@
 <title>HireAI — Intelligent Resume Screening</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 :root {
   --bg:#07080a;
@@ -854,78 +852,53 @@ function removeFile(i) { S.pendingFiles.splice(i, 1); renderChips(); }
 
 // ── RESUME TEXT EXTRACTION ─────────────────────────────
 async function extractText(file) {
-  const name = file.name.toLowerCase();
-
-  // Plain text
-  if (name.endsWith('.txt')) {
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target.result || '');
-      reader.readAsText(file);
-    });
-  }
-
-  // PDF — use PDF.js for accurate text extraction
-  if (name.endsWith('.pdf')) {
-    try {
-      const pdfjsLib = window['pdfjs-dist/build/pdf'];
-      if (pdfjsLib) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-        const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = '';
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const content = await page.getTextContent();
-          const pageText = content.items.map(item => item.str).join(' ');
-          fullText += pageText + '';
-        }
-        if (fullText.trim().length > 50) return fullText.trim();
-      }
-      // Fallback: basic extraction
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      const decoder = new TextDecoder('latin1');
-      const raw = decoder.decode(bytes);
-      const readable = raw.replace(/[^ -~ ]/g, ' ').replace(/\s+/g, ' ');
-      const words = readable.match(/[A-Za-z0-9@.,'\-+#]{2,}/g) || [];
-      return words.join(' ') || `[PDF: ${file.name}]`;
-    } catch(e) {
-      console.error('PDF extract error:', e);
-      return `[PDF: ${file.name} - could not extract text]`;
-    }
-  }
-
-  // DOCX — use mammoth.js for accurate extraction
-  if (name.endsWith('.docx') || name.endsWith('.doc')) {
-    try {
-      if (window.mammoth) {
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        if (result.value && result.value.trim().length > 20) return result.value.trim();
-      }
-      // Fallback
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      const decoder = new TextDecoder('utf-8', {fatal:false});
-      const raw = decoder.decode(bytes);
-      const text = raw.replace(/<[^>]*>/g,' ').replace(/[^ -~ ]/g,' ').replace(/\s+/g,' ').trim();
-      const words = text.match(/[A-Za-z0-9@.,\-+#]{2,}/g) || [];
-      return words.join(' ') || `[DOCX: ${file.name}]`;
-    } catch(e) {
-      console.error('DOCX extract error:', e);
-      return `[DOCX: ${file.name} - could not extract text]`;
-    }
-  }
-
-  // Fallback for other types
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result || `[${file.name}]`);
-    reader.readAsText(file);
+    reader.onload = async (e) => {
+      const name = file.name.toLowerCase();
+      if (name.endsWith('.txt')) {
+        resolve(e.target.result || '');
+        return;
+      }
+      if (name.endsWith('.pdf')) {
+        // Extract text from PDF using basic text extraction
+        try {
+          const bytes = new Uint8Array(e.target.result);
+          let text = '';
+          // Simple PDF text extraction - decode readable strings
+          const decoder = new TextDecoder('latin1');
+          const raw = decoder.decode(bytes);
+          // Extract text between BT and ET markers (PDF text blocks)
+          const matches = raw.match(/BT[\s\S]*?ET/g) || [];
+          matches.forEach(block => {
+            const strings = block.match(/\(([^)]+)\)/g) || [];
+            strings.forEach(s => { text += s.slice(1,-1).replace(/\\n/g,' ').replace(/\\/g,'') + ' '; });
+          });
+          // Also grab any readable ASCII text
+          const readable = raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s+/g, ' ');
+          const words = readable.match(/[A-Za-z]{3,}/g) || [];
+          if (text.length < 100) text = words.join(' ');
+          resolve(text.trim() || `[PDF: ${file.name} - ${(file.size/1024).toFixed(0)}KB]`);
+        } catch { resolve(`[PDF: ${file.name}]`); }
+        return;
+      }
+      if (name.endsWith('.docx') || name.endsWith('.doc')) {
+        try {
+          const bytes = new Uint8Array(e.target.result);
+          const decoder = new TextDecoder('utf-8', {fatal:false});
+          const raw = decoder.decode(bytes);
+          const text = raw.replace(/<[^>]*>/g,' ').replace(/[^\x20-\x7E\n\r]/g,' ').replace(/\s+/g,' ').trim();
+          const words = text.match(/[A-Za-z0-9@.,\-+#]{2,}/g) || [];
+          resolve(words.join(' ') || `[DOCX: ${file.name}]`);
+        } catch { resolve(`[DOCX: ${file.name}]`); }
+        return;
+      }
+      resolve(e.target.result || `[${file.name}]`);
+    };
+    if (file.name.toLowerCase().endsWith('.txt')) reader.readAsText(file);
+    else reader.readAsArrayBuffer(file);
   });
 }
-
 
 // ── AI SCREENING ───────────────────────────────────────
 async function startScreening() {
@@ -1068,10 +1041,7 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: model,
-        messages: [
-          { role: 'system', content: 'You are an HR screening AI. You must respond ONLY with a valid JSON object. No markdown, no code blocks, no explanation, no preamble. Just the raw JSON object.' },
-          { role: 'user', content: prompt }
-        ],
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.1,
         max_tokens: 1500
       })
@@ -1085,10 +1055,7 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
 
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || '';
-  // Robust JSON extraction — find the first { ... } block even if there's extra text
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('AI did not return valid JSON. Please try again.');
-  const clean = jsonMatch[0].replace(/```json|```/g, '').trim();
+  const clean = raw.replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
 
   return {
