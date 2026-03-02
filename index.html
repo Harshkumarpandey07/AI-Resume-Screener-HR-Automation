@@ -6,6 +6,8 @@
 <title>HireAI — Intelligent Resume Screening</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
 <style>
 :root {
   --bg:#07080a;
@@ -301,6 +303,264 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 /* ── CHART CONTAINER ── */
 .chart-wrap{position:relative;height:220px}
+
+.otw-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(0,212,170,.12);border:1px solid rgba(0,212,170,.3);border-radius:20px;padding:4px 12px;font-size:.75rem;font-weight:700;color:var(--accent);margin-bottom:8px;}
+.otw-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite;}
+/* ── PORTFOLIO PAGE ── */
+.portfolio-hero {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  background: var(--bg2);
+}
+.portfolio-hero-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 0% 0%, rgba(0,212,170,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 100% 100%, rgba(74,158,255,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+.portfolio-hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 36px;
+}
+.portfolio-avatar {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent), #4a9eff);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bg);
+  flex-shrink: 0;
+  box-shadow: 0 0 30px rgba(0,212,170,0.3);
+}
+.portfolio-greeting { font-size: .85rem; color: var(--text2); margin-bottom: 4px; }
+.portfolio-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, var(--text), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.portfolio-tagline {
+  font-size: .9rem;
+  color: var(--text2);
+  margin-bottom: 14px;
+  font-weight: 500;
+}
+.portfolio-highlight {
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+}
+.portfolio-bio {
+  font-size: .875rem;
+  color: var(--text3);
+  line-height: 1.7;
+  max-width: 560px;
+  margin-bottom: 20px;
+}
+.portfolio-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.portfolio-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: var(--r2);
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--border2);
+  background: var(--bg3);
+  color: var(--text3);
+  transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.portfolio-link-btn:hover { border-color: var(--accent); color: var(--accent); }
+.portfolio-link-accent {
+  background: var(--accent);
+  color: var(--bg) !important;
+  border-color: var(--accent);
+  -webkit-text-fill-color: var(--bg);
+}
+.portfolio-link-accent:hover { background: var(--accent2); box-shadow: 0 0 20px var(--accent-glow); }
+
+.portfolio-section { margin-bottom: 28px; }
+.portfolio-section-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text2);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Skills cloud */
+.skills-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
+.skill-tag {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  border: 1px solid;
+  transition: transform .15s;
+  cursor: default;
+}
+.skill-tag:hover { transform: translateY(-2px); }
+.skill-tag-primary { background: rgba(0,212,170,.1); color: var(--accent); border-color: rgba(0,212,170,.25); }
+.skill-tag-secondary { background: rgba(74,158,255,.1); color: var(--blue); border-color: rgba(74,158,255,.25); }
+.skill-tag-accent { background: rgba(155,89,182,.1); color: var(--purple); border-color: rgba(155,89,182,.25); }
+.skill-tag-default { background: var(--bg3); color: var(--text3); border-color: var(--border); }
+
+/* Featured project */
+.featured-project-card {
+  background: var(--bg2);
+  border: 1px solid rgba(0,212,170,.2);
+  border-radius: var(--r);
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+}
+.featured-project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), #4a9eff);
+}
+.fp-header { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+.fp-icon { font-size: 2rem; flex-shrink: 0; }
+.fp-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; }
+.fp-subtitle { font-size: .78rem; color: var(--accent); margin-top: 2px; }
+.fp-badge {
+  margin-left: auto;
+  background: rgba(0,212,170,.15);
+  color: var(--accent);
+  border: 1px solid rgba(0,212,170,.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.fp-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.fp-desc { font-size: .875rem; color: var(--text3); line-height: 1.7; margin-bottom: 16px; }
+.fp-tech { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+.fp-tech span {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: .72rem;
+  font-family: 'DM Mono', monospace;
+}
+.fp-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.fp-stat {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 14px;
+  text-align: center;
+}
+.fp-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+}
+.fp-stat-label { font-size: .7rem; color: var(--text2); margin-top: 2px; }
+
+/* Other projects */
+.other-projects-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.op-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  transition: all .2s;
+}
+.op-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.op-card-add { border-style: dashed; cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.op-card-add:hover { border-color: var(--accent); }
+.op-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.op-title { font-family: 'Syne', sans-serif; font-size: .9rem; font-weight: 700; margin-bottom: 6px; }
+.op-desc { font-size: .78rem; color: var(--text2); line-height: 1.5; margin-bottom: 12px; }
+.op-tech { display: flex; flex-wrap: wrap; gap: 5px; }
+.op-tech span {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: .7rem;
+  font-family: 'DM Mono', monospace;
+}
+
+/* Why hire me */
+.why-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+.why-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 20px;
+  transition: all .2s;
+}
+.why-card:hover { border-color: rgba(0,212,170,.3); transform: translateY(-2px); }
+.why-icon { font-size: 1.6rem; margin-bottom: 10px; }
+.why-title { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; margin-bottom: 8px; }
+.why-desc { font-size: .78rem; color: var(--text2); line-height: 1.6; }
+
+/* CTA */
+.portfolio-cta {
+  background: linear-gradient(135deg, rgba(0,212,170,.08), rgba(74,158,255,.06));
+  border: 1px solid rgba(0,212,170,.2);
+  border-radius: var(--r);
+  padding: 40px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.portfolio-cta-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  margin-bottom: 8px;
+}
+.portfolio-cta-sub { font-size: .875rem; color: var(--text2); margin-bottom: 24px; }
+.portfolio-cta-buttons { display: flex; gap: 12px; justify-content: center; }
+
 </style>
 </head>
 <body>
@@ -316,7 +576,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   </div>
   <nav class="nav" id="nav">
     <span class="nav-section">Main</span>
-    <a class="nav-item active" onclick="go('dashboard',this)">
+    <a class="nav-item active" onclick="go('dashboard',this)" id="nav-dashboard">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Dashboard <span class="nav-dot"></span>
     </a>
@@ -347,11 +607,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Settings <span class="nav-dot"></span>
     </a>
+      <span class="nav-section">Portfolio</span>
+    <a class="nav-item" onclick="go('portfolio',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      My Portfolio <span class="nav-dot"></span>
+    </a>
   </nav>
   <div class="sidebar-footer">
     <div class="user-card">
-      <div class="user-ava">HR</div>
-      <div><div class="user-name">HR Admin</div><div class="user-role">Administrator</div></div>
+      <div class="user-ava">HK</div>
+      <div><div class="user-name">Harsh K. Pandey</div><div class="user-role">B.Tech CS · Final Year</div></div>
       <div class="status-dot"></div>
     </div>
   </div>
@@ -419,7 +684,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <!-- ── AI SCREENING ── -->
   <section class="page" id="page-screen">
     <div class="sec-head">
-      <div><h1>AI Resume Screening</h1><p>Upload resumes — Claude AI analyzes, scores & ranks every candidate</p></div>
+      <div><h1>AI Resume Screening</h1><p>Upload resumes — Groq AI analyzes, scores & ranks every candidate</p></div>
     </div>
     <div class="screen-grid">
       <div>
@@ -649,7 +914,7 @@ function go(page, el) {
   if (el) el.classList.add('active');
   document.getElementById('breadcrumb').textContent = {
     dashboard:'Dashboard', jobs:'Job Postings', screen:'AI Screening',
-    candidates:'Candidates', pipeline:'Pipeline', emails:'Email Campaigns', settings:'Settings'
+    candidates:'Candidates', pipeline:'Pipeline', emails:'Email Campaigns', settings:'Settings', portfolio:'My Portfolio'
   }[page] || page;
   if (page === 'dashboard') refreshDash();
   if (page === 'candidates') renderCands();
@@ -852,53 +1117,78 @@ function removeFile(i) { S.pendingFiles.splice(i, 1); renderChips(); }
 
 // ── RESUME TEXT EXTRACTION ─────────────────────────────
 async function extractText(file) {
+  const name = file.name.toLowerCase();
+
+  // Plain text
+  if (name.endsWith('.txt')) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result || '');
+      reader.readAsText(file);
+    });
+  }
+
+  // PDF — use PDF.js for accurate text extraction
+  if (name.endsWith('.pdf')) {
+    try {
+      const pdfjsLib = window.pdfjsLib;
+      if (pdfjsLib) {
+        if (pdfjsLib.GlobalWorkerOptions) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          const pageText = content.items.map(item => item.str).join(' ');
+          fullText += pageText + '';
+        }
+        if (fullText.trim().length > 50) return fullText.trim();
+      }
+      // Fallback: basic extraction
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const decoder = new TextDecoder('latin1');
+      const raw = decoder.decode(bytes);
+      const readable = raw.replace(/[^\x20-\x7E\t]/g, ' ').replace(/\s+/g, ' ');
+      const words = readable.match(/[A-Za-z0-9@.,'\-+#]{2,}/g) || [];
+      return words.join(' ') || `[PDF: ${file.name}]`;
+    } catch(e) {
+      console.error('PDF extract error:', e);
+      return `[PDF: ${file.name} - could not extract text]`;
+    }
+  }
+
+  // DOCX — use mammoth.js for accurate extraction
+  if (name.endsWith('.docx') || name.endsWith('.doc')) {
+    try {
+      if (window.mammoth) {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        if (result.value && result.value.trim().length > 20) return result.value.trim();
+      }
+      // Fallback
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      const decoder = new TextDecoder('utf-8', {fatal:false});
+      const raw = decoder.decode(bytes);
+      const text = raw.replace(/<[^>]*>/g,' ').replace(/[^\x20-\x7E]/g,' ').replace(/\s+/g,' ').trim();
+      const words = text.match(/[A-Za-z0-9@.,\-+#]{2,}/g) || [];
+      return words.join(' ') || `[DOCX: ${file.name}]`;
+    } catch(e) {
+      console.error('DOCX extract error:', e);
+      return `[DOCX: ${file.name} - could not extract text]`;
+    }
+  }
+
+  // Fallback for other types
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const name = file.name.toLowerCase();
-      if (name.endsWith('.txt')) {
-        resolve(e.target.result || '');
-        return;
-      }
-      if (name.endsWith('.pdf')) {
-        // Extract text from PDF using basic text extraction
-        try {
-          const bytes = new Uint8Array(e.target.result);
-          let text = '';
-          // Simple PDF text extraction - decode readable strings
-          const decoder = new TextDecoder('latin1');
-          const raw = decoder.decode(bytes);
-          // Extract text between BT and ET markers (PDF text blocks)
-          const matches = raw.match(/BT[\s\S]*?ET/g) || [];
-          matches.forEach(block => {
-            const strings = block.match(/\(([^)]+)\)/g) || [];
-            strings.forEach(s => { text += s.slice(1,-1).replace(/\\n/g,' ').replace(/\\/g,'') + ' '; });
-          });
-          // Also grab any readable ASCII text
-          const readable = raw.replace(/[^\x20-\x7E\n\r\t]/g, ' ').replace(/\s+/g, ' ');
-          const words = readable.match(/[A-Za-z]{3,}/g) || [];
-          if (text.length < 100) text = words.join(' ');
-          resolve(text.trim() || `[PDF: ${file.name} - ${(file.size/1024).toFixed(0)}KB]`);
-        } catch { resolve(`[PDF: ${file.name}]`); }
-        return;
-      }
-      if (name.endsWith('.docx') || name.endsWith('.doc')) {
-        try {
-          const bytes = new Uint8Array(e.target.result);
-          const decoder = new TextDecoder('utf-8', {fatal:false});
-          const raw = decoder.decode(bytes);
-          const text = raw.replace(/<[^>]*>/g,' ').replace(/[^\x20-\x7E\n\r]/g,' ').replace(/\s+/g,' ').trim();
-          const words = text.match(/[A-Za-z0-9@.,\-+#]{2,}/g) || [];
-          resolve(words.join(' ') || `[DOCX: ${file.name}]`);
-        } catch { resolve(`[DOCX: ${file.name}]`); }
-        return;
-      }
-      resolve(e.target.result || `[${file.name}]`);
-    };
-    if (file.name.toLowerCase().endsWith('.txt')) reader.readAsText(file);
-    else reader.readAsArrayBuffer(file);
+    reader.onload = (e) => resolve(e.target.result || `[${file.name}]`);
+    reader.readAsText(file);
   });
 }
+
 
 // ── AI SCREENING ───────────────────────────────────────
 async function startScreening() {
@@ -1041,7 +1331,10 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+          { role: 'system', content: 'You are an HR screening AI. You must respond ONLY with a valid JSON object. No markdown, no code blocks, no explanation, no preamble. Just the raw JSON object.' },
+          { role: 'user', content: prompt }
+        ],
         temperature: 0.1,
         max_tokens: 1500
       })
@@ -1055,7 +1348,10 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
 
   const data = await res.json();
   const raw = data.choices?.[0]?.message?.content || '';
-  const clean = raw.replace(/```json|```/g, '').trim();
+  // Robust JSON extraction — find the first { ... } block even if there's extra text
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('AI did not return valid JSON. Please try again.');
+  const clean = jsonMatch[0].replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
 
   return {
@@ -1572,6 +1868,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderJobs();
   updateJobSelects();
   refreshDash();
+  // Set active nav item on load
+  const navDash = document.getElementById('nav-dashboard');
+  if (navDash) navDash.classList.add('active');
   applyTemplate('accept');
 
   // Upload zone drag styles
@@ -1597,9 +1896,151 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Show welcome toast if no API key
   if (!c.apiKey || !c.apiKey.startsWith('gsk_')) {
-    setTimeout(() => toast('👋 Welcome! Go to Settings and add your Anthropic API key to enable real AI screening.', 'info'), 1000);
+    setTimeout(() => toast('👋 Welcome to HireAI! Go to Settings and add your Groq API key to enable AI screening.', 'info'), 1000);
   }
 });
 </script>
+
+  <!-- PORTFOLIO PAGE -->
+  <section class="page" id="page-portfolio">
+    <div class="portfolio-hero">
+      <div class="portfolio-hero-bg"></div>
+      <div class="portfolio-hero-content">
+        <div class="portfolio-avatar">HK</div>
+        <div class="portfolio-intro">
+          <div class="portfolio-greeting">👋 Hey there, I'm</div>
+          <h1 class="portfolio-name">Harsh Kumar Pandey</h1>
+          <div class="otw-badge"><div class="otw-dot"></div> Open to Work · Graduating 2026</div>
+          <div class="portfolio-tagline">B.Tech CS · <span class="portfolio-highlight">AI & Full Stack Developer</span> · Building real things</div>
+          <p class="portfolio-bio">I'm a B.Tech final year Computer Science student who builds production-ready web applications and AI-powered tools. I don't just learn technologies — I ship projects that solve real problems. HireAI is proof of that.</p>
+          <div class="portfolio-links">
+            <a href="https://github.com" target="_blank" class="portfolio-link-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/></svg>
+              GitHub
+            </a>
+            <a href="https://linkedin.com" target="_blank" class="portfolio-link-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+              LinkedIn
+            </a>
+            <a href="mailto:harshkumarpandey@email.com" class="portfolio-link-btn portfolio-link-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              Hire Me
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills -->
+    <div class="portfolio-section">
+      <div class="portfolio-section-label">⚡ Technical Skills</div>
+      <div class="skills-cloud">
+        <span class="skill-tag skill-tag-primary">JavaScript (ES6+)</span>
+        <span class="skill-tag skill-tag-primary">React</span>
+        <span class="skill-tag skill-tag-primary">Node.js</span>
+        <span class="skill-tag skill-tag-secondary">Python</span>
+        <span class="skill-tag skill-tag-secondary">Machine Learning</span>
+        <span class="skill-tag skill-tag-secondary">SQL</span>
+        <span class="skill-tag skill-tag-secondary">C++</span>
+        <span class="skill-tag skill-tag-accent">LLM / Prompt Engineering</span>
+        <span class="skill-tag skill-tag-accent">Groq API</span>
+        <span class="skill-tag skill-tag-accent">REST APIs</span>
+        <span class="skill-tag skill-tag-default">PDF.js</span>
+        <span class="skill-tag skill-tag-default">Chart.js</span>
+        <span class="skill-tag skill-tag-default">Mammoth.js</span>
+        <span class="skill-tag skill-tag-default">CSS3 / UI Design</span>
+        <span class="skill-tag skill-tag-default">LocalStorage / State Mgmt</span>
+        <span class="skill-tag skill-tag-default">SendGrid API</span>
+        <span class="skill-tag skill-tag-default">Git / GitHub</span>
+      </div>
+    </div>
+
+    <!-- Featured Project -->
+    <div class="portfolio-section">
+      <div class="portfolio-section-label">🚀 Featured Project</div>
+      <div class="featured-project-card">
+        <div class="fp-header">
+          <div class="fp-icon">🤖</div>
+          <div>
+            <div class="fp-title">HireAI — AI Resume Screening Platform</div>
+            <div class="fp-subtitle">The app you're looking at right now</div>
+          </div>
+          <span class="fp-badge">Live</span>
+        </div>
+        <p class="fp-desc">A fully functional HR automation SaaS that uses Groq's free LLM API (Llama 3.3 70B) to screen resumes, score candidates, and manage hiring pipelines — all in a single HTML file with zero backend.</p>
+        <div class="fp-tech">
+          <span>Groq API</span><span>Llama 3.3</span><span>PDF.js</span><span>Mammoth.js</span><span>Chart.js</span><span>Vanilla JS</span><span>SendGrid</span>
+        </div>
+        <div class="fp-stats">
+          <div class="fp-stat"><div class="fp-stat-val">~1600</div><div class="fp-stat-label">Lines of Code</div></div>
+          <div class="fp-stat"><div class="fp-stat-val">7</div><div class="fp-stat-label">App Pages</div></div>
+          <div class="fp-stat"><div class="fp-stat-val">0</div><div class="fp-stat-label">Frameworks Used</div></div>
+          <div class="fp-stat"><div class="fp-stat-val">100%</div><div class="fp-stat-label">Browser-Side</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Projects -->
+    <div class="portfolio-section">
+      <div class="portfolio-section-label">📁 Other Projects</div>
+      <div class="other-projects-grid">
+        <div class="op-card">
+          <div class="op-icon">💡</div>
+          <div class="op-title">Project 2</div>
+          <div class="op-desc">Add your project description here. What problem did it solve? What tech did you use?</div>
+          <div class="op-tech"><span>React</span><span>Node.js</span></div>
+        </div>
+        <div class="op-card">
+          <div class="op-icon">🔬</div>
+          <div class="op-title">Project 3</div>
+          <div class="op-desc">Add your project description here. What problem did it solve? What tech did you use?</div>
+          <div class="op-tech"><span>Python</span><span>ML</span></div>
+        </div>
+        <div class="op-card op-card-add" onclick="toast('Edit the HTML to add more projects!', 'info')">
+          <div class="op-icon">➕</div>
+          <div class="op-title">Add Project</div>
+          <div class="op-desc">Click to add another project to your portfolio</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What makes me different -->
+    <div class="portfolio-section">
+      <div class="portfolio-section-label">🎯 Why Hire Me</div>
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="why-icon">🏗️</div>
+          <div class="why-title">I Ship Real Products</div>
+          <div class="why-desc">Not just tutorials or toy projects. HireAI is a complete, production-ready SaaS application I built end to end.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🤖</div>
+          <div class="why-title">AI-Native Developer</div>
+          <div class="why-desc">I understand LLMs, prompt engineering, and how to integrate AI into real applications — not just use ChatGPT.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">⚡</div>
+          <div class="why-title">Fast Learner</div>
+          <div class="why-desc">Final year B.Tech CS student already shipping production-ready AI applications. I learn by doing, and I do it fast.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-icon">🔧</div>
+          <div class="why-title">Strong Fundamentals</div>
+          <div class="why-desc">No shortcuts — I understand how the browser, APIs, async code, and data flow actually work under the hood.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="portfolio-cta">
+      <div class="portfolio-cta-text">Interested in working together?</div>
+      <div class="portfolio-cta-sub">I'm open to internships, freelance projects, and full-time opportunities</div>
+      <div class="portfolio-cta-buttons">
+        <a href="mailto:harshkumarpandey@email.com" class="btn btn-primary" style="text-decoration:none">✉️ Get In Touch</a>
+        <a href="https://github.com" target="_blank" class="btn btn-ghost" style="text-decoration:none">View GitHub</a>
+      </div>
+    </div>
+  </section>
+
 </body>
 </html>
