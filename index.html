@@ -561,15 +561,15 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .portfolio-cta-sub { font-size: .875rem; color: var(--text2); margin-bottom: 24px; }
 .portfolio-cta-buttons { display: flex; gap: 12px; justify-content: center; }
 
-.about-dev-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;display:grid;grid-template-columns:220px 1fr;gap:32px}
-.about-dev-left{display:flex;flex-direction:column;align-items:center;gap:20px}
+.about-dev-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;display:grid;grid-template-columns:200px 1fr;gap:28px;width:100%;box-sizing:border-box}
+.about-dev-left{display:flex;flex-direction:column;align-items:center;gap:20px;min-width:200px}
 .about-dev-avatar{display:flex;flex-direction:column;align-items:center;gap:10px}
 .about-dev-avatar-inner{width:100px;height:100px;background:linear-gradient(135deg,var(--accent),#4a9eff);border-radius:24px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--bg);box-shadow:0 0 40px rgba(0,212,170,.25)}
 .about-dev-status{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:700;color:var(--accent)}
-.about-dev-quick-info{width:100%;display:flex;flex-direction:column;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.about-dev-quick-info{width:100%;display:flex;flex-direction:column;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px;box-sizing:border-box}
 .about-dev-info-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text3)}
 .about-dev-info-icon{font-size:.9rem;flex-shrink:0}
-.about-dev-right{display:flex;flex-direction:column}
+.about-dev-right{display:flex;flex-direction:column;overflow:hidden;min-width:0}
 .about-dev-name{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.03em}
 .about-dev-role{font-size:.85rem;color:var(--accent);font-weight:600;margin-top:4px;margin-bottom:14px}
 .about-dev-divider{height:1px;background:var(--border);margin:14px 0}
@@ -583,7 +583,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .about-dev-currently-item{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--text3)}
 .about-dev-curr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .about-dev-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-
 </style>
 </head>
 <body>
@@ -2060,24 +2059,25 @@ document.addEventListener('DOMContentLoaded', () => {
   <div class="about-dev-card">
     <div class="about-dev-left">
       <div class="about-dev-avatar">
-        <div class="about-dev-avatar-inner">HK</div>
+        <div class="about-dev-avatar-inner">HKP</div>
         <div class="about-dev-status"><div class="otw-dot"></div> Open to Work</div>
       </div>
       <div class="about-dev-quick-info">
-        <div class="about-dev-info-item"><span class="about-dev-info-icon">🎓</span><span>B.Tech Computer Science</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">🎓</span><span>B.Tech CSE · UCER Prayagraj</span></div>
         <div class="about-dev-info-item"><span class="about-dev-info-icon">📅</span><span>Final Year · Graduating 2026</span></div>
-        <div class="about-dev-info-item"><span class="about-dev-info-icon">📍</span><span>India</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">🏆</span><span>CGPA: 7.0</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">📍</span><span>Prayagraj, India</span></div>
         <div class="about-dev-info-item"><span class="about-dev-info-icon">💼</span><span>Full Stack · AI/ML · Frontend</span></div>
         <div class="about-dev-info-item"><span class="about-dev-info-icon">🌐</span><span>English · Hindi</span></div>
       </div>
     </div>
     <div class="about-dev-right">
       <div class="about-dev-name">Harsh Kumar Pandey</div>
-      <div class="about-dev-role">Full Stack Developer & AI Engineer</div>
+      <div class="about-dev-role">Full Stack Developer & AI/ML Engineer</div>
       <div class="about-dev-divider"></div>
-      <p class="about-dev-bio">Hi, I'm Harsh — a final year B.Tech Computer Science student with a deep passion for building things that actually work in the real world. I don't just write code; I engineer solutions.</p>
-      <p class="about-dev-bio">HireAI is one of my flagship projects — a fully functional AI-powered HR automation platform built entirely from scratch using vanilla JavaScript, Groq's LLM API, and modern browser technologies. No frameworks. No shortcuts. Just clean, production-ready code.</p>
-      <p class="about-dev-bio">My interests span Full Stack Development, Artificial Intelligence, Machine Learning, and building SaaS-style applications. I believe the best way to learn is to build.</p>
+      <p class="about-dev-bio">Hi, I'm Harsh — a final year B.Tech CSE student at United College of Engineering and Research, Prayagraj. I'm a Full-Stack Developer with a strong Machine Learning background, passionate about building things that actually work in the real world.</p>
+      <p class="about-dev-bio">I've built projects like a Plant Disease Detection System using CNN & TensorFlow, a Salary Prediction System using Random Forest, an Online Food Delivery Website, and HireAI — a full AI-powered HR automation platform. Each one solves a real problem.</p>
+      <p class="about-dev-bio">My stack includes React.js, Node.js, Express.js, MongoDB, Python, TensorFlow, and scikit-learn. I hold certifications from NPTEL IIT Madras and IBM Skills Network, and completed web dev training at IIIT Allahabad.</p>
       <div class="about-dev-divider"></div>
       <div class="about-dev-traits">
         <div class="about-dev-trait">🚀 Ships real products</div>
@@ -2095,6 +2095,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--blue)"></span><span>Exploring Machine Learning & Deep Learning</span></div>
           <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--yellow)"></span><span>Looking for internship / full-time opportunities</span></div>
           <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--purple)"></span><span>Working on my final year project</span></div>
+          <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--red)"></span><span>NPTEL Certified · IBM AI Certified · IIIT Allahabad Trained</span></div>
         </div>
       </div>
       <div class="about-dev-cta-row">
