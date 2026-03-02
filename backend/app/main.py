@@ -27,3 +27,7 @@ app.include_router(emails.router, prefix="/api/emails", tags=["Emails"])
 
 @app.get("/health")
 async def health(): return {"status": "ok", "service": "HireAI"}
+
+from fastapi.staticfiles import StaticFiles
+
+app.mount("/", StaticFiles(directory="../frontend/build", html=True), name="static")
