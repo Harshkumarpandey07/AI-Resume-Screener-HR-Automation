@@ -1,0 +1,18 @@
+### 🐍 `backend/requirements.txt`
+```
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+anthropic==0.28.0
+pymupdf==1.24.3
+python-docx==1.1.2
+sqlalchemy==2.0.30
+aiosqlite==0.20.0
+sendgrid==6.11.0
+python-dotenv==1.0.1
+jinja2==3.1.4
+pytest==8.2.0
+httpx==0.27.0
+pydantic==2.7.1
+passlib==1.7.4
+python-jose==3.3.0
