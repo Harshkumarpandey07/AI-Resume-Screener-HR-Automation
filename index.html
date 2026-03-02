@@ -530,11 +530,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="card-head"><h3>🔑 API Configuration</h3></div>
         <div class="fg"><label>Anthropic API Key</label>
           <div class="key-row">
-            <input type="password" id="apiKey" placeholder="AIza..."/>
+            <input type="password" id="apiKey" placeholder="gsk_..."/>
             <button class="btn btn-ghost btn-sm" onclick="toggleVis('apiKey')">👁</button>
             <button class="btn btn-primary btn-sm" onclick="testApiKey()">Test</button>
           </div>
-          <div style="font-size:.72rem;color:var(--text2);margin-top:6px">Get your FREE key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a> — No credit card needed!</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:6px">Get your FREE key at <a href="https://console.groq.com/keys" target="_blank" style="color:var(--accent)">console.groq.com</a> — No credit card needed!</div>
         </div>
         <div class="fg"><label>Email Service</label>
           <select id="emailSvc"><option value="sendgrid">SendGrid</option><option value="gmail">Gmail SMTP</option><option value="outlook">Outlook SMTP</option><option value="simulate">Simulate (Demo)</option></select>
@@ -552,9 +552,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="fg"><label>Default Interview Threshold</label><input type="number" id="defInterview" value="50" min="0" max="100"/></div>
         <div class="fg"><label>AI Model</label>
           <select id="aiModel">
-            <option value="gemini-2.0-flash-lite" selected>Gemini 2.0 Flash Lite — Free ✅ (Recommended · Highest Quota)</option>
-            <option value="gemini-2.0-flash">Gemini 2.0 Flash — Free ✅ (More Powerful)</option>
-            <option value="gemini-2.5-flash-preview-05-20">Gemini 2.5 Flash — Free ✅ (Most Powerful)</option>
+            <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B — Free ✅ (Recommended)</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B — Free ✅ (Fastest)</option>
+            <option value="mixtral-8x7b-32768">Mixtral 8x7B — Free ✅ (Balanced)</option>
           </select>
         </div>
         <div class="fg"><label>Screening Language</label>
@@ -724,14 +724,14 @@ function toggleVis(id) {
 async function testApiKey() {
   const key = document.getElementById('apiKey').value.trim();
   if (!key) { toast('Enter an API key first', 'err'); return; }
-  toast('Testing Gemini API key...', 'info');
+  toast('Testing Groq API key...', 'info');
   try {
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${key}`, {
+    const res = await fetch(`https://api.groq.com/openai/v1/chat/completions`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({contents:[{parts:[{text:'Hi'}]}]})
+      headers: {'Content-Type':'application/json', 'Authorization': `Bearer ${key}`},
+      body: JSON.stringify({model:'llama-3.1-8b-instant', messages:[{role:'user',content:'Hi'}], max_tokens:5})
     });
-    if (res.ok) { toast('✅ Gemini API key is valid and working! (FREE)', 'ok'); saveCfg({apiKey:key}); updateApiStatus(); }
+    if (res.ok) { toast('✅ Groq API key is valid and working! (FREE)', 'ok'); saveCfg({apiKey:key}); updateApiStatus(); }
     else { const d = await res.json(); toast(`❌ API error: ${d.error?.message || res.status}`, 'err'); }
   } catch (e) { toast(`Connection error: ${e.message}`, 'err'); }
 }
@@ -739,9 +739,9 @@ async function testApiKey() {
 function updateApiStatus() {
   const el = document.getElementById('apiStatusBadge');
   const key = cfg().apiKey;
-  if (key && key.startsWith('AIza')) {
+  if (key && key.startsWith('gsk_')) {
     el.className = 'api-status connected';
-    el.innerHTML = '<div class="api-dot"></div> Gemini Free API ✓';
+    el.innerHTML = '<div class="api-dot"></div> Groq Free API ✓';
   } else {
     el.className = 'api-status disconnected';
     el.innerHTML = '<div class="api-dot"></div> No API Key';
@@ -910,8 +910,8 @@ async function startScreening() {
   if (!S.pendingFiles.length) { toast('Upload at least one resume to screen', 'err'); return; }
 
   const apiKey = cfg().apiKey;
-  if (!apiKey || !apiKey.startsWith('AIza')) {
-    toast('Add your free Gemini API key in Settings first!', 'err');
+  if (!apiKey || !apiKey.startsWith('gsk_')) {
+    toast('Add your free Groq API key in Settings first!', 'err');
     go('settings', document.querySelector('[onclick*="settings"]'));
     return;
   }
@@ -992,7 +992,7 @@ async function startScreening() {
 async function callClaudeScreening(resumeText, jd, jobTitle, threshold, apiKey, filename) {
   const c = cfg();
   const company = c.companyName || 'Our Company';
-  const model = c.aiModel || 'gemini-2.0-flash-lite';
+  const model = c.aiModel || 'llama-3.3-70b-versatile';
   const interviewMin = c.defInterview || 50;
 
   const prompt = `You are an expert HR screening AI for ${company}. Analyze this resume against the job description with deep professional insight.
@@ -1033,26 +1033,28 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
   "interview_questions": ["Relevant question 1?", "Relevant question 2?", "Relevant question 3?"]
 }`;
 
-  // Google Gemini API — 100% FREE, no credit card needed, 1500 requests/day
+  // Groq API — 100% FREE, no credit card needed, generous daily limits
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    `https://api.groq.com/openai/v1/chat/completions`,
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
+        model: model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.1,
+        max_tokens: 1500
       })
     }
   );
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `Gemini API Error ${res.status}`);
+    throw new Error(err.error?.message || `Groq API Error ${res.status}`);
   }
 
   const data = await res.json();
-  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const raw = data.choices?.[0]?.message?.content || '';
   const clean = raw.replace(/```json|```/g, '').trim();
   const parsed = JSON.parse(clean);
 
@@ -1594,7 +1596,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Show welcome toast if no API key
-  if (!c.apiKey || !c.apiKey.startsWith('AIza')) {
+  if (!c.apiKey || !c.apiKey.startsWith('gsk_')) {
     setTimeout(() => toast('👋 Welcome! Go to Settings and add your Anthropic API key to enable real AI screening.', 'info'), 1000);
   }
 });
