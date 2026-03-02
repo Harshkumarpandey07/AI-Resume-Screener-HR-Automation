@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HireAI — AI-Powered HR Automation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">⚡</div>
+    <span class="logo-text">HireAI</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="dashboard" onclick="navigate('dashboard',this)"><span class="nav-icon">📊</span><span>Dashboard</span></a>
+    <a href="#" class="nav-item" data-page="jobs" onclick="navigate('jobs',this)"><span class="nav-icon">💼</span><span>Job Postings</span></a>
+    <a href="#" class="nav-item" data-page="screen" onclick="navigate('screen',this)"><span class="nav-icon">🤖</span><span>AI Screening</span></a>
+    <a href="#" class="nav-item" data-page="candidates" onclick="navigate('candidates',this)"><span class="nav-icon">👥</span><span>Candidates</span></a>
+    <a href="#" class="nav-item" data-page="emails" onclick="navigate('emails',this)"><span class="nav-icon">📧</span><span>Email Campaigns</span></a>
+    <a href="#" class="nav-item" data-page="settings" onclick="navigate('settings',this)"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-avatar">HR</div>
+    <div><div class="user-name">HR Admin</div><div class="user-role">Administrator</div></div>
+  </div>
+</aside>
+
+<main class="main-content">
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="page-title" id="pageTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box"><span>🔍</span><input type="text" placeholder="Search candidates, jobs..." id="globalSearch" oninput="handleSearch(this.value)"/></div>
+      <div class="notif-btn" onclick="toggleNotif()" style="position:relative;cursor:pointer">
+        🔔 <span class="badge" id="notifBadge">3</span>
+        <div class="notif-panel" id="notifPanel">
+          <div class="notif-header">Notifications</div>
+          <div class="notif-item unread">✅ Resume screened: John Doe — Score 87</div>
+          <div class="notif-item unread">📧 Email sent to 12 candidates</div>
+          <div class="notif-item unread">💼 New job posted: Senior Dev</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="section-header">
+      <div><h1>Welcome back, HR Admin 👋</h1><p class="subtitle">Here's what's happening today</p></div>
+      <button class="btn-primary" onclick="navigate('screen',document.querySelector('[data-page=screen]'))">+ Screen Resumes</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card" style="--accent:#6366f1"><div class="stat-icon">📄</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Total Screened</div><div class="stat-change positive">↑ 12% this week</div></div>
+      <div class="stat-card" style="--accent:#10b981"><div class="stat-icon">✅</div><div class="stat-value" id="statAccepted">0</div><div class="stat-label">Accepted</div><div class="stat-change positive">↑ 8%</div></div>
+      <div class="stat-card" style="--accent:#f59e0b"><div class="stat-icon">📅</div><div class="stat-value" id="statInterview">0</div><div class="stat-label">Interview Stage</div><div class="stat-change positive">↑ 5%</div></div>
+      <div class="stat-card" style="--accent:#ef4444"><div class="stat-icon">❌</div><div class="stat-value" id="statRejected">0</div><div class="stat-label">Rejected</div><div class="stat-change negative">↓ 3%</div></div>
+    </div>
+    <div class="dashboard-grid">
+      <div class="card"><div class="card-header"><h3>Screening Activity</h3></div><canvas id="activityChart" height="220"></canvas></div>
+      <div class="card"><div class="card-header"><h3>Decision Distribution</h3></div><canvas id="pieChart" height="220"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h3>Recent Candidates</h3><button class="btn-outline" onclick="navigate('candidates',document.querySelector('[data-page=candidates]'))">View All</button></div>
+      <table class="data-table"><thead><tr><th>Name</th><th>Position</th><th>Score</th><th>Decision</th><th>Date</th><th>Action</th></tr></thead><tbody id="recentCandidates"></tbody></table>
+    </div>
+  </section>
+
+  <!-- JOBS -->
+  <section class="page" id="page-jobs">
+    <div class="section-header"><div><h1>Job Postings</h1><p class="subtitle">Manage active positions</p></div><button class="btn-primary" onclick="openJobModal()">+ Add Job</button></div>
+    <div class="jobs-grid" id="jobsGrid"></div>
+  </section>
+
+  <!-- SCREENING -->
+  <section class="page" id="page-screen">
+    <div class="section-header"><div><h1>AI Resume Screening</h1><p class="subtitle">Upload resumes for instant AI analysis</p></div></div>
+    <div class="screen-layout">
+      <div class="card screen-form">
+        <h3>⚙️ Configure Screening</h3>
+        <div class="form-group"><label>Job Position</label><select id="screenJobSelect"><option value="">-- Select position --</option></select></div>
+        <div class="form-group"><label>Custom Job Description</label><textarea id="customJD" rows="5" placeholder="Or paste a custom job description..."></textarea></div>
+        <div class="form-group">
+          <label>Accept Threshold: <span id="thresholdVal">70</span></label>
+          <input type="range" id="threshold" min="0" max="100" value="70" oninput="document.getElementById('thresholdVal').textContent=this.value" style="width:100%"/>
+        </div>
+        <div class="form-group"><label>Upload Resumes (PDF / DOCX)</label>
+          <div class="upload-zone" id="uploadZone" ondrop="handleDrop(event)" ondragover="event.preventDefault()" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size:2.5rem">📂</div>
+            <p><strong>Drag & drop</strong> or click to browse</p>
+            <p class="upload-hint">PDF, DOCX — max 10MB each</p>
+            <input type="file" id="fileInput" multiple accept=".pdf,.docx" style="display:none" onchange="handleFiles(this.files)"/>
+          </div>
+          <div id="fileList"></div>
+        </div>
+        <button class="btn-primary full-width" onclick="startScreening()" id="screenBtn">🤖 Start AI Screening</button>
+      </div>
+      <div class="card screen-results">
+        <h3>🎯 Screening Results</h3>
+        <div class="results-placeholder" id="resultsPlaceholder"><div style="font-size:3rem">🤖</div><p>Results appear here after screening</p></div>
+        <div id="screeningResults"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CANDIDATES -->
+  <section class="page" id="page-candidates">
+    <div class="section-header">
+      <div><h1>All Candidates</h1><p class="subtitle">Complete screening history</p></div>
+      <div class="filter-row">
+        <select id="filterDecision" onchange="filterCandidates()"><option value="">All Decisions</option><option value="ACCEPT">Accepted</option><option value="INTERVIEW">Interview</option><option value="REJECT">Rejected</option></select>
+        <select id="filterJob" onchange="filterCandidates()"><option value="">All Jobs</option></select>
+      </div>
+    </div>
+    <div class="card"><table class="data-table"><thead><tr><th>Candidate</th><th>Position</th><th>Score</th><th>Decision</th><th>Key Strengths</th><th>Date</th><th>Actions</th></tr></thead><tbody id="allCandidates"></tbody></table></div>
+  </section>
+
+  <!-- EMAILS -->
+  <section class="page" id="page-emails">
+    <div class="section-header"><div><h1>Email Campaigns</h1><p class="subtitle">Automated candidate communications</p></div></div>
+    <div class="email-layout">
+      <div class="card">
+        <h3>📬 Quick Send</h3>
+        <div class="quick-send-row">
+          <div class="qs-card" onclick="quickSend('ACCEPT')"><div class="qs-icon" style="background:#d1fae5;color:#10b981">✅</div><div class="qs-label">Send Acceptances</div><div class="qs-count" id="qsAcceptCount">0 pending</div></div>
+          <div class="qs-card" onclick="quickSend('INTERVIEW')"><div class="qs-icon" style="background:#fef3c7;color:#f59e0b">📅</div><div class="qs-label">Interview Invites</div><div class="qs-count" id="qsInterviewCount">0 pending</div></div>
+          <div class="qs-card" onclick="quickSend('REJECT')"><div class="qs-icon" style="background:#fee2e2;color:#ef4444">❌</div><div class="qs-label">Send Rejections</div><div class="qs-count" id="qsRejectCount">0 pending</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>✉️ Email Composer</h3>
+        <div class="form-group"><label>Template</label><select id="emailTemplate" onchange="loadTemplate(this.value)"><option value="accept">Acceptance Letter</option><option value="interview">Interview Invitation</option><option value="reject">Rejection Letter</option><option value="custom">Custom</option></select></div>
+        <div class="form-group"><label>Subject</label><input type="text" id="emailSubject"/></div>
+        <div class="form-group"><label>Body</label><textarea id="emailBody" rows="8"></textarea></div>
+        <div class="form-group"><label>Send To</label><select id="sendToGroup"><option value="ACCEPT">All Accepted</option><option value="INTERVIEW">All Interview</option><option value="REJECT">All Rejected</option><option value="ALL">All Candidates</option></select></div>
+        <button class="btn-primary full-width" onclick="sendEmails()">📤 Send Emails</button>
+      </div>
+      <div class="card"><div class="card-header"><h3>📊 Email History</h3></div>
+        <table class="data-table"><thead><tr><th>Campaign</th><th>Sent To</th><th>Count</th><th>Date</th><th>Status</th></tr></thead><tbody id="emailHistory"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="page" id="page-settings">
+    <div class="section-header"><div><h1>Settings</h1><p class="subtitle">Configure your automation</p></div></div>
+    <div class="settings-grid">
+      <div class="card">
+        <h3>🔑 API Keys</h3>
+        <div class="form-group"><label>Anthropic API Key</label><div class="api-key-row"><input type="password" id="anthropicKey" placeholder="sk-ant-..."/><button class="btn-outline" onclick="toggleKey('anthropicKey')">👁</button></div></div>
+        <div class="form-group"><label>Email Service</label><select id="emailService"><option>SendGrid</option><option>Gmail SMTP</option><option>Outlook SMTP</option></select></div>
+        <div class="form-group"><label>Email API Key</label><input type="password" id="emailKey" placeholder="Your email API key..."/></div>
+        <div class="form-group"><label>From Email</label><input type="email" id="fromEmail" placeholder="hr@company.com"/></div>
+        <button class="btn-primary" onclick="saveSettings()">💾 Save</button>
+      </div>
+      <div class="card">
+        <h3>🤖 AI Config</h3>
+        <div class="form-group"><label>Accept Threshold (score ≥)</label><input type="number" id="acceptThreshold" value="75" min="0" max="100"/></div>
+        <div class="form-group"><label>Interview Threshold (score ≥)</label><input type="number" id="interviewThreshold" value="50" min="0" max="100"/></div>
+        <div class="form-group"><label>AI Model</label><select id="aiModel"><option value="claude-sonnet-4-20250514">Claude Sonnet 4 (Recommended)</option><option value="claude-opus-4-20250514">Claude Opus 4 (Powerful)</option></select></div>
+        <div class="form-group"><label>Company Name</label><input type="text" id="companyName" placeholder="Acme Corp"/></div>
+        <button class="btn-primary" onclick="saveSettings()">💾 Save</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="jobModal">
+  <div class="modal">
+    <div class="modal-header"><h3>Add Job Posting</h3><button class="modal-close" onclick="closeModal('jobModal')">✕</button></div>
+    <div class="form-group"><label>Job Title</label><input type="text" id="jobTitle" placeholder="e.g. Senior Full Stack Developer"/></div>
+    <div class="form-group"><label>Department</label><input type="text" id="jobDept" placeholder="e.g. Engineering"/></div>
+    <div class="form-group"><label>Location</label><input type="text" id="jobLocation" placeholder="e.g. Remote / New York"/></div>
+    <div class="form-group"><label>Job Description</label><textarea id="jobDescription" rows="8" placeholder="Full job description with requirements..."></textarea></div>
+    <div class="form-group"><label>Required Skills (comma-separated)</label><input type="text" id="jobSkills" placeholder="Python, React, AWS..."/></div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('jobModal')">Cancel</button><button class="btn-primary" onclick="saveJob()">Save Job</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="candidateModal">
+  <div class="modal modal-wide">
+    <div class="modal-header"><h3>Candidate Profile</h3><button class="modal-close" onclick="closeModal('candidateModal')">✕</button></div>
+    <div id="candidateDetailContent"></div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('candidateModal')">Close</button><button class="btn-primary" onclick="emailCurrentCandidate()">📧 Send Email</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="confirmEmailModal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="confirmEmailTitle">Confirm Send</h3><button class="modal-close" onclick="closeModal('confirmEmailModal')">✕</button></div>
+    <div id="confirmEmailContent"></div>
+    <div class="modal-footer"><button class="btn-outline" onclick="closeModal('confirmEmailModal')">Cancel</button><button class="btn-primary" onclick="executeSend()">✅ Confirm Send</button></div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+<script src="app.js"></script>
+</body>
+</html>
