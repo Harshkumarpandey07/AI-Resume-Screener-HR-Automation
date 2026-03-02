@@ -530,11 +530,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="card-head"><h3>🔑 API Configuration</h3></div>
         <div class="fg"><label>Anthropic API Key</label>
           <div class="key-row">
-            <input type="password" id="apiKey" placeholder="sk-ant-api03-..."/>
+            <input type="password" id="apiKey" placeholder="AIza..."/>
             <button class="btn btn-ghost btn-sm" onclick="toggleVis('apiKey')">👁</button>
             <button class="btn btn-primary btn-sm" onclick="testApiKey()">Test</button>
           </div>
-          <div style="font-size:.72rem;color:var(--text2);margin-top:6px">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--accent)">console.anthropic.com</a></div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:6px">Get your FREE key at <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--accent)">aistudio.google.com</a> — No credit card needed!</div>
         </div>
         <div class="fg"><label>Email Service</label>
           <select id="emailSvc"><option value="sendgrid">SendGrid</option><option value="gmail">Gmail SMTP</option><option value="outlook">Outlook SMTP</option><option value="simulate">Simulate (Demo)</option></select>
@@ -552,8 +552,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
         <div class="fg"><label>Default Interview Threshold</label><input type="number" id="defInterview" value="50" min="0" max="100"/></div>
         <div class="fg"><label>AI Model</label>
           <select id="aiModel">
-            <option value="claude-sonnet-4-20250514">Claude Sonnet 4 — Fast & Smart ⚡</option>
-            <option value="claude-opus-4-20250514">Claude Opus 4 — Most Powerful 🧠</option>
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash — Fast & Free ⚡</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro — Most Powerful 🧠</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash — Ultra Fast 🚀</option>
           </select>
         </div>
         <div class="fg"><label>Screening Language</label>
@@ -723,14 +724,14 @@ function toggleVis(id) {
 async function testApiKey() {
   const key = document.getElementById('apiKey').value.trim();
   if (!key) { toast('Enter an API key first', 'err'); return; }
-  toast('Testing API key...', 'info');
+  toast('Testing Gemini API key...', 'info');
   try {
-    const res = await fetch('/api/proxy', {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
       method: 'POST',
-      headers: {'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
-      body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:10,messages:[{role:'user',content:'Hi'}]})
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({contents:[{parts:[{text:'Hi'}]}]})
     });
-    if (res.ok) { toast('✅ API key is valid and working!', 'ok'); saveCfg({apiKey:key}); updateApiStatus(); }
+    if (res.ok) { toast('✅ Gemini API key is valid and working! (FREE)', 'ok'); saveCfg({apiKey:key}); updateApiStatus(); }
     else { const d = await res.json(); toast(`❌ API error: ${d.error?.message || res.status}`, 'err'); }
   } catch (e) { toast(`Connection error: ${e.message}`, 'err'); }
 }
@@ -738,9 +739,9 @@ async function testApiKey() {
 function updateApiStatus() {
   const el = document.getElementById('apiStatusBadge');
   const key = cfg().apiKey;
-  if (key && key.startsWith('sk-ant')) {
+  if (key && key.startsWith('AIza')) {
     el.className = 'api-status connected';
-    el.innerHTML = '<div class="api-dot"></div> API Connected';
+    el.innerHTML = '<div class="api-dot"></div> Gemini Free API ✓';
   } else {
     el.className = 'api-status disconnected';
     el.innerHTML = '<div class="api-dot"></div> No API Key';
@@ -909,8 +910,8 @@ async function startScreening() {
   if (!S.pendingFiles.length) { toast('Upload at least one resume to screen', 'err'); return; }
 
   const apiKey = cfg().apiKey;
-  if (!apiKey || !apiKey.startsWith('sk-ant')) {
-    toast('Add your Anthropic API key in Settings first!', 'err');
+  if (!apiKey || !apiKey.startsWith('AIza')) {
+    toast('Add your free Gemini API key in Settings first!', 'err');
     go('settings', document.querySelector('[onclick*="settings"]'));
     return;
   }
@@ -991,9 +992,7 @@ async function startScreening() {
 async function callClaudeScreening(resumeText, jd, jobTitle, threshold, apiKey, filename) {
   const c = cfg();
   const company = c.companyName || 'Our Company';
-  const lang = c.screenLang || 'English';
-  const model = c.aiModel || 'claude-sonnet-4-20250514';
-
+  const model = c.aiModel || 'gemini-2.0-flash';
   const interviewMin = c.defInterview || 50;
 
   const prompt = `You are an expert HR screening AI for ${company}. Analyze this resume against the job description with deep professional insight.
@@ -1008,7 +1007,7 @@ ${resumeText.substring(0, 5000)}
 
 SCORING CRITERIA:
 - Skills match: 35 points
-- Experience relevance: 30 points  
+- Experience relevance: 30 points
 - Education fit: 15 points
 - Achievements/impact: 20 points
 
@@ -1034,28 +1033,28 @@ Respond ONLY with a valid JSON object, no markdown, no extra text:
   "interview_questions": ["Relevant question 1?", "Relevant question 2?", "Relevant question 3?"]
 }`;
 
-  const res = await fetch('/api/proxy', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model,
-      max_tokens: 1500,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
+  // Google Gemini API — 100% FREE, no credit card needed, 1500 requests/day
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 1500 }
+      })
+    }
+  );
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error?.message || `API Error ${res.status}`);
+    throw new Error(err.error?.message || `Gemini API Error ${res.status}`);
   }
 
   const data = await res.json();
-  const raw = data.content[0].text.replace(/```json|```/g, '').trim();
-  const parsed = JSON.parse(raw);
+  const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const clean = raw.replace(/```json|```/g, '').trim();
+  const parsed = JSON.parse(clean);
 
   return {
     name: parsed.name || filename,
@@ -1595,7 +1594,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Show welcome toast if no API key
-  if (!c.apiKey) {
+  if (!c.apiKey || !c.apiKey.startsWith('AIza')) {
     setTimeout(() => toast('👋 Welcome! Go to Settings and add your Anthropic API key to enable real AI screening.', 'info'), 1000);
   }
 });
