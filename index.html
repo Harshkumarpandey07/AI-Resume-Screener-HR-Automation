@@ -561,6 +561,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .portfolio-cta-sub { font-size: .875rem; color: var(--text2); margin-bottom: 24px; }
 .portfolio-cta-buttons { display: flex; gap: 12px; justify-content: center; }
 
+.about-dev-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:28px;display:grid;grid-template-columns:220px 1fr;gap:32px}
+.about-dev-left{display:flex;flex-direction:column;align-items:center;gap:20px}
+.about-dev-avatar{display:flex;flex-direction:column;align-items:center;gap:10px}
+.about-dev-avatar-inner{width:100px;height:100px;background:linear-gradient(135deg,var(--accent),#4a9eff);border-radius:24px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--bg);box-shadow:0 0 40px rgba(0,212,170,.25)}
+.about-dev-status{display:flex;align-items:center;gap:6px;background:rgba(0,212,170,.1);border:1px solid rgba(0,212,170,.25);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:700;color:var(--accent)}
+.about-dev-quick-info{width:100%;display:flex;flex-direction:column;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:14px}
+.about-dev-info-item{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text3)}
+.about-dev-info-icon{font-size:.9rem;flex-shrink:0}
+.about-dev-right{display:flex;flex-direction:column}
+.about-dev-name{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;letter-spacing:-.03em}
+.about-dev-role{font-size:.85rem;color:var(--accent);font-weight:600;margin-top:4px;margin-bottom:14px}
+.about-dev-divider{height:1px;background:var(--border);margin:14px 0}
+.about-dev-bio{font-size:.875rem;color:var(--text3);line-height:1.75;margin-bottom:10px}
+.about-dev-traits{display:flex;flex-wrap:wrap;gap:8px}
+.about-dev-trait{background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.75rem;color:var(--text3);font-weight:500;transition:all .2s;cursor:default}
+.about-dev-trait:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.about-dev-currently{display:flex;flex-direction:column;gap:8px}
+.about-dev-currently-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text2);margin-bottom:4px}
+.about-dev-currently-items{display:flex;flex-direction:column;gap:8px}
+.about-dev-currently-item{display:flex;align-items:center;gap:10px;font-size:.82rem;color:var(--text3)}
+.about-dev-curr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.about-dev-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
 </style>
 </head>
 <body>
@@ -2031,6 +2054,57 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
 
+    <!-- About the Developer -->
+<div class="portfolio-section">
+  <div class="portfolio-section-label">👨‍💻 About the Developer</div>
+  <div class="about-dev-card">
+    <div class="about-dev-left">
+      <div class="about-dev-avatar">
+        <div class="about-dev-avatar-inner">HK</div>
+        <div class="about-dev-status"><div class="otw-dot"></div> Open to Work</div>
+      </div>
+      <div class="about-dev-quick-info">
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">🎓</span><span>B.Tech Computer Science</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">📅</span><span>Final Year · Graduating 2026</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">📍</span><span>India</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">💼</span><span>Full Stack · AI/ML · Frontend</span></div>
+        <div class="about-dev-info-item"><span class="about-dev-info-icon">🌐</span><span>English · Hindi</span></div>
+      </div>
+    </div>
+    <div class="about-dev-right">
+      <div class="about-dev-name">Harsh Kumar Pandey</div>
+      <div class="about-dev-role">Full Stack Developer & AI Engineer</div>
+      <div class="about-dev-divider"></div>
+      <p class="about-dev-bio">Hi, I'm Harsh — a final year B.Tech Computer Science student with a deep passion for building things that actually work in the real world. I don't just write code; I engineer solutions.</p>
+      <p class="about-dev-bio">HireAI is one of my flagship projects — a fully functional AI-powered HR automation platform built entirely from scratch using vanilla JavaScript, Groq's LLM API, and modern browser technologies. No frameworks. No shortcuts. Just clean, production-ready code.</p>
+      <p class="about-dev-bio">My interests span Full Stack Development, Artificial Intelligence, Machine Learning, and building SaaS-style applications. I believe the best way to learn is to build.</p>
+      <div class="about-dev-divider"></div>
+      <div class="about-dev-traits">
+        <div class="about-dev-trait">🚀 Ships real products</div>
+        <div class="about-dev-trait">🤖 AI-native thinker</div>
+        <div class="about-dev-trait">⚡ Fast learner</div>
+        <div class="about-dev-trait">🔧 Strong fundamentals</div>
+        <div class="about-dev-trait">🎯 Problem solver</div>
+        <div class="about-dev-trait">📦 Zero-dependency mindset</div>
+      </div>
+      <div class="about-dev-divider"></div>
+      <div class="about-dev-currently">
+        <div class="about-dev-currently-label">Currently</div>
+        <div class="about-dev-currently-items">
+          <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--accent)"></span><span>Building AI-powered web applications</span></div>
+          <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--blue)"></span><span>Exploring Machine Learning & Deep Learning</span></div>
+          <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--yellow)"></span><span>Looking for internship / full-time opportunities</span></div>
+          <div class="about-dev-currently-item"><span class="about-dev-curr-dot" style="background:var(--purple)"></span><span>Working on my final year project</span></div>
+        </div>
+      </div>
+      <div class="about-dev-cta-row">
+        <a href="mailto:YOUR_EMAIL" class="btn btn-primary btn-sm" style="text-decoration:none">✉️ Contact Me</a>
+        <a href="https://github.com/Harshkumarpandey07" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">⚡ GitHub</a>
+        <a href="YOUR_LINKEDIN_URL" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">💼 LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</div>
     <!-- CTA -->
     <div class="portfolio-cta">
       <div class="portfolio-cta-text">Interested in working together?</div>
