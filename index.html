@@ -881,25 +881,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
   <!-- PORTFOLIO PAGE -->
   <section class="page" id="page-portfolio">
-    <div class="portfolio-hero">
-      <div class="portfolio-hero-bg"></div>
-      <div class="portfolio-hero-content">
-        <div class="portfolio-avatar">HK</div>
-        <div class="portfolio-intro">
-          <div class="portfolio-greeting">Hey there, I am</div>
-          <h1 class="portfolio-name">Harsh Kumar Pandey</h1>
-          <div class="otw-badge"><div class="otw-dot"></div> Open to Work &middot; Graduating 2026</div>
-          <div class="portfolio-tagline">B.Tech CS &middot; <span class="portfolio-highlight">AI &amp; Full Stack Developer</span> &middot; Building real things</div>
-          <p class="portfolio-bio">I am a B.Tech final year Computer Science student who builds production-ready web applications and AI-powered tools. I ship projects that solve real problems. HireAI is proof of that.</p>
-          <div class="portfolio-links">
-            <a href="https://github.com/Harshkumarpandey07" target="_blank" class="portfolio-link-btn">GitHub</a>
-            <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" class="portfolio-link-btn">LinkedIn</a>
-            <a href="mailto:harshkumaranipandey@gmail.com" class="portfolio-link-btn portfolio-link-accent">Hire Me</a>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="portfolio-section">
       <div class="portfolio-section-label">About the Developer</div>
       <div class="about-dev-card">
@@ -942,7 +923,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
             </div>
           </div>
           <div class="about-dev-cta-row">
-            <a href="mailto:harshkumaranipandey@gmail.com" class="btn btn-primary btn-sm" style="text-decoration:none">Contact Me</a>
+            <a href="/cdn-cgi/l/email-protection#ec848d9e9f848799818d9e8d82859c8d82888995ac8b818d8580c28f8381" class="btn btn-primary btn-sm" style="text-decoration:none">Contact Me</a>
             <a href="https://github.com/Harshkumarpandey07" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">GitHub</a>
             <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">LinkedIn</a>
           </div>
@@ -1057,7 +1038,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <div class="toasts" id="toasts"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════════════════════
 // HIREAI — Complete Production Application
 // ═══════════════════════════════════════════════════════
@@ -2069,9 +2050,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('threshold').value = c.defAccept;
     document.getElementById('thVal').textContent = c.defAccept;
   }
-
-  // Show welcome toast if no API key
-  if (!c.apiKey || !c.apiKey.startsWith('gsk_')) {
+ if (!c.apiKey || !c.apiKey.startsWith('gsk_')) {
     setTimeout(() => toast('👋 Welcome to HireAI! Go to Settings and add your Groq API key to enable AI screening.', 'info'), 1000);
   }
 });
