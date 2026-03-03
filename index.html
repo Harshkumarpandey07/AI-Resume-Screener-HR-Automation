@@ -314,6 +314,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   margin-bottom: 24px;
   border: 1px solid var(--border);
   background: var(--bg2);
+  width: 100%;
+  box-sizing: border-box;
 }
 .portfolio-hero-bg {
   position: absolute;
@@ -329,17 +331,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   align-items: flex-start;
   gap: 28px;
   padding: 36px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .portfolio-avatar {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, var(--accent), #4a9eff);
+  background: linear-gradient(135deg, var(--accent), #00b4d8);
   border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Syne', sans-serif;
-  font-size: 2rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: var(--bg);
   flex-shrink: 0;
@@ -413,7 +417,10 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   align-items: center;
   gap: 8px;
 }
-
+.portfolio-intro {
+  flex: 1;
+  min-width: 0;
+}
 /* Skills cloud */
 .skills-cloud { display: flex; flex-wrap: wrap; gap: 8px; }
 .skill-tag {
