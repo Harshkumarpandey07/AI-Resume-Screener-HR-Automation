@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireAI — Job Seeker Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#06080f;--bg2:#0b0f1c;--bg3:#0f1525;
+  --cyan:#00e5ff;--cyan2:#00b8d9;
+  --violet:#7c3aed;--violet2:#a855f7;
+  --green:#10b981;--amber:#f59e0b;--red:#ef4444;--pink:#ec4899;
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#475569;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --glass:rgba(255,255,255,0.03);--glass2:rgba(255,255,255,0.06);
+  --r:14px;--r-sm:9px;
+  --font-h:'Syne',sans-serif;--font-b:'DM Sans',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 15% 20%,rgba(124,58,237,.08),transparent 50%),
+  radial-gradient(ellipse at 85% 75%,rgba(0,229,255,.06),transparent 50%)}
+
+/* NAV */
+.nav{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;gap:16px;
+  padding:14px 36px;
+  background:rgba(6,8,15,.85);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:14px}
+.logo-text{font-family:var(--font-h);font-size:17px;font-weight:800;color:var(--text)}
+.logo-text span{color:var(--cyan)}
+.nav-tag{font-size:10px;background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.2);padding:2px 8px;border-radius:5px;font-weight:700}
+.nav-tabs{display:flex;gap:2px;background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:3px;margin-left:auto}
+.nav-tab{padding:7px 18px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;border:none;background:none}
+.nav-tab.active{background:var(--glass2);color:var(--text);border:1px solid var(--border2)}
+.nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s;margin-left:12px}
+.nav-back:hover{color:var(--cyan)}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 57px);position:relative;z-index:1}
+.sidebar{
+  width:300px;min-height:100%;
+  background:var(--bg2);border-right:1px solid var(--border);
+  padding:20px;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;
+  flex-shrink:0;
+}
+.main{flex:1;padding:28px;overflow-x:hidden}
+
+/* FILTER SIDEBAR */
+.filter-title{font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.filter-clear{font-size:11px;color:var(--cyan);cursor:pointer;font-weight:500;font-family:var(--font-b)}
+.filter-section{margin-bottom:24px}
+.filter-label{font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:block}
+.filter-input{
+  width:100%;padding:9px 12px;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-family:var(--font-b);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.filter-input:focus{border-color:var(--cyan)}
+.filter-input::placeholder{color:var(--text3)}
+.filter-chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:500;
+  cursor:pointer;border:1px solid var(--border);
+  background:var(--glass);color:var(--text2);transition:all .2s;
+}
+.chip:hover,.chip.active{border-color:var(--cyan);color:var(--cyan);background:rgba(0,229,255,.07)}
+.chip.active-violet{border-color:var(--violet2);color:var(--violet2);background:rgba(168,85,247,.07)}
+.filter-range{width:100%;accent-color:var(--cyan);cursor:pointer}
+.range-row{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px}
+
+/* JOBS GRID */
+.page{display:none}.page.active{display:block;animation:fadeUp .3s ease}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.page-title{font-family:var(--font-h);font-size:20px;font-weight:700}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px}
+.results-meta{font-size:13px;color:var(--text2)}
+
+.jobs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.job-card{
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--r);padding:22px;
+  cursor:pointer;transition:all .25s;
+  position:relative;overflow:hidden;
+}
+.job-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent-a),var(--accent-b));opacity:0;transition:opacity .25s}
+.job-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.3)}
+.job-card:hover::before{opacity:1}
+.job-card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.company-logo{
+  width:44px;height:44px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;border:1px solid var(--border2);
+}
+.job-title{font-family:var(--font-h);font-size:15px;font-weight:700;margin-bottom:3px;line-height:1.3}
+.job-company{font-size:12px;color:var(--text2)}
+.job-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.job-meta-item{
+  display:flex;align-items:center;gap:5px;
+  font-size:11px;color:var(--text3);
+}
+.job-skills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px}
+.skill-tag{
+  background:rgba(0,229,255,.07);color:var(--cyan);
+  border:1px solid rgba(0,229,255,.15);
+  border-radius:5px;padding:2px 9px;font-size:11px;font-weight:500;
+}
+.skill-tag.secondary{background:var(--glass);color:var(--text3);border-color:var(--border)}
+.job-footer{display:flex;align-items:center;justify-content:space-between}
+.salary-tag{
+  font-family:var(--font-h);font-size:14px;font-weight:700;color:var(--green);
+}
+.job-badge{
+  font-size:10px;padding:3px 9px;border-radius:5px;font-weight:700;
+}
+.badge-new{background:rgba(0,229,255,.12);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.badge-hot{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.badge-remote{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.badge-saved{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+
+/* JOB DETAIL VIEW */
+.job-detail{display:none;animation:fadeUp .3s ease}
+.detail-back{display:flex;align-items:center;gap:8px;color:var(--text2);cursor:pointer;font-size:13px;margin-bottom:20px;transition:color .2s;border:none;background:none;padding:0}
+.detail-back:hover{color:var(--cyan)}
+.detail-layout{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.detail-main{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:28px}
+.detail-sticky{position:sticky;top:80px;display:flex;flex-direction:column;gap:14px}
+.detail-header{display:flex;align-items:flex-start;gap:16px;margin-bottom:24px}
+.company-logo-lg{width:60px;height:60px;border-radius:14px;font-size:28px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border2);flex-shrink:0}
+.detail-title{font-family:var(--font-h);font-size:24px;font-weight:800;margin-bottom:4px}
+.detail-company{font-size:14px;color:var(--text2);margin-bottom:8px}
+.detail-badges{display:flex;flex-wrap:wrap;gap:6px}
+.detail-section{margin-bottom:24px}
+.detail-section-title{font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.detail-list{display:flex;flex-direction:column;gap:8px}
+.detail-list-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--text2);line-height:1.6}
+.detail-list-item::before{content:'→';color:var(--cyan);flex-shrink:0;margin-top:1px}
+.prereq-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.prereq-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px}
+.prereq-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.prereq-value{font-size:14px;font-weight:600}
+
+/* SCORE PANEL */
+.score-panel{background:var(--glass);border:1px solid var(--border2);border-radius:var(--r);padding:22px}
+.score-panel-title{font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:16px}
+.score-ring-big{
+  width:80px;height:80px;border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  border:3px solid;font-family:var(--font-h);font-weight:800;margin:0 auto 14px;
+}
+.score-ring-big.great{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08)}
+.score-ring-big.good{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)}
+.score-ring-big.fair{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+.score-ring-big.none{border-color:var(--text3);color:var(--text3);background:var(--glass)}
+.score-num-big{font-size:24px;line-height:1}
+.score-lbl{font-size:10px;opacity:.7}
+.score-breakdown{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
+.sb-row{display:flex;align-items:center;gap:10px}
+.sb-label{font-size:12px;color:var(--text2);width:90px;flex-shrink:0}
+.sb-bar{flex:1;height:5px;background:var(--glass2);border-radius:3px;overflow:hidden}
+.sb-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .6s ease}
+.sb-val{font-size:12px;font-weight:700;width:30px;text-align:right;flex-shrink:0}
+
+/* APPLY PANEL */
+.apply-panel{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.apply-panel-title{font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:14px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px;display:block}
+.form-input{
+  width:100%;padding:10px 13px;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-family:var(--font-b);font-size:13px;outline:none;
+  transition:border-color .2s;
+}
+.form-input:focus{border-color:var(--cyan)}
+.form-input::placeholder{color:var(--text3)}
+textarea.form-input{resize:vertical;min-height:80px}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  padding:10px 20px;border-radius:var(--r-sm);
+  font-family:var(--font-b);font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;border:none;width:100%;
+}
+.btn-cyan{background:linear-gradient(135deg,var(--violet),var(--cyan2));color:#fff}
+.btn-cyan:hover{opacity:.88;transform:translateY(-1px)}
+.btn-ghost{background:var(--glass);border:1px solid var(--border);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-outline-cyan{background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.25);color:var(--cyan)}
+.btn-outline-cyan:hover{background:rgba(0,229,255,.12)}
+.btn-sm{padding:7px 14px;font-size:12px;width:auto}
+
+/* RESUME CHECKER */
+.checker-card{background:var(--glass);border:1px solid var(--border2);border-radius:var(--r);padding:24px;margin-bottom:14px}
+.checker-title{font-family:var(--font-h);font-size:15px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.checker-sub{font-size:12px;color:var(--text2);margin-bottom:18px}
+.role-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab-row{display:flex;gap:4px;background:var(--glass);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:14px}
+.tab-btn{flex:1;padding:7px 12px;border-radius:7px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;transition:all .2s;font-family:var(--font-b)}
+.tab-btn.active{background:var(--glass2);color:var(--text)}
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:var(--r);
+  padding:28px 20px;text-align:center;cursor:pointer;
+  transition:all .25s;background:var(--glass);margin-bottom:10px;
+}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--cyan);background:rgba(0,229,255,.04)}
+.upload-zone-icon{font-size:28px;margin-bottom:8px}
+.upload-zone-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.upload-zone-sub{font-size:12px;color:var(--text2)}
+textarea.resume-ta{
+  width:100%;height:160px;resize:vertical;
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:var(--r-sm);color:var(--text);
+  font-family:var(--font-b);font-size:13px;padding:12px 14px;
+  outline:none;line-height:1.6;transition:border-color .2s;
+}
+textarea.resume-ta:focus{border-color:var(--cyan)}
+textarea.resume-ta::placeholder{color:var(--text3)}
+
+/* RESULT DISPLAY */
+.result-box{margin-top:20px;animation:fadeUp .4s ease}
+.result-hero{display:flex;align-items:center;gap:20px;padding:20px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);margin-bottom:14px}
+.result-score-circle{
+  width:76px;height:76px;border-radius:50%;flex-shrink:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:var(--font-h);font-weight:800;border:3px solid;
+}
+.rsc-great{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08)}
+.rsc-good{border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)}
+.rsc-fair{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+.rsc-num{font-size:22px;line-height:1}
+.rsc-lbl{font-size:10px;opacity:.6}
+.result-verdict{font-family:var(--font-h);font-size:18px;font-weight:700;margin-bottom:4px}
+.result-sub{font-size:12px;color:var(--text2);margin-bottom:10px}
+.result-verdict-desc{font-size:13px;color:var(--text2);line-height:1.65}
+.breakdown-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.bd-item{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
+.bd-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.bd-val{font-family:var(--font-h);font-size:22px;font-weight:800}
+.bd-bar{height:4px;background:var(--glass2);border-radius:2px;margin-top:8px;overflow:hidden}
+.bd-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--violet),var(--cyan));transition:width .6s .2s ease}
+.tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tips-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tip-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text2);margin-bottom:7px;line-height:1.5}
+
+/* APPLICATIONS */
+.app-table{width:100%;border-collapse:collapse}
+.app-table th{text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.app-table td{padding:14px;font-size:13px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.app-table tr:hover td{background:var(--glass)}
+.app-table tr:last-child td{border-bottom:none}
+.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.status-applied{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.2)}
+.status-review{background:rgba(245,158,11,.1);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.status-interview{background:rgba(168,85,247,.12);color:var(--violet2);border:1px solid rgba(168,85,247,.2)}
+.status-accepted{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.status-rejected{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+
+/* SAVED */
+.saved-empty{text-align:center;padding:60px 24px;color:var(--text2)}
+.saved-empty-icon{font-size:44px;margin-bottom:12px;opacity:.4}
+
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--bg2);border:1px solid var(--border2);
+  border-radius:10px;padding:12px 18px;
+  font-size:13px;font-weight:500;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  display:none;animation:slideIn .3s ease;
+  display:none;
+}
+.toast-show{display:flex!important;align-items:center;gap:10px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:30px;width:480px;max-width:92vw;max-height:88vh;overflow-y:auto;transform:translateY(16px);transition:transform .3s;position:relative}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-family:var(--font-h);font-size:18px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.modal-close{position:absolute;top:14px;right:14px;background:var(--glass);border:1px solid var(--border);border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:13px;transition:all .2s}
+.modal-close:hover{color:var(--text)}
+
+/* MISC */
+.empty-state{text-align:center;padding:60px 24px;color:var(--text2)}
+.empty-icon{font-size:44px;margin-bottom:12px;opacity:.35}
+.empty-title{font-size:15px;font-weight:600;margin-bottom:4px;color:var(--text)}
+.empty-sub{font-size:13px}
+.spinner{width:18px;height:18px;border-radius:50%;border:2px solid var(--glass2);border-top-color:var(--cyan);animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+
+select.form-input option{background:var(--bg2)}
+input[type=file]{display:none}
+input[type=range]{accent-color:var(--cyan);cursor:pointer}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">
+    <div class="logo-mark">🤖</div>
+    <div class="logo-text">Hire<span>AI</span></div>
+  </a>
+  <span class="nav-tag">Job Seeker</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('jobs')">🔍 Browse Jobs</button>
+    <button class="nav-tab" onclick="switchTab('checker')">📊 Resume Checker</button>
+    <button class="nav-tab" onclick="switchTab('applications')">📋 My Applications</button>
+    <button class="nav-tab" onclick="switchTab('saved')">🔖 Saved</button>
+  </div>
+  <a href="recruiter.html" class="nav-back">🏢 Recruiter Login →</a>
+</nav>
+
+<div class="layout">
+  <!-- LEFT SIDEBAR (filters — only for jobs tab) -->
+  <aside class="sidebar" id="filterSidebar">
+    <div class="filter-title">
+      Filters
+      <span class="filter-clear" onclick="clearFilters()">Clear all</span>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Search</span>
+      <input type="text" class="filter-input" id="searchInput" placeholder="Job title, skill, company..." oninput="applyFilters()">
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Job Type</span>
+      <div class="filter-chips" id="typeChips">
+        <div class="chip active" data-val="all" onclick="filterChip(this,'type')">All</div>
+        <div class="chip" data-val="Full-Time" onclick="filterChip(this,'type')">Full-Time</div>
+        <div class="chip" data-val="Part-Time" onclick="filterChip(this,'type')">Part-Time</div>
+        <div class="chip" data-val="Internship" onclick="filterChip(this,'type')">Internship</div>
+        <div class="chip" data-val="Contract" onclick="filterChip(this,'type')">Contract</div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Work Mode</span>
+      <div class="filter-chips" id="modeChips">
+        <div class="chip active" data-val="all" onclick="filterChip(this,'mode')">All</div>
+        <div class="chip" data-val="Remote" onclick="filterChip(this,'mode')">Remote</div>
+        <div class="chip" data-val="Hybrid" onclick="filterChip(this,'mode')">Hybrid</div>
+        <div class="chip" data-val="On-site" onclick="filterChip(this,'mode')">On-site</div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Experience Level</span>
+      <div class="filter-chips" id="expChips">
+        <div class="chip active" data-val="all" onclick="filterChip(this,'exp')">All</div>
+        <div class="chip" data-val="Fresher" onclick="filterChip(this,'exp')">Fresher</div>
+        <div class="chip" data-val="1-3 years" onclick="filterChip(this,'exp')">1–3 yrs</div>
+        <div class="chip" data-val="3-7 years" onclick="filterChip(this,'exp')">3–7 yrs</div>
+        <div class="chip" data-val="7+ years" onclick="filterChip(this,'exp')">7+ yrs</div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Domain</span>
+      <div class="filter-chips" id="domainChips">
+        <div class="chip active" data-val="all" onclick="filterChip(this,'domain')">All</div>
+        <div class="chip" data-val="Engineering" onclick="filterChip(this,'domain')">Engineering</div>
+        <div class="chip" data-val="Data" onclick="filterChip(this,'domain')">Data / AI</div>
+        <div class="chip" data-val="Design" onclick="filterChip(this,'domain')">Design</div>
+        <div class="chip" data-val="Product" onclick="filterChip(this,'domain')">Product</div>
+        <div class="chip" data-val="Marketing" onclick="filterChip(this,'domain')">Marketing</div>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Min Salary (LPA)</span>
+      <input type="range" class="filter-range" id="salaryRange" min="0" max="50" value="0" step="1" oninput="document.getElementById('salaryVal').textContent=this.value+'L+';applyFilters()">
+      <div class="range-row"><span>₹0</span><span id="salaryVal">₹0</span><span>₹50L+</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+
+    <!-- BROWSE JOBS TAB -->
+    <div class="page active" id="tab-jobs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Open Positions</div>
+          <div class="page-sub">Find your next opportunity · <span id="jobCount">0</span> jobs listed</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <select class="form-input" id="sortJobs" onchange="applyFilters()" style="width:150px;padding:8px 12px;font-size:13px">
+            <option value="newest">Newest First</option>
+            <option value="salary">Highest Salary</option>
+            <option value="match">Best Match</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="jobsGrid" class="jobs-grid"></div>
+
+      <!-- Detail view (inside same tab) -->
+      <div class="job-detail" id="jobDetail">
+        <button class="detail-back" onclick="closeDetail()">← Back to listings</button>
+        <div class="detail-layout">
+          <div class="detail-main" id="detailMain"></div>
+          <div class="detail-sticky">
+            <!-- Score panel -->
+            <div class="score-panel" id="detailScorePanel">
+              <div class="score-panel-title">📊 Your Resume Score</div>
+              <div style="text-align:center;margin-bottom:14px">
+                <div class="score-ring-big none" id="detailScoreCircle">
+                  <span class="score-num-big" id="detailScoreNum">?</span>
+                  <span class="score-lbl">/100</span>
+                </div>
+                <div style="font-size:12px;color:var(--text2)" id="detailScoreLabel">Check your score for this role</div>
+              </div>
+              <div class="score-breakdown" id="detailBreakdown" style="display:none"></div>
+              <button class="btn btn-outline-cyan btn-sm" style="width:100%;margin-bottom:8px" onclick="openCheckerFor()">🔍 Check My Score</button>
+              <div style="font-size:11px;color:var(--text3);text-align:center">Paste your resume to see how you match</div>
+            </div>
+            <!-- Apply panel -->
+            <div class="apply-panel" id="applyPanel">
+              <div class="apply-panel-title">Apply for this role</div>
+              <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input type="text" class="form-input" id="applyName" placeholder="Full name">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-input" id="applyEmail" placeholder="your@email.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" class="form-input" id="applyPhone" placeholder="+91 9876543210">
+              </div>
+              <div class="form-group">
+                <label class="form-label">LinkedIn / Portfolio URL</label>
+                <input type="url" class="form-input" id="applyLink" placeholder="https://linkedin.com/in/...">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Cover Note (optional)</label>
+                <textarea class="form-input" id="applyCover" placeholder="Why are you a great fit?" style="height:80px;resize:vertical"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Paste Your Resume</label>
+                <textarea class="form-input" id="applyResume" placeholder="Paste resume text for AI scoring..." style="height:80px;resize:vertical"></textarea>
+              </div>
+              <button class="btn btn-cyan" onclick="submitApplication()">🚀 Submit Application</button>
+              <button class="btn btn-ghost" style="margin-top:8px" onclick="toggleSaveJob()">🔖 Save Job</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUME CHECKER TAB -->
+    <div class="page" id="tab-checker">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Resume Score Checker</div>
+          <div class="page-sub">Get an AI score for any role at any company — free, instant, no login</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:20px">
+        <div>
+          <div class="checker-card">
+            <div class="checker-title">🎯 Target Role & Company</div>
+            <div class="checker-sub">Select what you're applying for</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+              <div>
+                <label class="form-label">Job Role</label>
+                <select class="form-input" id="checkerRole">
+                  <option>Software Engineer</option>
+                  <option>Frontend Developer</option>
+                  <option>Backend Developer</option>
+                  <option>Full Stack Developer</option>
+                  <option>Data Scientist</option>
+                  <option>ML Engineer</option>
+                  <option>DevOps Engineer</option>
+                  <option>Product Manager</option>
+                  <option>UI/UX Designer</option>
+                  <option>Business Analyst</option>
+                  <option>Data Analyst</option>
+                  <option>Cybersecurity Engineer</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Target Company</label>
+                <select class="form-input" id="checkerCompany">
+                  <option>Google</option><option>Meta</option><option>Amazon</option>
+                  <option>Microsoft</option><option>Apple</option><option>Netflix</option>
+                  <option>Flipkart</option><option>Swiggy</option><option>Zomato</option>
+                  <option>Infosys</option><option>TCS</option><option>Wipro</option>
+                  <option>Startup (Early Stage)</option><option>Any / General</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+              <div>
+                <label class="form-label">Experience Level</label>
+                <select class="form-input" id="checkerExp">
+                  <option>Fresher / Entry Level</option>
+                  <option>1–3 Years</option>
+                  <option>3–7 Years</option>
+                  <option>7+ Years (Senior)</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Paste Job Description (optional)</label>
+                <textarea class="form-input" id="checkerJD" placeholder="Paste JD to get a more precise score..." style="height:41px;resize:none;font-size:12px"></textarea>
+              </div>
+            </div>
+
+            <div class="checker-title" style="margin-bottom:8px">📄 Your Resume</div>
+            <div class="tab-row">
+              <button class="tab-btn active" onclick="switchCheckerInput('paste',this)">✏️ Paste Text</button>
+              <button class="tab-btn" onclick="switchCheckerInput('upload',this)">📂 Upload File</button>
+            </div>
+
+            <div id="checkerPaste">
+              <textarea class="resume-ta" id="resumeText" placeholder="Paste your full resume here — work experience, education, skills, projects...
+
+Example:
+Name: John Doe | john@gmail.com
+Education: B.Tech CSE, 2024, CGPA 8.2
+Skills: Python, React, Node.js, SQL, Machine Learning
+Experience: 6-month internship at XYZ Corp — built REST APIs
+Projects: AI chatbot using GPT-4, E-commerce site with React..."></textarea>
+            </div>
+            <div id="checkerUpload" style="display:none">
+              <div class="upload-zone" onclick="document.getElementById('resumeFile').click()" id="checkerDropZone">
+                <div class="upload-zone-icon">📂</div>
+                <div class="upload-zone-title">Drop your resume here</div>
+                <div class="upload-zone-sub">PDF, DOCX, TXT supported</div>
+              </div>
+              <input type="file" id="resumeFile" accept=".pdf,.txt,.docx" onchange="handleResumeFile(this)">
+              <div id="fileLoaded" style="display:none;font-size:12px;color:var(--green);padding:8px;background:rgba(16,185,129,.08);border-radius:8px;border:1px solid rgba(16,185,129,.2)">✅ File loaded — ready to analyze</div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:12px;margin-top:14px">
+              <button class="btn btn-cyan" style="flex:1" onclick="analyzeResume()" id="analyzeBtn">
+                🤖 Analyze My Resume
+              </button>
+              <span style="font-size:11px;color:var(--text3)">Results in ~5 seconds</span>
+            </div>
+          </div>
+
+          <!-- result renders here -->
+          <div id="checkerResult" style="display:none"></div>
+        </div>
+
+        <!-- WHAT COMPANIES WANT sidebar -->
+        <div>
+          <div class="checker-card" style="position:sticky;top:70px">
+            <div class="checker-title" style="margin-bottom:14px">🏢 What Companies Want</div>
+            <div id="companyExpectations">
+              <div style="font-size:13px;color:var(--text2);line-height:1.7">Select a role and company above to see what they look for in candidates.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPLICATIONS TAB -->
+    <div class="page" id="tab-applications">
+      <div class="page-header">
+        <div>
+          <div class="page-title">My Applications</div>
+          <div class="page-sub">Track all the jobs you've applied to</div>
+        </div>
+        <div style="font-size:13px;color:var(--text2)" id="appCount">0 applications</div>
+      </div>
+      <div class="glass-card" style="background:var(--glass);border:1px solid var(--border);border-radius:var(--r);overflow:hidden" id="appsContainer">
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">No applications yet</div>
+          <div class="empty-sub">Browse jobs and apply to see them here</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVED TAB -->
+    <div class="page" id="tab-saved">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Saved Jobs</div>
+          <div class="page-sub">Jobs you bookmarked for later</div>
+        </div>
+      </div>
+      <div id="savedContainer" class="jobs-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SCORE CHECKER MODAL (from job detail) -->
+<div class="modal-overlay" id="quickCheckerModal">
+  <div class="modal" style="width:540px">
+    <button class="modal-close" onclick="closeModal('quickCheckerModal')">✕</button>
+    <div class="modal-title">📊 Score Your Resume</div>
+    <div class="modal-sub" id="quickCheckerSubtitle">See how you match this specific role</div>
+    <textarea class="resume-ta" id="quickResumeText" placeholder="Paste your resume here..."></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-cyan" onclick="runQuickScore()" id="quickScoreBtn">Get My Score →</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('quickCheckerModal')">Cancel</button>
+    </div>
+    <div id="quickResult" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal" style="text-align:center">
+    <div style="font-size:52px;margin-bottom:16px">🎉</div>
+    <div class="modal-title" style="text-align:center">Application Submitted!</div>
+    <div class="modal-sub" style="text-align:center" id="successMsg">Your application has been sent.</div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('successModal');switchTab('applications')">View Applications</button>
+      <button class="btn btn-outline-cyan btn-sm" onclick="closeModal('successModal')">Browse More</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ==================== DATA ====================
+const COMPANIES_INFO = {
+  'Google': { culture:'Innovation-first, strong CS fundamentals, systems thinking, open-source contributions valued', must:['Algorithms & Data Structures','System Design','LLD/HLD','Clean Code','CS fundamentals'], nice:['Open Source','Competitive Programming','Side Projects'] },
+  'Meta': { culture:'Move fast, social-scale systems, strong on product sense alongside engineering', must:['React / React Native','APIs & System Design','Behavioral (STAR method)','SQL'], nice:['GraphQL','Distributed Systems','A/B Testing'] },
+  'Amazon': { culture:'Leadership Principles are critical — demonstrate them in every answer', must:['Leadership Principles (14)','System Design','Java/Python','OOP','SQL'], nice:['AWS services','Microservices','Cost optimization mindset'] },
+  'Microsoft': { culture:'Growth mindset, collaboration, FAANG-level but slightly more welcoming to diverse paths', must:['OOP','System Design','Problem Solving','C++/Java/Python'], nice:['Azure','TypeScript','Agile experience'] },
+  'Apple': { culture:'Attention to detail, privacy-first, excellence over speed, deep specialization valued', must:['Swift/Objective-C (mobile)','Algorithms','Attention to detail','Testing'], nice:['UI/UX sensibility','Performance optimization','Hardware awareness'] },
+  'Netflix': { culture:'Freedom and responsibility, senior-heavy culture, streaming/cloud expertise', must:['Distributed Systems','Java/Python','Cloud (AWS)','High Availability Design'], nice:['Chaos Engineering','Microservices','Kafka','CDN knowledge'] },
+  'Flipkart': { culture:'Speed, scale (Indian internet), frugal innovation, data-driven decisions', must:['Data Structures','Java/Python','SQL','Scalable system design'], nice:['Kafka','Redis','E-commerce domain knowledge'] },
+  'Swiggy': { culture:'Hyperlocal tech, real-time systems, rapid iteration, food-tech problems', must:['Backend (Go/Java/Python)','Real-time systems','SQL','APIs'], nice:['Geospatial systems','Kafka','React Native'] },
+  'Zomato': { culture:'Hungry culture, product-led, data obsessed, hyperlocal + food domain', must:['Python/Java','SQL/Analytics','System Design','APIs'], nice:['ML/Data Science','Product metrics','Restaurant domain'] },
+  'Infosys': { culture:'Delivery excellence, client management, broad tech stack, certifications valued', must:['Java or .NET','SQL','Communication skills','Agile/SDLC'], nice:['Cloud certifications','React/Angular','SAP'] },
+  'TCS': { culture:'Process-oriented, large enterprise, training-heavy for freshers, certifications', must:['Programming basics','SQL','Communication','Aptitude'], nice:['Java','Python','AWS/Azure certifications'] },
+  'Wipro': { culture:'Similar to TCS — process, enterprise clients, good for freshers', must:['Programming fundamentals','SQL','Verbal communication'], nice:['Full stack skills','Cloud basics','Domain knowledge'] },
+  'Startup (Early Stage)': { culture:'Bias for action, wear multiple hats, ownership mentality, ship fast', must:['Full-stack or deep specialization','Git & deployment','Product thinking','Self-driven'], nice:['Previous startup experience','Side projects / SaaS','No/Low ego'] },
+  'Any / General': { culture:'Fundamentals matter most, demonstrate learning ability, problem-solving', must:['Core language proficiency','Problem solving','Communication','Git'], nice:['Side projects','Certifications','Leadership experience'] }
+};
+
+const SAMPLE_JOBS = [
+  { id:'j1', title:'Software Engineer II', company:'Google', logo:'🟦', domain:'Engineering', type:'Full-Time', mode:'Hybrid', exp:'1-3 years', location:'Bengaluru, India', salary:45, salaryStr:'₹35–55 LPA', posted:'2 days ago', badge:'hot', color:'#4285f4', color2:'#0f9d58',
+    skills:['Python','Go','Data Structures','System Design','Kubernetes'],
+    prereqs:{ degree:'B.Tech / M.Tech CS or equivalent', gpa:'CGPA 7.5+', exp:'1–3 years SWE experience', tech:'Python, Go, or Java', other:'Strong DSA — LeetCode Medium+' },
+    desc:'Join Google\'s core infrastructure team building systems that serve billions of users. You\'ll design, develop, and maintain highly reliable, scalable software systems.',
+    responsibilities:['Design and implement scalable backend services','Participate in code reviews and technical design discussions','Work with cross-functional teams on product features','On-call responsibilities for production systems','Mentor junior engineers'],
+    requirements:['1–3 years of software engineering experience','Proficiency in Python, Go, or Java','Strong understanding of data structures and algorithms','Experience with distributed systems and cloud platforms','BS/MS in Computer Science or equivalent']
+  },
+  { id:'j2', title:'Frontend Developer', company:'Swiggy', logo:'🟠', domain:'Engineering', type:'Full-Time', mode:'Remote', exp:'1-3 years', location:'Remote, India', salary:18, salaryStr:'₹15–25 LPA', posted:'1 day ago', badge:'new', color:'#fc8019', color2:'#ff5200',
+    skills:['React','TypeScript','Redux','REST APIs','CSS'],
+    prereqs:{ degree:'Any B.Tech / BCA', gpa:'CGPA 6.5+', exp:'1–2 years React experience', tech:'React, TypeScript, Redux', other:'Portfolio / GitHub projects essential' },
+    desc:'Build the consumer-facing web app used by millions of hungry users every day. Own the frontend architecture for Swiggy Web.',
+    responsibilities:['Build performant React components','Optimize Web Vitals and page load times','Work closely with designers on Figma-to-code implementation','Integrate backend APIs','Write unit and integration tests'],
+    requirements:['1–3 years of frontend experience','Strong in React and TypeScript','Good eye for UI/UX details','Experience with REST APIs','Familiarity with CI/CD pipelines']
+  },
+  { id:'j3', title:'Data Scientist', company:'Zomato', logo:'🔴', domain:'Data', type:'Full-Time', mode:'Hybrid', exp:'1-3 years', location:'Gurugram, India', salary:22, salaryStr:'₹18–30 LPA', posted:'3 days ago', badge:'', color:'#e23744', color2:'#cb202d',
+    skills:['Python','SQL','Machine Learning','Pandas','scikit-learn'],
+    prereqs:{ degree:'B.Tech / M.Sc Statistics / Data Science', gpa:'CGPA 7.0+', exp:'1+ year in data / analytics', tech:'Python, SQL, ML frameworks', other:'Kaggle profile or published work a plus' },
+    desc:'Drive data-driven decisions across Zomato\'s restaurant and logistics operations using machine learning and analytics.',
+    responsibilities:['Build ML models for demand forecasting and pricing','Perform exploratory data analysis on large datasets','Create dashboards and reports for leadership','A/B test product hypotheses','Collaborate with product and engineering teams'],
+    requirements:['Strong Python and SQL skills','Experience with ML algorithms','Good statistical knowledge','Experience with Pandas, NumPy, scikit-learn','Ability to communicate findings clearly']
+  },
+  { id:'j4', title:'ML Engineer', company:'Google', logo:'🟦', domain:'Data', type:'Full-Time', mode:'Hybrid', exp:'3-7 years', location:'Hyderabad, India', salary:65, salaryStr:'₹55–80 LPA', posted:'5 days ago', badge:'hot', color:'#4285f4', color2:'#ea4335',
+    skills:['TensorFlow','PyTorch','Python','MLOps','Kubernetes'],
+    prereqs:{ degree:'M.Tech / PhD preferred', gpa:'CGPA 8.0+', exp:'3+ years ML engineering', tech:'TensorFlow or PyTorch at production scale', other:'Research publications a strong plus' },
+    desc:'Build and deploy ML systems that power Google Search, Ads, and Maps at planetary scale.',
+    responsibilities:['Train and productionize large-scale ML models','Design ML pipelines with MLOps best practices','Collaborate with research teams to productionize papers','Monitor model performance in production','Define ML infrastructure standards'],
+    requirements:['3+ years ML engineering experience','Production ML systems experience','Strong Python and TensorFlow/PyTorch','Experience with distributed training','Strong understanding of ML theory']
+  },
+  { id:'j5', title:'Product Manager', company:'Flipkart', logo:'🟡', domain:'Product', type:'Full-Time', mode:'On-site', exp:'3-7 years', location:'Bengaluru, India', salary:35, salaryStr:'₹28–45 LPA', posted:'1 week ago', badge:'', color:'#f7c01a', color2:'#ff6600',
+    skills:['Product Strategy','SQL','Data Analysis','Agile','Stakeholder Management'],
+    prereqs:{ degree:'MBA (IIM/ISB) or B.Tech + experience', gpa:'Not primary criteria', exp:'3–5 years PM or relevant experience', tech:'SQL proficiency required', other:'E-commerce or marketplace experience preferred' },
+    desc:'Own a key product vertical at Flipkart, driving strategy, roadmap, and execution for millions of Indian consumers.',
+    responsibilities:['Define product vision and roadmap','Work with engineering, design, and business teams','Analyse metrics and user research to drive decisions','Write PRDs and user stories','Manage stakeholder communication'],
+    requirements:['3–5 years of product management experience','Strong analytical and data skills','Excellent communication and storytelling','Experience with agile development','E-commerce or consumer internet background preferred']
+  },
+  { id:'j6', title:'DevOps Engineer', company:'Amazon', logo:'🟠', domain:'Engineering', type:'Full-Time', mode:'Hybrid', exp:'1-3 years', location:'Hyderabad, India', salary:28, salaryStr:'₹22–35 LPA', posted:'4 days ago', badge:'', color:'#ff9900', color2:'#232f3e',
+    skills:['AWS','Docker','Kubernetes','CI/CD','Terraform','Linux'],
+    prereqs:{ degree:'B.Tech CS / IT or equivalent', gpa:'CGPA 6.5+', exp:'1–3 years DevOps/SRE', tech:'AWS + Kubernetes + Terraform', other:'AWS certification a big plus' },
+    desc:'Join Amazon\'s infrastructure team to build, automate, and scale cloud systems serving millions of transactions per second.',
+    responsibilities:['Build and maintain CI/CD pipelines','Manage Kubernetes clusters and container orchestration','Infrastructure as Code using Terraform','Monitor and improve system reliability (SLAs/SLOs)','Respond to incidents and drive post-mortems'],
+    requirements:['Strong AWS knowledge (EC2, EKS, RDS, S3, Lambda)','Kubernetes and Docker experience','Scripting in Python or Bash','Terraform or CloudFormation','Understanding of networking and security']
+  },
+  { id:'j7', title:'UI/UX Designer', company:'Startup (Early Stage)', logo:'🟣', domain:'Design', type:'Full-Time', mode:'Remote', exp:'Fresher', location:'Remote, India', salary:8, salaryStr:'₹6–12 LPA', posted:'Today', badge:'new', color:'#7c3aed', color2:'#ec4899',
+    skills:['Figma','User Research','Prototyping','Design Systems','CSS basics'],
+    prereqs:{ degree:'Any design / CS degree or self-taught', gpa:'Portfolio > GPA', exp:'0–2 years, strong portfolio acceptable', tech:'Figma proficiency required', other:'Dribbble / Behance portfolio mandatory' },
+    desc:'Be the first designer at a fast-growing B2B SaaS startup. You\'ll own the entire design system and user experience from scratch.',
+    responsibilities:['Own end-to-end UX from research to high-fidelity prototypes','Build and maintain the design system in Figma','Conduct user interviews and usability tests','Work directly with founders and engineers','Define product design principles'],
+    requirements:['Strong Figma skills','Portfolio showing real product design work','Basic understanding of frontend (CSS/HTML helpful)','Excellent visual design sensibility','Self-motivated and comfortable with ambiguity']
+  },
+  { id:'j8', title:'Backend Developer (Go)', company:'Swiggy', logo:'🟠', domain:'Engineering', type:'Full-Time', mode:'Hybrid', exp:'3-7 years', location:'Bengaluru, India', salary:35, salaryStr:'₹28–45 LPA', posted:'2 days ago', badge:'', color:'#fc8019', color2:'#1a1a1a',
+    skills:['Go','gRPC','Kafka','PostgreSQL','Redis','Microservices'],
+    prereqs:{ degree:'B.Tech CS or equivalent', gpa:'CGPA 7.0+', exp:'3+ years backend engineering', tech:'Go (primary) or Java', other:'Hyperlocal / logistics domain experience a plus' },
+    desc:'Build the real-time order routing, dispatch, and logistics systems that power Swiggy\'s 10-minute delivery promise.',
+    responsibilities:['Build high-throughput microservices in Go','Design and implement real-time event streaming with Kafka','Optimize PostgreSQL queries and schema design','Contribute to system architecture decisions','Write comprehensive unit and integration tests'],
+    requirements:['3+ years of backend engineering experience','Strong Go programming skills','Experience with Kafka or similar message queues','PostgreSQL/MySQL proficiency','Microservices and distributed systems knowledge']
+  },
+  { id:'j9', title:'Business Analyst', company:'Infosys', logo:'🔵', domain:'Product', type:'Full-Time', mode:'On-site', exp:'Fresher', location:'Pune, India', salary:7, salaryStr:'₹5.5–9 LPA', posted:'3 days ago', badge:'new', color:'#007cc3', color2:'#00a8e0',
+    skills:['SQL','Excel','Communication','Requirements Gathering','JIRA'],
+    prereqs:{ degree:'B.Tech / BBA / MBA', gpa:'CGPA 6.0+', exp:'0–1 year (freshers welcome)', tech:'SQL basics, Advanced Excel', other:'Strong communication skills essential' },
+    desc:'Join Infosys as a Business Analyst, working with enterprise clients to gather requirements and translate them into technical specifications.',
+    responsibilities:['Gather and document business requirements','Create BRDs, FRDs, and user stories','Facilitate workshops with client stakeholders','Perform data analysis using SQL and Excel','Work with development teams to ensure delivery'],
+    requirements:['Strong communication and presentation skills','Basic SQL and Excel knowledge','Analytical and problem-solving mindset','Ability to work in client-facing environment','Agile/Scrum familiarity preferred']
+  },
+  { id:'j10', title:'Full Stack Developer', company:'Zomato', logo:'🔴', domain:'Engineering', type:'Full-Time', mode:'Hybrid', exp:'1-3 years', location:'Gurugram, India', salary:20, salaryStr:'₹16–28 LPA', posted:'Today', badge:'new', color:'#e23744', color2:'#7c3aed',
+    skills:['React','Node.js','PostgreSQL','Redis','Docker','TypeScript'],
+    prereqs:{ degree:'B.Tech CS or equivalent', gpa:'CGPA 7.0+', exp:'1–3 years full stack experience', tech:'React + Node.js + SQL', other:'Side projects or open-source contributions valued' },
+    desc:'Build product features across the stack for Zomato\'s web and internal tools, serving millions of foodies and restaurant partners.',
+    responsibilities:['Build features across frontend (React) and backend (Node.js)','Design and optimize database schemas','Integrate third-party services and APIs','Write tests and maintain code quality','Participate in architecture discussions'],
+    requirements:['1–3 years full-stack experience','React and Node.js proficiency','PostgreSQL or MySQL experience','Understanding of Redis and caching','TypeScript familiarity preferred']
+  }
+];
+
+// ==================== STATE ====================
+let filters = { type:'all', mode:'all', exp:'all', domain:'all', salary:0, search:'' };
+let applications = JSON.parse(localStorage.getItem('js_applications') || '[]');
+let savedJobs = JSON.parse(localStorage.getItem('js_saved') || '[]');
+let currentJob = null;
+let uploadedResumeText = '';
+
+function saveState() {
+  localStorage.setItem('js_applications', JSON.stringify(applications));
+  localStorage.setItem('js_saved', JSON.stringify(savedJobs));
+}
+
+// ==================== TABS ====================
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${tab}`).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t => { if(t.textContent.toLowerCase().includes(tab==='jobs'?'browse':tab)) t.classList.add('active'); });
+  document.getElementById('filterSidebar').style.display = tab === 'jobs' ? '' : 'none';
+  if(tab==='applications') renderApplications();
+  if(tab==='saved') renderSaved();
+  if(tab==='checker') updateCompanyExpectations();
+  closeDetail();
+}
+
+// ==================== JOBS ====================
+function applyFilters() {
+  filters.search = document.getElementById('searchInput').value.toLowerCase();
+  filters.salary = parseInt(document.getElementById('salaryRange').value);
+  let list = SAMPLE_JOBS.filter(j => {
+    if(filters.type !== 'all' && j.type !== filters.type) return false;
+    if(filters.mode !== 'all' && j.mode !== filters.mode) return false;
+    if(filters.exp !== 'all' && j.exp !== filters.exp) return false;
+    if(filters.domain !== 'all' && j.domain !== filters.domain) return false;
+    if(j.salary < filters.salary) return false;
+    if(filters.search && !j.title.toLowerCase().includes(filters.search) && !j.company.toLowerCase().includes(filters.search) && !j.skills.some(s=>s.toLowerCase().includes(filters.search))) return false;
+    return true;
+  });
+  const sort = document.getElementById('sortJobs').value;
+  if(sort==='salary') list.sort((a,b)=>b.salary-a.salary);
+  renderJobs(list);
+}
+
+function renderJobs(list) {
+  document.getElementById('jobCount').textContent = list.length;
+  const grid = document.getElementById('jobsGrid');
+  if(!list.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">No jobs match</div><div class="empty-sub">Try adjusting your filters</div></div>'; return; }
+  grid.innerHTML = list.map(j => `
+    <div class="job-card" style="--accent-a:${j.color};--accent-b:${j.color2}" onclick="openJob('${j.id}')">
+      <div class="job-card-top">
+        <div class="company-logo" style="background:linear-gradient(135deg,${j.color}22,${j.color2}11)">${j.logo}</div>
+        <div>
+          <div class="job-title">${j.title}</div>
+          <div class="job-company">${j.company} · ${j.location}</div>
+        </div>
+      </div>
+      <div class="job-meta">
+        <div class="job-meta-item">⏰ ${j.type}</div>
+        <div class="job-meta-item">🌐 ${j.mode}</div>
+        <div class="job-meta-item">📅 ${j.exp}</div>
+        <div class="job-meta-item">🕐 ${j.posted}</div>
+      </div>
+      <div class="job-skills">
+        ${j.skills.slice(0,3).map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+        ${j.skills.length>3?`<span class="skill-tag secondary">+${j.skills.length-3}</span>`:''}
+      </div>
+      <div class="job-footer">
+        <div class="salary-tag">${j.salaryStr}</div>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${savedJobs.includes(j.id)?'<span class="job-badge badge-saved">🔖</span>':''}
+          ${j.badge==='new'?'<span class="job-badge badge-new">NEW</span>':''}
+          ${j.badge==='hot'?'<span class="job-badge badge-hot">🔥 HOT</span>':''}
+          ${j.mode==='Remote'?'<span class="job-badge badge-remote">Remote</span>':''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterChip(el, group) {
+  const containers = { type:'typeChips', mode:'modeChips', exp:'expChips', domain:'domainChips' };
+  document.querySelectorAll(`#${containers[group]} .chip`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  filters[group] = el.dataset.val;
+  applyFilters();
+}
+
+function clearFilters() {
+  filters = { type:'all', mode:'all', exp:'all', domain:'all', salary:0, search:'' };
+  document.getElementById('searchInput').value='';
+  document.getElementById('salaryRange').value=0;
+  document.getElementById('salaryVal').textContent='₹0';
+  ['typeChips','modeChips','expChips','domainChips'].forEach(id => {
+    const c = document.getElementById(id);
+    c.querySelectorAll('.chip').forEach(ch=>ch.classList.remove('active'));
+    c.querySelector('[data-val="all"]').classList.add('active');
+  });
+  applyFilters();
+}
+
+// ==================== JOB DETAIL ====================
+function openJob(id) {
+  const j = SAMPLE_JOBS.find(x=>x.id===id);
+  if(!j) return;
+  currentJob = j;
+  document.getElementById('jobsGrid').style.display='none';
+  document.getElementById('jobDetail').style.display='block';
+
+  const isSaved = savedJobs.includes(j.id);
+  document.getElementById('detailMain').innerHTML = `
+    <div class="detail-header">
+      <div class="company-logo-lg" style="background:linear-gradient(135deg,${j.color}22,${j.color2}11)">${j.logo}</div>
+      <div>
+        <div class="detail-title">${j.title}</div>
+        <div class="detail-company">${j.company} · ${j.location}</div>
+        <div class="detail-badges">
+          <span class="job-badge badge-new" style="padding:4px 10px;font-size:11px">⏰ ${j.type}</span>
+          <span class="job-badge badge-remote" style="padding:4px 10px;font-size:11px">🌐 ${j.mode}</span>
+          <span class="job-badge badge-saved" style="padding:4px 10px;font-size:11px">📅 ${j.exp}</span>
+        </div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div style="font-family:var(--font-h);font-size:22px;font-weight:800;color:var(--green)">${j.salaryStr}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Posted ${j.posted}</div>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">About the Role</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.75">${j.desc}</div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">📋 Prerequisites (What You Need)</div>
+      <div class="prereq-grid">
+        <div class="prereq-item"><div class="prereq-label">Degree</div><div class="prereq-value">${j.prereqs.degree}</div></div>
+        <div class="prereq-item"><div class="prereq-label">GPA / Academics</div><div class="prereq-value">${j.prereqs.gpa}</div></div>
+        <div class="prereq-item"><div class="prereq-label">Experience</div><div class="prereq-value">${j.prereqs.exp}</div></div>
+        <div class="prereq-item"><div class="prereq-label">Core Tech</div><div class="prereq-value">${j.prereqs.tech}</div></div>
+      </div>
+      ${j.prereqs.other?`<div style="margin-top:10px;padding:12px 14px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:9px;font-size:13px;color:var(--cyan)">💡 ${j.prereqs.other}</div>`:''}
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">🛠 Required Skills</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        ${j.skills.map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">📌 Responsibilities</div>
+      <div class="detail-list">
+        ${j.responsibilities.map(r=>`<div class="detail-list-item">${r}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">✅ Requirements</div>
+      <div class="detail-list">
+        ${j.requirements.map(r=>`<div class="detail-list-item">${r}</div>`).join('')}
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-section-title">🏢 Company Culture at ${j.company}</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.75;padding:14px;background:var(--glass);border-radius:10px;border:1px solid var(--border)">
+        ${COMPANIES_INFO[j.company]?.culture || 'A great place to build your career.'}
+      </div>
+    </div>`;
+
+  // reset score panel
+  document.getElementById('detailScoreNum').textContent = '?';
+  document.getElementById('detailScoreCircle').className = 'score-ring-big none';
+  document.getElementById('detailScoreLabel').textContent = 'Check your score for this role';
+  document.getElementById('detailBreakdown').style.display = 'none';
+
+  window.scrollTo(0,0);
+}
+
+function closeDetail() {
+  document.getElementById('jobsGrid').style.display='';
+  document.getElementById('jobDetail').style.display='none';
+  currentJob = null;
+}
+
+function openCheckerFor() {
+  if(!currentJob) return;
+  document.getElementById('quickCheckerSubtitle').textContent = `${currentJob.title} at ${currentJob.company}`;
+  openModal('quickCheckerModal');
+}
+
+async function runQuickScore() {
+  const text = document.getElementById('quickResumeText').value.trim();
+  if(!text || text.length < 40) { showToast('Please paste your resume first','error'); return; }
+  const btn = document.getElementById('quickScoreBtn');
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...'; btn.disabled = true;
+  const result = await doScoreAnalysis(text, currentJob?.title || 'Software Engineer', currentJob?.company || 'General', 'Fresher / Entry Level', '');
+  renderQuickResult(result);
+  btn.innerHTML = 'Get My Score →'; btn.disabled = false;
+}
+
+function renderQuickResult(r) {
+  const cls = r.score>=70?'great':r.score>=50?'good':'fair';
+  document.getElementById('quickResult').innerHTML = `
+    <div style="text-align:center;padding:16px;background:var(--bg3);border-radius:10px;border:1px solid var(--border2)">
+      <div style="font-family:var(--font-h);font-size:36px;font-weight:800;color:${r.score>=70?'var(--green)':r.score>=50?'var(--amber)':'var(--red)'}">${r.score}<span style="font-size:18px;color:var(--text3)">/100</span></div>
+      <div style="font-size:13px;color:var(--text2);margin-top:4px">${r.verdict}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;line-height:1.6">${r.company_fit}</div>
+    </div>
+    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px">
+      ${(r.improvements||[]).slice(0,2).map(i=>`<div style="font-size:12px;color:var(--amber);background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:6px 10px">⚡ ${i}</div>`).join('')}
+    </div>`;
+  // update sidebar score
+  updateDetailScore(r);
+}
+
+function updateDetailScore(r) {
+  const cls = r.score>=70?'great':r.score>=50?'good':'fair';
+  const el = document.getElementById('detailScoreCircle');
+  if(!el) return;
+  el.className = `score-ring-big ${cls}`;
+  document.getElementById('detailScoreNum').textContent = r.score;
+  document.getElementById('detailScoreLabel').textContent = r.verdict;
+  const bd = document.getElementById('detailBreakdown');
+  bd.style.display='flex';
+  bd.innerHTML = [
+    {l:'Skills',v:r.skills_score},{l:'Experience',v:r.experience_score},{l:'Presentation',v:r.presentation_score}
+  ].map(x=>`<div class="sb-row"><span class="sb-label">${x.l}</span><div class="sb-bar"><div class="sb-fill" style="width:${Math.max(0,Math.min(100,x.v||0))}%"></div></div><span class="sb-val" style="color:${(x.v||0)>=70?'var(--green)':(x.v||0)>=50?'var(--amber)':'var(--red)'}">${x.v||0}</span></div>`).join('');
+}
+
+// ==================== APPLY ====================
+function submitApplication() {
+  const name = document.getElementById('applyName').value.trim();
+  const email = document.getElementById('applyEmail').value.trim();
+  if(!name || !email) { showToast('Please fill name and email','error'); return; }
+  if(!currentJob) return;
+  const already = applications.find(a=>a.jobId===currentJob.id && a.email===email);
+  if(already) { showToast('You already applied to this job!','error'); return; }
+  applications.push({
+    id: Date.now().toString(),
+    jobId: currentJob.id, jobTitle: currentJob.title, company: currentJob.company,
+    logo: currentJob.logo, salaryStr: currentJob.salaryStr,
+    name, email,
+    phone: document.getElementById('applyPhone').value,
+    link: document.getElementById('applyLink').value,
+    cover: document.getElementById('applyCover').value,
+    resume: document.getElementById('applyResume').value,
+    status: 'Applied', appliedAt: new Date().toISOString()
+  });
+  saveState();
+  document.getElementById('successMsg').textContent = `Your application for ${currentJob.title} at ${currentJob.company} has been submitted. Track it in "My Applications".`;
+  openModal('successModal');
+  ['applyName','applyEmail','applyPhone','applyLink','applyCover','applyResume'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
+
+// ==================== SAVED ====================
+function toggleSaveJob() {
+  if(!currentJob) return;
+  if(savedJobs.includes(currentJob.id)) {
+    savedJobs = savedJobs.filter(id=>id!==currentJob.id);
+    showToast('Job removed from saved','info');
+  } else {
+    savedJobs.push(currentJob.id);
+    showToast('Job saved! 🔖','success');
+  }
+  saveState();
+  applyFilters();
+}
+
+function renderSaved() {
+  const el = document.getElementById('savedContainer');
+  const jobs = SAMPLE_JOBS.filter(j=>savedJobs.includes(j.id));
+  if(!jobs.length) {
+    el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔖</div><div class="empty-title">No saved jobs</div><div class="empty-sub">Click "Save Job" on any listing to bookmark it here</div></div>';
+    return;
+  }
+  // Reuse same card rendering
+  const tmpGrid = document.createElement('div');
+  tmpGrid.className='jobs-grid';
+  document.getElementById('savedContainer').innerHTML = '';
+  jobs.forEach(j=>{
+    const d = document.createElement('div');
+    d.innerHTML = `<div class="job-card" style="--accent-a:${j.color};--accent-b:${j.color2}" onclick="switchTab('jobs');setTimeout(()=>openJob('${j.id}'),100)">
+      <div class="job-card-top">
+        <div class="company-logo" style="background:linear-gradient(135deg,${j.color}22,${j.color2}11)">${j.logo}</div>
+        <div><div class="job-title">${j.title}</div><div class="job-company">${j.company}</div></div>
+      </div>
+      <div class="job-meta"><div class="job-meta-item">⏰ ${j.type}</div><div class="job-meta-item">🌐 ${j.mode}</div></div>
+      <div class="job-footer"><div class="salary-tag">${j.salaryStr}</div><span class="job-badge badge-saved">🔖 Saved</span></div>
+    </div>`;
+    document.getElementById('savedContainer').appendChild(d.firstElementChild);
+  });
+}
+
+// ==================== APPLICATIONS ====================
+function renderApplications() {
+  const el = document.getElementById('appsContainer');
+  document.getElementById('appCount').textContent = `${applications.length} application${applications.length!==1?'s':''}`;
+  if(!applications.length) {
+    el.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No applications yet</div><div class="empty-sub">Browse jobs and apply to see them here</div></div>';
+    return;
+  }
+  el.innerHTML = `<table class="app-table">
+    <thead><tr><th>Job</th><th>Company</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      ${applications.map(a=>`<tr>
+        <td><div style="font-weight:600;font-size:13px">${a.jobTitle}</div></td>
+        <td><div style="display:flex;align-items:center;gap:7px"><span>${a.logo}</span><span>${a.company}</span></div></td>
+        <td style="color:var(--text2);font-size:12px">${new Date(a.appliedAt).toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}</td>
+        <td>${statusBadge(a.status)}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="withdrawApp('${a.id}')" style="font-size:11px;width:auto">Withdraw</button></td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function statusBadge(s) {
+  const m = {'Applied':'status-applied','Under Review':'status-review','Interview':'status-interview','Accepted':'status-accepted','Rejected':'status-rejected'};
+  return `<span class="status-badge ${m[s]||'status-applied'}">● ${s}</span>`;
+}
+
+function withdrawApp(id) {
+  if(!confirm('Withdraw this application?')) return;
+  applications = applications.filter(a=>a.id!==id);
+  saveState(); renderApplications();
+  showToast('Application withdrawn','info');
+}
+
+// ==================== RESUME CHECKER ====================
+function switchCheckerInput(mode, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('checkerPaste').style.display = mode==='paste'?'':'none';
+  document.getElementById('checkerUpload').style.display = mode==='upload'?'':'none';
+}
+
+function handleResumeFile(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    uploadedResumeText = e.target.result;
+    document.getElementById('fileLoaded').style.display='block';
+  };
+  r.readAsText(file);
+}
+
+// drag & drop
+document.addEventListener('DOMContentLoaded', () => {
+  const dz = document.getElementById('checkerDropZone');
+  if(dz) {
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+    dz.addEventListener('drop',e=>{
+      e.preventDefault();dz.classList.remove('drag');
+      const file = e.dataTransfer.files[0];
+      if(!file) return;
+      const r = new FileReader();
+      r.onload = ev => {uploadedResumeText=ev.target.result;document.getElementById('fileLoaded').style.display='block'};
+      r.readAsText(file);
+    });
+  }
+  applyFilters();
+  updateCompanyExpectations();
+  document.getElementById('checkerCompany').addEventListener('change', updateCompanyExpectations);
+  document.getElementById('checkerRole').addEventListener('change', updateCompanyExpectations);
+});
+
+async function analyzeResume() {
+  const pasteMode = document.getElementById('checkerPaste').style.display !== 'none';
+  const text = pasteMode ? document.getElementById('resumeText').value.trim() : uploadedResumeText;
+  if(!text || text.length < 40) { showToast('Please paste or upload your resume first','error'); return; }
+
+  const role = document.getElementById('checkerRole').value;
+  const company = document.getElementById('checkerCompany').value;
+  const exp = document.getElementById('checkerExp').value;
+  const jd = document.getElementById('checkerJD').value;
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.innerHTML='<span class="spinner"></span> Analyzing...'; btn.disabled=true;
+
+  const result = await doScoreAnalysis(text, role, company, exp, jd);
+  renderCheckerResult(result, role, company);
+  btn.innerHTML='🤖 Analyze My Resume'; btn.disabled=false;
+}
+
+async function doScoreAnalysis(resumeText, role, company, exp, jd) {
+  const prompt = `You are an expert career coach and technical recruiter at ${company}. Analyze this resume for the role of ${role} (${exp}) at ${company}.
+${jd ? `\nJob Description context:\n${jd.slice(0,800)}` : ''}
+
+Resume:
+${resumeText.slice(0,3000)}
+
+Respond ONLY with valid JSON (no markdown):
+{
+  "score": <0-100>,
+  "verdict": "one-line verdict",
+  "skills_score": <0-100>,
+  "experience_score": <0-100>,
+  "presentation_score": <0-100>,
+  "strengths": ["strength1","strength2","strength3"],
+  "improvements": ["actionable improvement 1","actionable improvement 2","actionable improvement 3"],
+  "company_fit": "2 sentences on fit for ${company} specifically",
+  "missing_keywords": ["keyword1","keyword2","keyword3"]
+}`;
+
+  try {
+    const res = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ max_tokens: 700, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    const clean = data.content[0].text.replace(/```json|```/g,'').trim();
+    return JSON.parse(clean);
+  } catch(e) {
+    return {score:50,verdict:'Could not analyze',skills_score:50,experience_score:50,presentation_score:50,strengths:['Resume received'],improvements:['Please ensure resume text is clear'],company_fit:'Analysis failed. Try again.',missing_keywords:[]};
+  }
+}
+
+function renderCheckerResult(r, role, company) {
+  const score = Math.max(0,Math.min(100,r.score));
+  const cls = score>=70?'rsc-great':score>=50?'rsc-good':'rsc-fair';
+
+  document.getElementById('checkerResult').style.display='block';
+  document.getElementById('checkerResult').innerHTML = `
+    <div class="result-box">
+      <div class="result-hero">
+        <div class="result-score-circle ${cls}">
+          <span class="rsc-num">${score}</span>
+          <span class="rsc-lbl">/100</span>
+        </div>
+        <div>
+          <div class="result-verdict">${r.verdict}</div>
+          <div class="result-sub">${role} at ${company}</div>
+          <div class="result-verdict-desc">${r.company_fit}</div>
+        </div>
+      </div>
+
+      <div class="breakdown-3">
+        ${[{l:'Skills Match',v:r.skills_score||0},{l:'Experience',v:r.experience_score||0},{l:'Presentation',v:r.presentation_score||0}].map(x=>`
+          <div class="bd-item">
+            <div class="bd-label">${x.l}</div>
+            <div class="bd-val" style="color:${x.v>=70?'var(--green)':x.v>=50?'var(--amber)':'var(--red)'}">${Math.max(0,Math.min(100,x.v))}</div>
+            <div class="bd-bar"><div class="bd-fill" style="width:${Math.max(0,Math.min(100,x.v))}%"></div></div>
+          </div>`).join('')}
+      </div>
+
+      <div class="tips-grid">
+        <div>
+          <div class="tips-col-title" style="color:var(--green)">✅ Strengths</div>
+          ${(r.strengths||[]).map(s=>`<div class="tip-item"><span style="color:var(--green);flex-shrink:0">✓</span>${s}</div>`).join('')}
+        </div>
+        <div>
+          <div class="tips-col-title" style="color:var(--amber)">⚡ Action Items</div>
+          ${(r.improvements||[]).map(i=>`<div class="tip-item"><span style="color:var(--amber);flex-shrink:0">→</span>${i}</div>`).join('')}
+        </div>
+      </div>
+
+      ${(r.missing_keywords||[]).length?`
+      <div style="margin-top:14px;padding:14px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px">
+        <div style="font-size:11px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">🚨 Missing Keywords (Add These to Your Resume)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${(r.missing_keywords||[]).map(k=>`<span style="background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2);border-radius:5px;padding:3px 10px;font-size:12px">${k}</span>`).join('')}
+        </div>
+      </div>`:''}
+
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn btn-outline-cyan btn-sm" onclick="switchTab('jobs')">🔍 Find Matching Jobs</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('checkerResult').style.display='none'">Clear</button>
+      </div>
+    </div>`;
+
+  document.getElementById('checkerResult').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ==================== COMPANY EXPECTATIONS ====================
+function updateCompanyExpectations() {
+  const company = document.getElementById('checkerCompany')?.value || 'Any / General';
+  const role = document.getElementById('checkerRole')?.value || 'Software Engineer';
+  const info = COMPANIES_INFO[company] || COMPANIES_INFO['Any / General'];
+  document.getElementById('companyExpectations').innerHTML = `
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Culture at ${company}</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.7;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">${info.culture}</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:11px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Must-Have Skills</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+        ${info.must.map(s=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)"><span style="color:var(--red)">★</span>${s}</div>`).join('')}
+      </div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Nice-to-Have</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        ${info.nice.map(s=>`<span style="background:rgba(16,185,129,.08);color:var(--green);border:1px solid rgba(16,185,129,.18);border-radius:5px;padding:3px 9px;font-size:11px">${s}</span>`).join('')}
+      </div>
+    </div>`;
+}
+
+// ==================== MODAL / TOAST ====================
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))closeModal(e.target.id)});
+
+let toastTimer;
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  const icons = {success:'✅',error:'❌',info:'ℹ️'};
+  t.textContent = `${icons[type]} ${msg}`;
+  t.className = 'toast-show';
+  t.style.borderLeft = type==='success'?'3px solid var(--green)':type==='error'?'3px solid var(--red)':'3px solid var(--cyan)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.className='',3000);
+}
+</script>
+</body>
+</html>
