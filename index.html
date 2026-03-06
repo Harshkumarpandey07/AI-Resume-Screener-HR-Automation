@@ -1020,18 +1020,59 @@ let applyingJobId = null;
 let chkFileText = '';
 
 // ===== SAMPLE JOBS =====
-const SAMPLE_JOBS = [
-  {id:'j1',title:'ML Engineer',company:'Google',logo:'🔍',domain:'Engineering',type:'Full-time',mode:'Hybrid',exp:'3-5 years',location:'Bangalore',salary:'₹55-80 LPA',skills:['Python','TensorFlow','PyTorch','MLOps','GCP'],desc:'Build and deploy large-scale ML models for Google Search and Ads products.',badge:'HOT'},
-  {id:'j2',title:'Frontend Developer',company:'Swiggy',logo:'🛵',domain:'Engineering',type:'Full-time',mode:'Hybrid',exp:'1-3 years',location:'Bangalore',salary:'₹15-25 LPA',skills:['React','TypeScript','Redux','CSS','GraphQL'],desc:'Build fast, delightful consumer experiences for millions of users.',badge:'NEW'},
-  {id:'j3',title:'Data Scientist',company:'Zomato',logo:'🍕',domain:'Data Science',type:'Full-time',mode:'Hybrid',exp:'1-3 years',location:'Gurgaon',salary:'₹18-30 LPA',skills:['Python','SQL','ML','Statistics','Spark'],desc:'Drive data-driven decisions across restaurant discovery and delivery.',badge:''},
-  {id:'j4',title:'DevOps Engineer',company:'Amazon',logo:'📦',domain:'DevOps',type:'Full-time',mode:'On-site',exp:'3-5 years',location:'Hyderabad',salary:'₹22-35 LPA',skills:['AWS','Docker','Kubernetes','Terraform','CI/CD'],desc:'Scale AWS infrastructure for millions of daily transactions.',badge:'HOT'},
-  {id:'j5',title:'Product Manager',company:'Flipkart',logo:'🛒',domain:'Product',type:'Full-time',mode:'Hybrid',exp:'3-5 years',location:'Bangalore',salary:'₹28-45 LPA',skills:['Product Strategy','SQL','User Research','Agile','Data Analysis'],desc:'Lead product development for Flipkart\'s core e-commerce platform.',badge:''},
-  {id:'j6',title:'Full Stack Developer',company:'Razorpay',logo:'💳',domain:'Engineering',type:'Full-time',mode:'Remote',exp:'1-3 years',location:'Remote',salary:'₹20-32 LPA',skills:['React','Node.js','MongoDB','Redis','AWS'],desc:'Build payment infrastructure that processes millions of transactions.',badge:'REMOTE'},
-  {id:'j7',title:'UI/UX Designer',company:'CRED',logo:'💎',domain:'Design',type:'Full-time',mode:'Hybrid',exp:'1-3 years',location:'Bangalore',salary:'₹14-22 LPA',skills:['Figma','Prototyping','User Research','Design Systems','Motion'],desc:'Craft premium financial experiences for CRED\'s high-trust user base.',badge:'NEW'},
-  {id:'j8',title:'Backend Developer',company:'Paytm',logo:'💸',domain:'Engineering',type:'Full-time',mode:'Hybrid',exp:'3-5 years',location:'Noida',salary:'₹18-28 LPA',skills:['Java','Spring Boot','Kafka','MySQL','Microservices'],desc:'Build scalable backend systems for India\'s largest fintech platform.',badge:''},
-  {id:'j9',title:'Data Analyst',company:'Meesho',logo:'🛍',domain:'Data Science',type:'Full-time',mode:'Remote',exp:'Fresher',location:'Remote',salary:'₹8-14 LPA',skills:['SQL','Python','Excel','Tableau','Statistics'],desc:'Analyse seller behaviour and supply chain data to drive growth.',badge:'REMOTE'},
-  {id:'j10',title:'Cloud Architect',company:'Microsoft',logo:'🪟',domain:'DevOps',type:'Full-time',mode:'Hybrid',exp:'5+ years',location:'Hyderabad',salary:'₹50-90 LPA',skills:['Azure','Kubernetes','Terraform','Security','Architecture'],desc:'Design cloud-native solutions for Microsoft enterprise customers.',badge:'HOT'},
-];
+// ===== JOB DATA (live + recruiter) =====
+let ALL_JOBS = [];   // combined: real API + recruiter posted
+let jobsLoading = false;
+
+// Map recruiter job to display format
+function recruiterJobToDisplay(j) {
+  return {
+    id: j.id,
+    title: j.title,
+    company: (R.settings && R.settings.company) ? R.settings.company : 'HireAI Corp',
+    logo: '🏢',
+    location: j.location || 'India',
+    mode: 'On-site',
+    type: 'Full-time',
+    exp: j.exp || '',
+    domain: 'Engineering',
+    salary: j.salary || '',
+    skills: j.skills || [],
+    desc: j.desc || '',
+    badge: 'NEW',
+    url: '',
+    source: 'recruiter',
+    date: j.date || '',
+  };
+}
+
+async function fetchLiveJobs() {
+  try {
+    // Fetch multiple tech categories from RemoteOK via our proxy
+    const tags = ['software', 'react', 'python', 'devops', 'design'];
+    const results = await Promise.allSettled(
+      tags.map(tag =>
+        fetch(`/api/claude?jobs=1&tag=${tag}&limit=8`)
+          .then(r => r.json())
+          .then(d => d.jobs || [])
+      )
+    );
+    const apiJobs = results
+      .filter(r => r.status === 'fulfilled')
+      .flatMap(r => r.value);
+    // Deduplicate by id
+    const seen = new Set();
+    return apiJobs.filter(j => {
+      if (seen.has(j.id)) return false;
+      seen.add(j.id);
+      return true;
+    });
+  } catch (e) {
+    console.warn('Live job fetch failed:', e);
+    return [];
+  }
+}
+
 
 // ===== STORAGE =====
 function saveR(){ try{localStorage.setItem('hireai_r',JSON.stringify(R))}catch(e){} }
@@ -1426,15 +1467,31 @@ function exportJSON(){
 }
 
 // ===== JOB SEEKER =====
-function initJobSeeker(){renderJobs(SAMPLE_JOBS);}
+async function initJobSeeker(){
+  renderJobsLoading();
+  const [liveJobs] = await Promise.all([fetchLiveJobs()]);
+  const recruiterJobs = (R.jobs || []).map(recruiterJobToDisplay);
+  // Recruiter jobs first, then live
+  ALL_JOBS = [...recruiterJobs, ...liveJobs];
+  applyFilters();
+}
+
+function renderJobsLoading(){
+  document.getElementById('jobsList').innerHTML = `
+    <div style="text-align:center;padding:60px 20px;color:var(--text3)">
+      <div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 14px"></div>
+      <p style="font-size:13px">Loading live jobs...</p>
+    </div>`;
+}
+
 function applyFilters(){
   const q=(document.getElementById('jsSearch').value||'').toLowerCase();
   const type=document.getElementById('jsType').value;
   const mode=document.getElementById('jsMode').value;
   const exp=document.getElementById('jsExp').value;
   const domain=document.getElementById('jsDomain').value;
-  let list=SAMPLE_JOBS.filter(j=>{
-    if(q&&!`${j.title} ${j.company} ${(j.skills||[]).join(' ')}`.toLowerCase().includes(q))return false;
+  let list=ALL_JOBS.filter(j=>{
+    if(q&&!`${j.title} ${j.company} ${(j.skills||[]).join(' ')} ${j.desc||''}`.toLowerCase().includes(q))return false;
     if(type&&j.type!==type)return false;
     if(mode&&j.mode!==mode)return false;
     if(exp&&j.exp!==exp)return false;
@@ -1445,33 +1502,39 @@ function applyFilters(){
 }
 function renderJobs(list){
   const el=document.getElementById('jobsList');
-  if(!list.length){el.innerHTML='<div class="empty-state"><div class="e-icon">🔍</div><p>No jobs match your filters</p></div>';return}
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="e-icon">🔍</div><p>No jobs match your filters</p></div>';
+    return;
+  }
   el.innerHTML=list.map(j=>`
     <div class="job-card ${selectedJobId===j.id?'selected':''}" id="jc-${j.id}" onclick="openJobDetail('${j.id}')">
       <button class="jc-save" onclick="event.stopPropagation();toggleSave('${j.id}')" title="Save">${JS_SAVED.includes(j.id)?'🔖':'🤍'}</button>
       <div class="jc-header">
-        <div class="jc-logo">${j.logo}</div>
+        <div class="jc-logo">${j.logo && !j.logo.startsWith('http') ? j.logo : (j.logo?`<img src="${j.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.parentElement.textContent='💼'">`:'💼')}</div>
         <div class="jc-meta">
           <div class="jc-title">${j.title}</div>
           <div class="jc-company">${j.company} · ${j.location}</div>
         </div>
       </div>
       <div class="jc-tags">
-        <span class="jc-tag">${j.type}</span><span class="jc-tag">${j.mode}</span><span class="jc-tag">${j.exp}</span>
+        <span class="jc-tag">${j.type}</span>
+        <span class="jc-tag">${j.mode}</span>
+        ${j.exp?`<span class="jc-tag">${j.exp}</span>`:''}
+        ${j.source==='recruiter'?'<span class="jc-tag" style="color:var(--violet2);border-color:rgba(124,58,237,.3)">🏢 Direct</span>':'<span class="jc-tag" style="color:var(--cyan);border-color:rgba(0,229,255,.2)">🌐 Live</span>'}
       </div>
       <div class="jc-footer">
-        <span class="jc-salary">${j.salary}</span>
+        <span class="jc-salary">${j.salary||'Competitive'}</span>
         ${j.badge?`<span class="jc-badge ${j.badge.toLowerCase()}">${j.badge}</span>`:''}
       </div>
     </div>`).join('');
   if(selectedJobId){
-    const j=SAMPLE_JOBS.find(x=>x.id===selectedJobId);
+    const j=ALL_JOBS.find(x=>x.id===selectedJobId);
     if(j) renderJobDetail(j);
   }
 }
 function openJobDetail(id){
   selectedJobId=id;
-  const j=SAMPLE_JOBS.find(x=>x.id===id);
+  const j=ALL_JOBS.find(x=>x.id===id);
   if(!j)return;
   document.querySelectorAll('.job-card').forEach(c=>c.classList.remove('selected'));
   const card=document.getElementById('jc-'+id);
@@ -1481,36 +1544,43 @@ function openJobDetail(id){
 function renderJobDetail(j){
   const applied=JS_APPS.find(a=>a.jobId===j.id);
   const el=document.getElementById('jobsList');
-  // We'll render detail in a separate area — replace jobs list with split view
   const container=el.parentElement;
   if(!document.getElementById('jobDetailPane')){
     const pane=document.createElement('div');pane.id='jobDetailPane';pane.style.cssText='margin-top:14px';
     container.appendChild(pane);
   }
+  const logoHtml = j.logo && j.logo.startsWith('http')
+    ? `<img src="${j.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:10px" onerror="this.parentElement.textContent='💼'">`
+    : (j.logo||'💼');
+  const applyBtn = j.source==='remoteok' && j.url
+    ? `<a href="${j.url}" target="_blank" class="btn btn-green btn-sm" style="text-decoration:none">Apply on RemoteOK ↗</a>`
+    : (applied
+        ? `<span class="badge badge-green" style="text-align:center">✓ Applied</span>`
+        : `<button class="btn btn-green btn-sm" onclick="openApply('${j.id}')">Apply Now</button>`
+      );
   document.getElementById('jobDetailPane').innerHTML=`
     <div class="job-detail">
       <div class="jd-header">
-        <div class="jd-logo">${j.logo}</div>
+        <div class="jd-logo">${logoHtml}</div>
         <div style="flex:1">
           <div class="jd-title">${j.title}</div>
           <div class="jd-meta">${j.company} · ${j.location} · ${j.mode} · ${j.type}</div>
           <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-            <span class="badge badge-green">${j.salary}</span>
-            <span class="badge badge-blue">${j.exp}</span>
+            ${j.salary?`<span class="badge badge-green">${j.salary}</span>`:''}
+            ${j.exp?`<span class="badge badge-blue">${j.exp}</span>`:''}
             ${j.badge?`<span class="badge badge-violet">${j.badge}</span>`:''}
+            ${j.source==='recruiter'?'<span class="badge badge-violet">🏢 Direct Hire</span>':'<span class="badge badge-blue">🌐 Live from RemoteOK</span>'}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          ${applied
-            ?`<span class="badge badge-green" style="text-align:center">✓ Applied</span>`
-            :`<button class="btn btn-green btn-sm" onclick="openApply('${j.id}')">Apply Now</button>`
-          }
-          <button class="btn btn-ghost btn-sm" onclick="showJSTab('checker')">Check Score</button>
+          ${applyBtn}
+          <button class="btn btn-ghost btn-sm" onclick="showJSTab('checker')">📊 Check My Score</button>
         </div>
       </div>
-      <div class="jd-section"><h4>About the Role</h4><p>${j.desc}</p></div>
-      <div class="jd-section"><h4>Required Skills</h4><div>${j.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div></div>
-      <div class="jd-section"><h4>Experience</h4><p style="color:var(--text2)">${j.exp}</p></div>
+      <div class="jd-section"><h4>About the Role</h4><p>${j.desc||'No description available.'}</p></div>
+      ${j.skills&&j.skills.length?`<div class="jd-section"><h4>Skills</h4><div>${j.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div></div>`:''}
+      ${j.exp?`<div class="jd-section"><h4>Experience</h4><p style="color:var(--text2)">${j.exp}</p></div>`:''}
+      ${j.date?`<div style="font-size:11px;color:var(--text3);margin-top:10px">Posted: ${new Date(j.date).toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}</div>`:''}
     </div>`;
 }
 function toggleSave(id){
@@ -1520,7 +1590,7 @@ function toggleSave(id){
 }
 function openApply(jobId){
   applyingJobId=jobId;
-  const j=SAMPLE_JOBS.find(x=>x.id===jobId);
+  const j=ALL_JOBS.find(x=>x.id===jobId);
   document.getElementById('applyJobTitle').textContent=`Apply — ${j?.title} at ${j?.company}`;
   openModal('applyModal');
 }
@@ -1528,7 +1598,7 @@ function submitApplication(){
   const name=document.getElementById('apName').value.trim();
   const email=document.getElementById('apEmail').value.trim();
   if(!name||!email){showToast('Name and email required','error');return}
-  const j=SAMPLE_JOBS.find(x=>x.id===applyingJobId);
+  const j=ALL_JOBS.find(x=>x.id===applyingJobId);
   JS_APPS.push({id:'a'+Date.now(),jobId:applyingJobId,title:j?.title||'',company:j?.company||'',date:new Date().toISOString().split('T')[0],status:'Applied'});
   saveJSData();closeModal('applyModal');
   document.getElementById('apName').value='';document.getElementById('apEmail').value='';document.getElementById('apPhone').value='';document.getElementById('apCover').value='';
@@ -1543,15 +1613,15 @@ function renderApps(){
 function withdrawApp(id){JS_APPS=JS_APPS.filter(a=>a.id!==id);saveJSData();renderApps();showToast('Withdrawn','info')}
 function renderSaved(){
   const el=document.getElementById('savedGrid');
-  const jobs=SAMPLE_JOBS.filter(j=>JS_SAVED.includes(j.id));
+  const jobs=ALL_JOBS.filter(j=>JS_SAVED.includes(j.id));
   if(!jobs.length){el.innerHTML='<div class="empty-state"><div class="e-icon">🔖</div><p>No saved jobs yet. Click the 🤍 on any job to save it.</p></div>';return}
   el.innerHTML=jobs.map(j=>`
     <div class="job-card" onclick="showJSTab('browse');setTimeout(()=>openJobDetail('${j.id}'),100)">
       <div class="jc-header">
-        <div class="jc-logo">${j.logo}</div>
+        <div class="jc-logo">${j.logo&&j.logo.startsWith('http')?`<img src="${j.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.parentElement.textContent='💼'">`:j.logo||'💼'}</div>
         <div class="jc-meta"><div class="jc-title">${j.title}</div><div class="jc-company">${j.company}</div></div>
       </div>
-      <div class="jc-footer"><span class="jc-salary">${j.salary}</span><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();toggleSave('${j.id}')">Remove</button></div>
+      <div class="jc-footer"><span class="jc-salary">${j.salary||'Competitive'}</span><button class="btn btn-danger btn-sm" onclick="event.stopPropagation();toggleSave('${j.id}')">Remove</button></div>
     </div>`).join('');
 }
 
