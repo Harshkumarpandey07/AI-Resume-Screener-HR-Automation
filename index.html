@@ -387,7 +387,7 @@ select.filter-input{cursor:pointer}
       </div>
     </div>
   </div>
-  <div class="land-footer">Built by <a href="https://github.com/Harshkumarpandey07" target="_blank">Harsh Kumar Pandey</a> · <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank">LinkedIn</a></div>
+  <div class="land-footer">Built by <a href="https://github.com/Harshkumarpandey07" target="_blank" rel="noopener noreferrer">Harsh Kumar Pandey</a> · <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
 </div>
 
 <!-- ===== AUTH MODAL ===== -->
@@ -734,7 +734,7 @@ select.filter-input{cursor:pointer}
                 </div>
                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                   <a href="https://github.com/Harshkumarpandey07" target="_blank" class="btn btn-cyan btn-sm" style="text-decoration:none">GitHub</a>
-                  <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">LinkedIn</a>
+                  <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="text-decoration:none">LinkedIn</a>
                 </div>
               </div>
             </div>
@@ -1166,32 +1166,57 @@ async function fetchLiveJobs() {
 
 
 // ===== STORAGE — per-user isolated =====
-function userKey(suffix){ return 'hireai_'+ROLE+'_'+currentUser.email+'_'+suffix; }
+function userKey(suffix){
+  const email = (currentUser && currentUser.email) ? currentUser.email.replace(/[^a-z0-9]/gi,'_') : 'guest';
+  const role  = ROLE || 'unknown';
+  return 'hireai_' + role + '_' + email + '_' + suffix;
+}
 function saveR(){
-  try{localStorage.setItem(userKey('r'),JSON.stringify(R))}catch(e){}
+  if(!currentUser) return;
+  try{ localStorage.setItem(userKey('r'), JSON.stringify(R)); }catch(e){ console.error('saveR failed',e); }
 }
 function loadR(){
+  if(!currentUser) return;
   try{
-    // try user-specific key first
-    const d=localStorage.getItem(userKey('r'));
-    if(d) Object.assign(R,JSON.parse(d));
-  }catch(e){}
+    const d = localStorage.getItem(userKey('r'));
+    if(d){
+      const parsed = JSON.parse(d);
+      // Merge carefully so we never lose defaults
+      R.candidates  = parsed.candidates  || [];
+      R.jobs        = parsed.jobs        || [];
+      R.interviews  = parsed.interviews  || [];
+      R.campaigns   = parsed.campaigns   || [];
+      R.settings    = parsed.settings    || R.settings;
+    }
+  }catch(e){ console.error('loadR failed',e); }
 }
-function saveUsers(u){ try{localStorage.setItem('hireai_users',JSON.stringify(u));return true}catch(e){console.error('saveUsers failed',e);return false} }
-function loadUsers(){ try{const d=localStorage.getItem('hireai_users');if(!d||d==='null'||d==='undefined')return{};const p=JSON.parse(d);return(p&&typeof p==='object')?p:{}}catch(e){console.error('loadUsers failed',e);return{}} }
-function saveJSData(){
+function saveUsers(u){
+  try{ localStorage.setItem('hireai_users', JSON.stringify(u)); return true; }
+  catch(e){ console.error('saveUsers failed',e); return false; }
+}
+function loadUsers(){
   try{
-    localStorage.setItem(userKey('apps'),JSON.stringify(JS_APPS));
-    localStorage.setItem(userKey('saved'),JSON.stringify(JS_SAVED));
-  }catch(e){}
+    const d = localStorage.getItem('hireai_users');
+    if(!d || d==='null' || d==='undefined') return {};
+    const p = JSON.parse(d);
+    return (p && typeof p === 'object') ? p : {};
+  }catch(e){ console.error('loadUsers failed',e); return {}; }
+}
+function saveJSData(){
+  if(!currentUser) return;
+  try{
+    localStorage.setItem(userKey('apps'),  JSON.stringify(JS_APPS));
+    localStorage.setItem(userKey('saved'), JSON.stringify(JS_SAVED));
+  }catch(e){ console.error('saveJSData failed',e); }
 }
 function loadJSData(){
+  if(!currentUser){ JS_APPS=[]; JS_SAVED=[]; return; }
   try{
-    const a=localStorage.getItem(userKey('apps'));
-    const s=localStorage.getItem(userKey('saved'));
-    JS_APPS  = a ? JSON.parse(a) : [];
-    JS_SAVED = s ? JSON.parse(s) : [];
-  }catch(e){ JS_APPS=[]; JS_SAVED=[]; }
+    const a = localStorage.getItem(userKey('apps'));
+    const s = localStorage.getItem(userKey('saved'));
+    JS_APPS  = (a && a !== 'null') ? JSON.parse(a) : [];
+    JS_SAVED = (s && s !== 'null') ? JSON.parse(s) : [];
+  }catch(e){ console.error('loadJSData failed',e); JS_APPS=[]; JS_SAVED=[]; }
 }
 
 // ===== LANDING & AUTH =====
@@ -1257,16 +1282,25 @@ function doRegister(){
   enterApp({name,email,role:pendingRole});
 }
 function enterApp(user){
+  // Set globals FIRST so userKey() works correctly
   currentUser = user;
-  ROLE = user.role;
+  ROLE = user.role; // 'recruiter' or 'jobseeker'
   closeAuth();
+
+  // Reset state cleanly before loading this user's data
+  R = {candidates:[],jobs:[],interviews:[],campaigns:[],settings:{company:'HireAI Corp',threshold:70,lang:'English'}};
+  JS_APPS=[]; JS_SAVED=[];
+
+  // Show app shell
   document.getElementById('landing').style.display='none';
   document.getElementById('app').style.display='block';
-  // Set sidebar user info
+
+  // Sidebar user info
   const initials = user.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('sideAvatar').textContent = initials;
-  document.getElementById('sideName').textContent = user.name;
-  document.getElementById('sideRole').textContent = ROLE==='recruiter'?'Recruiter':'Job Seeker';
+  document.getElementById('sideName').textContent   = user.name;
+  document.getElementById('sideRole').textContent   = ROLE==='recruiter' ? 'Recruiter' : 'Job Seeker';
+
   const pill = document.getElementById('rolePill');
   if(ROLE==='recruiter'){
     pill.className='role-pill rec'; pill.textContent='REC';
@@ -1276,7 +1310,8 @@ function enterApp(user){
     document.getElementById('seekPages').style.display='none';
     document.getElementById('topAction').textContent='+ Screen Resumes';
     document.getElementById('topAction').onclick=()=>showPage('screening');
-    loadR(); initRecruiter();
+    loadR();        // load THIS user's recruiter data
+    initRecruiter();
   } else {
     pill.className='role-pill seek'; pill.textContent='JOB';
     document.getElementById('recNav').style.display='none';
@@ -1285,32 +1320,40 @@ function enterApp(user){
     document.getElementById('seekPages').style.display='block';
     document.getElementById('topAction').textContent='📊 Check Resume';
     document.getElementById('topAction').onclick=()=>showJSTab('checker');
-    loadJSData(); initJobSeeker();
+    loadJSData();   // load THIS user's jobseeker data
+    initJobSeeker();
   }
 }
 function doLogout(){
-  // Save current user's data before clearing
-  if(ROLE==='recruiter') saveR();
-  if(ROLE==='jobseeker') saveJSData();
+  // Save before clearing
+  if(ROLE==='recruiter')  saveR();
+  if(ROLE==='jobseeker')  saveJSData();
+
+  // Destroy charts
+  if(actChart){ actChart.destroy(); actChart=null; }
+  if(decChart){ decChart.destroy(); decChart=null; }
+
   // Reset all state
   currentUser=null; ROLE='';
   R={candidates:[],jobs:[],interviews:[],campaigns:[],settings:{company:'HireAI Corp',threshold:70,lang:'English'}};
   JS_APPS=[]; JS_SAVED=[]; ALL_JOBS=[]; selectedJobId=null; uploadedFiles=[];
-  if(actChart){actChart.destroy();actChart=null;}
-  if(decChart){decChart.destroy();decChart=null;}
-  // Reset nav UI
+
+  // Hide app, show landing
   document.getElementById('recNav').style.display='none';
   document.getElementById('seekNav').style.display='none';
   document.getElementById('recPages').style.display='none';
   document.getElementById('seekPages').style.display='none';
   document.getElementById('app').style.display='none';
   document.getElementById('landing').style.display='flex';
-  // Clear login form fields for clean next login
-  document.getElementById('loginEmail').value='';
-  document.getElementById('loginPass').value='';
-  document.getElementById('regName').value='';
-  document.getElementById('regEmail').value='';
-  document.getElementById('regPass').value='';
+
+  // Clear all auth form fields
+  ['loginEmail','loginPass','regName','regEmail','regPass'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  // Clear error messages
+  ['loginErr','regErr'].forEach(id=>{
+    const el=document.getElementById(id); if(el){el.style.display='none';el.textContent='';}
+  });
 }
 function topActionFn(){}
 
