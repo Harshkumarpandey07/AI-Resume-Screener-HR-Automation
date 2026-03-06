@@ -243,7 +243,7 @@ select.s-input{cursor:pointer}
 .js-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
 .js-content{display:none;padding:24px}
 .js-content.active{display:block;animation:fadeUp .3s ease}
-.jobs-layout{display:grid;grid-template-columns:260px 1fr;gap:16px}
+.jobs-layout{display:grid;grid-template-columns:220px 320px 1fr;gap:14px;align-items:start}
 .filter-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:sticky;top:120px;max-height:calc(100vh - 140px);overflow-y:auto}
 .filter-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px;margin-top:12px;display:block}
 .filter-input{width:100%;padding:8px 11px;background:var(--glass);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font-b);font-size:12px;outline:none}
@@ -837,8 +837,14 @@ select.filter-input{cursor:pointer}
               <option>Engineering</option><option>Data Science</option><option>Design</option><option>Product</option><option>DevOps</option>
             </select>
           </div>
-          <div>
-            <div id="jobsList"></div>
+          <!-- Left: job cards -->
+          <div id="jobsList" style="overflow-y:auto;max-height:calc(100vh - 160px)"></div>
+          <!-- Right: job detail panel -->
+          <div id="jobDetailPane" style="overflow-y:auto;max-height:calc(100vh - 160px)">
+            <div class="empty-state" style="padding:80px 20px">
+              <div class="e-icon">👆</div>
+              <p>Click any job to see full details</p>
+            </div>
           </div>
         </div>
       </div>
@@ -925,20 +931,105 @@ select.filter-input{cursor:pointer}
 <div class="modal-overlay" id="jobModal">
   <div class="modal">
     <h3>➕ New Job Posting</h3>
-    <div class="s-field"><label class="s-label">Job Title *</label><input class="s-input" id="jTitle" type="text" placeholder="e.g. Senior Full Stack Developer"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="s-field"><label class="s-label">Department</label><input class="s-input" id="jDept" type="text" placeholder="Engineering"></div>
-      <div class="s-field"><label class="s-label">Location</label><input class="s-input" id="jLoc" type="text" placeholder="Remote / City"></div>
+    <div class="s-field"><label class="s-label">Job Title *</label>
+      <select class="s-input" id="jTitle">
+        <option value="">-- Select Role --</option>
+        <optgroup label="Engineering">
+          <option>Software Engineer</option>
+          <option>Frontend Developer</option>
+          <option>Backend Developer</option>
+          <option>Full Stack Developer</option>
+          <option>Mobile Developer</option>
+          <option>Cloud Engineer</option>
+        </optgroup>
+        <optgroup label="Data & AI">
+          <option>Data Scientist</option>
+          <option>ML Engineer</option>
+          <option>Data Analyst</option>
+          <option>AI Engineer</option>
+        </optgroup>
+        <optgroup label="DevOps">
+          <option>DevOps Engineer</option>
+          <option>Site Reliability Engineer</option>
+          <option>Cybersecurity Analyst</option>
+        </optgroup>
+        <optgroup label="Design">
+          <option>UI/UX Designer</option>
+          <option>Graphic Designer</option>
+        </optgroup>
+        <optgroup label="Management">
+          <option>Product Manager</option>
+          <option>Engineering Manager</option>
+          <option>Tech Lead</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option>Custom (type below)</option>
+        </optgroup>
+      </select>
     </div>
-    <div class="s-field"><label class="s-label">Job Description *</label><textarea class="s-input" id="jDesc" rows="4" style="resize:vertical" placeholder="Full job description..."></textarea></div>
-    <div class="s-field"><label class="s-label">Skills (comma separated)</label><input class="s-input" id="jSkills" type="text" placeholder="React, Node.js, Python"></div>
+    <div class="s-field"><label class="s-label">Custom Title (if "Custom" selected above)</label>
+      <input class="s-input" id="jTitleCustom" type="text" placeholder="e.g. Senior Golang Developer">
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="s-field"><label class="s-label">Experience</label><input class="s-input" id="jExp" type="text" placeholder="2-4 years"></div>
-      <div class="s-field"><label class="s-label">Salary</label><input class="s-input" id="jSal" type="text" placeholder="₹10-20 LPA"></div>
+      <div class="s-field"><label class="s-label">Domain</label>
+        <select class="s-input" id="jDept">
+          <option value="Engineering">Engineering</option>
+          <option value="Data Science">Data Science</option>
+          <option value="DevOps">DevOps</option>
+          <option value="Design">Design</option>
+          <option value="Product">Product</option>
+        </select>
+      </div>
+      <div class="s-field"><label class="s-label">Work Mode</label>
+        <select class="s-input" id="jMode">
+          <option value="Hybrid">Hybrid</option>
+          <option value="Remote">Remote</option>
+          <option value="On-site">On-site</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="s-field"><label class="s-label">Location</label>
+        <select class="s-input" id="jLoc">
+          <option>Bangalore</option><option>Mumbai</option><option>Delhi NCR</option>
+          <option>Hyderabad</option><option>Pune</option><option>Chennai</option>
+          <option>Gurgaon</option><option>Noida</option><option>Remote</option><option>Other</option>
+        </select>
+      </div>
+      <div class="s-field"><label class="s-label">Job Type</label>
+        <select class="s-input" id="jType">
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Contract">Contract</option>
+          <option value="Internship">Internship</option>
+        </select>
+      </div>
+    </div>
+    <div class="s-field"><label class="s-label">Experience Required</label>
+      <select class="s-input" id="jExp">
+        <option value="Fresher">Fresher (0 years)</option>
+        <option value="1-3 years">1–3 years</option>
+        <option value="3-5 years">3–5 years</option>
+        <option value="5+ years">5+ years</option>
+      </select>
+    </div>
+    <div class="s-field"><label class="s-label">Job Description *</label>
+      <textarea class="s-input" id="jDesc" rows="4" style="resize:vertical" placeholder="Describe responsibilities, requirements, what the team does..."></textarea>
+    </div>
+    <div class="s-field"><label class="s-label">Required Skills (comma separated)</label>
+      <input class="s-input" id="jSkills" type="text" placeholder="React, Node.js, Python, AWS...">
+    </div>
+    <div class="s-field"><label class="s-label">Salary Range</label>
+      <select class="s-input" id="jSal">
+        <option value="">Not disclosed</option>
+        <option>₹3-6 LPA</option><option>₹6-10 LPA</option><option>₹10-15 LPA</option>
+        <option>₹15-25 LPA</option><option>₹25-40 LPA</option><option>₹40-60 LPA</option>
+        <option>₹60-80 LPA</option><option>₹80+ LPA</option>
+      </select>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('jobModal')">Cancel</button>
-      <button class="btn btn-cyan" onclick="saveJob()">Save Job</button>
+      <button class="btn btn-cyan" onclick="saveJob()">✓ Post Job</button>
     </div>
   </div>
 </div>
@@ -1345,12 +1436,41 @@ function populateScreenJobDD(){
   const dd=document.getElementById('screenJob');if(!dd)return;
   dd.innerHTML='<option value="">-- Select job --</option>'+R.jobs.map(j=>`<option value="${j.id}">${j.title}</option>`).join('');
 }
-function openJobModal(){ document.getElementById('jTitle').value='';document.getElementById('jDept').value='';document.getElementById('jLoc').value='';document.getElementById('jDesc').value='';document.getElementById('jSkills').value='';document.getElementById('jExp').value='';document.getElementById('jSal').value='';openModal('jobModal'); }
+function openJobModal(){
+  document.getElementById('jTitle').value='';
+  document.getElementById('jTitleCustom').value='';
+  document.getElementById('jDept').value='Engineering';
+  document.getElementById('jMode').value='Hybrid';
+  document.getElementById('jLoc').value='Bangalore';
+  document.getElementById('jType').value='Full-time';
+  document.getElementById('jExp').value='1-3 years';
+  document.getElementById('jDesc').value='';
+  document.getElementById('jSkills').value='';
+  document.getElementById('jSal').value='';
+  openModal('jobModal');
+}
 function saveJob(){
-  const title=document.getElementById('jTitle').value.trim();
-  if(!title){showToast('Job title required','error');return}
-  R.jobs.push({id:'j'+Date.now(),title,dept:document.getElementById('jDept').value,location:document.getElementById('jLoc').value,desc:document.getElementById('jDesc').value,skills:document.getElementById('jSkills').value.split(',').map(s=>s.trim()).filter(Boolean),exp:document.getElementById('jExp').value,salary:document.getElementById('jSal').value,date:new Date().toISOString()});
-  saveR();renderJobsList();closeModal('jobModal');showToast('Job posted!','success');
+  const titleSelect=document.getElementById('jTitle').value;
+  const titleCustom=document.getElementById('jTitleCustom').value.trim();
+  const title = titleSelect==='Custom (type below)' ? titleCustom : titleSelect;
+  if(!title){showToast('Please select or enter a job title','error');return}
+  const desc=document.getElementById('jDesc').value.trim();
+  if(!desc){showToast('Job description is required','error');return}
+  R.jobs.push({
+    id:'j'+Date.now(),
+    title,
+    dept:document.getElementById('jDept').value,
+    domain:document.getElementById('jDept').value,
+    mode:document.getElementById('jMode').value,
+    location:document.getElementById('jLoc').value,
+    type:document.getElementById('jType').value,
+    exp:document.getElementById('jExp').value,
+    desc,
+    skills:document.getElementById('jSkills').value.split(',').map(s=>s.trim()).filter(Boolean),
+    salary:document.getElementById('jSal').value,
+    date:new Date().toISOString()
+  });
+  saveR();renderJobsList();closeModal('jobModal');showToast('Job posted! Job seekers can now see it.','success');
 }
 function delJob(id){if(confirm('Delete this job?')){R.jobs=R.jobs.filter(j=>j.id!==id);saveR();renderJobsList()}}
 
@@ -1583,44 +1703,72 @@ function openJobDetail(id){
 }
 function renderJobDetail(j){
   const applied=JS_APPS.find(a=>a.jobId===j.id);
-  const el=document.getElementById('jobsList');
-  const container=el.parentElement;
-  if(!document.getElementById('jobDetailPane')){
-    const pane=document.createElement('div');pane.id='jobDetailPane';pane.style.cssText='margin-top:14px';
-    container.appendChild(pane);
-  }
   const logoHtml = j.logo && j.logo.startsWith('http')
     ? `<img src="${j.logo}" style="width:100%;height:100%;object-fit:contain;border-radius:10px" onerror="this.parentElement.textContent='💼'">`
     : (j.logo||'💼');
   const applyBtn = j.source==='remoteok' && j.url
-    ? `<a href="${j.url}" target="_blank" class="btn btn-green btn-sm" style="text-decoration:none">Apply on RemoteOK ↗</a>`
+    ? `<a href="${j.url}" target="_blank" class="btn btn-green btn-sm" style="text-decoration:none;text-align:center">Apply on RemoteOK ↗</a>`
     : (applied
-        ? `<span class="badge badge-green" style="text-align:center">✓ Applied</span>`
-        : `<button class="btn btn-green btn-sm" onclick="openApply('${j.id}')">Apply Now</button>`
+        ? `<span class="badge badge-green" style="padding:8px 14px;font-size:12px">✓ Already Applied</span>`
+        : `<button class="btn btn-green" onclick="openApply('${j.id}')" style="width:100%;justify-content:center">Apply Now →</button>`
       );
   document.getElementById('jobDetailPane').innerHTML=`
     <div class="job-detail">
       <div class="jd-header">
-        <div class="jd-logo">${logoHtml}</div>
-        <div style="flex:1">
+        <div class="jd-logo" style="width:60px;height:60px;font-size:28px">${logoHtml}</div>
+        <div style="flex:1;min-width:0">
           <div class="jd-title">${j.title}</div>
-          <div class="jd-meta">${j.company} · ${j.location} · ${j.mode} · ${j.type}</div>
-          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+          <div class="jd-meta" style="margin-bottom:8px">${j.company} · ${j.location}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            ${j.mode?`<span class="badge badge-blue">${j.mode}</span>`:''}
+            ${j.type?`<span class="badge badge-violet">${j.type}</span>`:''}
+            ${j.exp?`<span class="badge badge-amber" style="background:rgba(245,158,11,.15);color:var(--amber)">${j.exp}</span>`:''}
             ${j.salary?`<span class="badge badge-green">${j.salary}</span>`:''}
-            ${j.exp?`<span class="badge badge-blue">${j.exp}</span>`:''}
-            ${j.badge?`<span class="badge badge-violet">${j.badge}</span>`:''}
-            ${j.source==='recruiter'?'<span class="badge badge-violet">🏢 Direct Hire</span>':'<span class="badge badge-blue">🌐 Live from RemoteOK</span>'}
+            ${j.source==='recruiter'?'<span class="badge" style="background:rgba(124,58,237,.15);color:var(--violet2)">🏢 Direct Hire</span>':'<span class="badge badge-blue">🌐 Live Job</span>'}
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          ${applyBtn}
-          <button class="btn btn-ghost btn-sm" onclick="showJSTab('checker')">📊 Check My Score</button>
+      </div>
+
+      <div style="margin-bottom:16px">${applyBtn}</div>
+
+      ${j.desc?`<div class="jd-section"><h4>About the Role</h4><p>${j.desc}</p></div>`:''}
+
+      ${j.skills&&j.skills.length?`
+      <div class="jd-section">
+        <h4>Required Skills</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+          ${j.skills.map(s=>`<span class="tag" style="font-size:12px;padding:4px 10px">${s}</span>`).join('')}
+        </div>
+      </div>`:''}
+
+      <div class="jd-section">
+        <h4>Job Details</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+          <div style="background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Work Mode</div>
+            <div style="font-size:13px;font-weight:600">${j.mode||'—'}</div>
+          </div>
+          <div style="background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Job Type</div>
+            <div style="font-size:13px;font-weight:600">${j.type||'—'}</div>
+          </div>
+          <div style="background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Experience</div>
+            <div style="font-size:13px;font-weight:600">${j.exp||'Not specified'}</div>
+          </div>
+          <div style="background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:10px">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">Salary</div>
+            <div style="font-size:13px;font-weight:600;color:var(--green)">${j.salary||'Competitive'}</div>
+          </div>
         </div>
       </div>
-      <div class="jd-section"><h4>About the Role</h4><p>${j.desc||'No description available.'}</p></div>
-      ${j.skills&&j.skills.length?`<div class="jd-section"><h4>Skills</h4><div>${j.skills.map(s=>`<span class="tag">${s}</span>`).join('')}</div></div>`:''}
-      ${j.exp?`<div class="jd-section"><h4>Experience</h4><p style="color:var(--text2)">${j.exp}</p></div>`:''}
-      ${j.date?`<div style="font-size:11px;color:var(--text3);margin-top:10px">Posted: ${new Date(j.date).toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}</div>`:''}
+
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-ghost btn-sm" onclick="showJSTab('checker')" style="flex:1;justify-content:center">📊 Check My Resume Score</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleSave('${j.id}')" style="flex:1;justify-content:center">${JS_SAVED.includes(j.id)?'🔖 Saved':'🤍 Save Job'}</button>
+      </div>
+
+      ${j.date?`<div style="font-size:11px;color:var(--text3);margin-top:12px;text-align:right">Posted: ${new Date(j.date).toLocaleDateString('en',{month:'short',day:'numeric',year:'numeric'})}</div>`:''}
     </div>`;
 }
 function toggleSave(id){
