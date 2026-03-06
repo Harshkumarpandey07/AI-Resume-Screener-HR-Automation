@@ -1074,13 +1074,34 @@ async function fetchLiveJobs() {
 }
 
 
-// ===== STORAGE =====
-function saveR(){ try{localStorage.setItem('hireai_r',JSON.stringify(R))}catch(e){} }
-function loadR(){ try{const d=localStorage.getItem('hireai_r');if(d)Object.assign(R,JSON.parse(d))}catch(e){} }
+// ===== STORAGE — per-user isolated =====
+function userKey(suffix){ return 'hireai_'+ROLE+'_'+currentUser.email+'_'+suffix; }
+function saveR(){
+  try{localStorage.setItem(userKey('r'),JSON.stringify(R))}catch(e){}
+}
+function loadR(){
+  try{
+    // try user-specific key first
+    const d=localStorage.getItem(userKey('r'));
+    if(d) Object.assign(R,JSON.parse(d));
+  }catch(e){}
+}
 function saveUsers(u){ try{localStorage.setItem('hireai_users',JSON.stringify(u));return true}catch(e){console.error('saveUsers failed',e);return false} }
 function loadUsers(){ try{const d=localStorage.getItem('hireai_users');if(!d||d==='null'||d==='undefined')return{};const p=JSON.parse(d);return(p&&typeof p==='object')?p:{}}catch(e){console.error('loadUsers failed',e);return{}} }
-function saveJSData(){ try{localStorage.setItem('js_apps',JSON.stringify(JS_APPS));localStorage.setItem('js_saved',JSON.stringify(JS_SAVED))}catch(e){} }
-function loadJSData(){ try{const a=localStorage.getItem('js_apps');const s=localStorage.getItem('js_saved');if(a)JS_APPS=JSON.parse(a);if(s)JS_SAVED=JSON.parse(s)}catch(e){} }
+function saveJSData(){
+  try{
+    localStorage.setItem(userKey('apps'),JSON.stringify(JS_APPS));
+    localStorage.setItem(userKey('saved'),JSON.stringify(JS_SAVED));
+  }catch(e){}
+}
+function loadJSData(){
+  try{
+    const a=localStorage.getItem(userKey('apps'));
+    const s=localStorage.getItem(userKey('saved'));
+    JS_APPS  = a ? JSON.parse(a) : [];
+    JS_SAVED = s ? JSON.parse(s) : [];
+  }catch(e){ JS_APPS=[]; JS_SAVED=[]; }
+}
 
 // ===== LANDING & AUTH =====
 let pendingRole = '';
@@ -1177,9 +1198,28 @@ function enterApp(user){
   }
 }
 function doLogout(){
-  currentUser=null;ROLE='';
+  // Save current user's data before clearing
+  if(ROLE==='recruiter') saveR();
+  if(ROLE==='jobseeker') saveJSData();
+  // Reset all state
+  currentUser=null; ROLE='';
+  R={candidates:[],jobs:[],interviews:[],campaigns:[],settings:{company:'HireAI Corp',threshold:70,lang:'English'}};
+  JS_APPS=[]; JS_SAVED=[]; ALL_JOBS=[]; selectedJobId=null; uploadedFiles=[];
+  if(actChart){actChart.destroy();actChart=null;}
+  if(decChart){decChart.destroy();decChart=null;}
+  // Reset nav UI
+  document.getElementById('recNav').style.display='none';
+  document.getElementById('seekNav').style.display='none';
+  document.getElementById('recPages').style.display='none';
+  document.getElementById('seekPages').style.display='none';
   document.getElementById('app').style.display='none';
   document.getElementById('landing').style.display='flex';
+  // Clear login form fields for clean next login
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('regName').value='';
+  document.getElementById('regEmail').value='';
+  document.getElementById('regPass').value='';
 }
 function topActionFn(){}
 
