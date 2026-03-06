@@ -8,6 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+:root{color-scheme:dark}
+select option{background:#0f1525 !important;color:#f1f5f9 !important}
 :root{
   --bg:#06080f;--bg2:#0b0f1c;--bg3:#0f1525;
   --cyan:#00e5ff;--cyan2:#00b8d9;
@@ -70,9 +72,9 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .land-footer a:hover{color:var(--text2)}
 
 /* ===== AUTH MODAL ===== */
-#authModal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);backdrop-filter:blur(8px)}
+#authModal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);backdrop-filter:blur(8px);padding:16px;overflow-y:auto}
 #authModal.open{display:flex;animation:fadeIn .2s ease}
-.auth-card{position:relative;background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:40px 36px;width:400px;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 40px rgba(124,58,237,.1);animation:fadeUp .3s ease}
+.auth-card{position:relative;background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:36px 32px;width:100%;max-width:420px;box-shadow:0 0 80px rgba(0,0,0,.6),0 0 40px rgba(124,58,237,.1);animation:fadeUp .3s ease;margin:auto}
 .auth-close{position:absolute;top:16px;right:16px;background:transparent;border:none;color:var(--text3);font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .auth-close:hover{background:var(--glass2);color:var(--text)}
 .auth-role-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:20px}
@@ -307,6 +309,51 @@ select.filter-input{cursor:pointer}
 .file-toggle-btn.active{background:var(--glass2);color:var(--text)}
 .upload-drop{border:2px dashed var(--border2);border-radius:var(--r-sm);padding:24px;text-align:center;cursor:pointer;transition:all .2s}
 .upload-drop:hover,.upload-drop.drag{border-color:var(--cyan);background:rgba(0,229,255,.03)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  :root{--sidebar:0px}
+  .sidebar{transform:translateX(-100%);transition:transform .3s;width:260px;z-index:200}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .topbar{padding:0 16px}
+  .page-content{padding:16px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .chart-grid{grid-template-columns:1fr}
+  .screen-layout{grid-template-columns:1fr}
+  .kanban{grid-template-columns:1fr}
+  .cal-grid{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .settings-layout{grid-template-columns:1fr}
+  .settings-nav{flex-direction:row;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+  .checker-layout{grid-template-columns:1fr}
+  .jobs-layout{grid-template-columns:1fr}
+  .filter-card{position:static;max-height:none}
+  .tips-grid{grid-template-columns:1fr}
+  .metrics-grid{grid-template-columns:repeat(3,1fr)}
+  .js-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .js-tab{flex-shrink:0}
+  #topAction{display:none}
+  .hamburger{display:flex !important}
+  .topbar-title{font-size:13px}
+}
+@media(max-width:600px){
+  .land-cards{flex-direction:column;align-items:center}
+  .role-card{width:100%;max-width:320px}
+  .land-title{font-size:clamp(36px,12vw,64px)}
+  .land-sub{font-size:15px;padding:0 16px}
+  .auth-card{padding:28px 20px;border-radius:16px}
+  .stat-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .stat-val{font-size:22px}
+  table{font-size:12px}
+  th,td{padding:8px}
+  .jd-header{flex-direction:column}
+  .modal{padding:20px;max-width:95vw}
+  .land-badge{font-size:10px}
+}
+.hamburger{display:none;background:transparent;border:none;color:var(--text);font-size:20px;cursor:pointer;padding:4px 8px;margin-right:4px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:150;backdrop-filter:blur(2px)}
+.sidebar-overlay.open{display:block}
 </style>
 </head>
 <body>
@@ -377,6 +424,9 @@ select.filter-input{cursor:pointer}
   </div>
 </div>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" id="sideOverlay" onclick="closeSidebar()"></div>
+
 <!-- ===== APP ===== -->
 <div id="app">
   <!-- Sidebar -->
@@ -399,6 +449,7 @@ select.filter-input{cursor:pointer}
       <div class="nav-section">System</div>
       <div class="nav-item" onclick="showPage('jobs')"><span class="nav-icon">💼</span>Job Postings</div>
       <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⚙️</span>Settings</div>
+      <div class="nav-item" onclick="showPage('portfolio')"><span class="nav-icon">🧑‍💻</span>My Portfolio</div>
     </div>
     <div id="seekNav" style="display:none">
       <div class="nav-section">Overview</div>
@@ -418,6 +469,7 @@ select.filter-input{cursor:pointer}
   <!-- Main -->
   <div class="main">
     <div class="topbar">
+      <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="pageTitle">Dashboard</div>
       <button class="btn btn-cyan btn-sm" id="topAction" onclick="topActionFn()">+ Screen Resumes</button>
     </div>
@@ -660,10 +712,95 @@ select.filter-input{cursor:pointer}
           </div>
         </div>
 
+        <!-- Portfolio -->
+        <div class="page" id="page-portfolio">
+          <div style="max-width:860px;margin:0 auto">
+            <div class="card" style="margin-bottom:16px;padding:32px;background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(0,229,255,.06));border-color:rgba(124,58,237,.2);position:relative;overflow:hidden">
+              <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:radial-gradient(rgba(0,229,255,.08),transparent 70%)"></div>
+              <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+                <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:24px;font-weight:800;flex-shrink:0">HK</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px">
+                    <div style="font-family:var(--font-h);font-size:24px;font-weight:800">Harsh Kumar Pandey</div>
+                    <span class="badge badge-green" style="font-size:10px">Open to Work</span>
+                  </div>
+                  <div style="font-size:14px;color:var(--text2);margin-bottom:10px">Full Stack Developer & AI/ML Engineer</div>
+                  <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text3)">
+                    <span>🎓 B.Tech CSE · UCER Prayagraj</span>
+                    <span>📅 Final Year · Graduating 2026</span>
+                    <span>🏆 CGPA: 7.0</span>
+                    <span>📍 Prayagraj, India</span>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <a href="https://github.com/Harshkumarpandey07" target="_blank" class="btn btn-cyan btn-sm" style="text-decoration:none">GitHub</a>
+                  <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" class="btn btn-ghost btn-sm" style="text-decoration:none">LinkedIn</a>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+              <div class="card">
+                <div class="card-title">👋 About Me</div>
+                <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px">Hi, I am Harsh, a final year B.Tech CSE student at United College of Engineering and Research, Prayagraj. Full-Stack Developer with strong ML background, passionate about building things that work in the real world.</p>
+                <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:10px">Built HireAI, Plant Disease Detection (CNN/TensorFlow), Salary Prediction (Random Forest), and an Online Food Delivery Website. Stack: React, Node.js, Python, MongoDB, TensorFlow, scikit-learn.</p>
+                <p style="font-size:12px;color:var(--text3)">NPTEL IIT Madras certified · IBM AI certified · IIIT Allahabad trained</p>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+                  <span class="tag" style="color:var(--green)">✓ Ships real products</span>
+                  <span class="tag" style="color:var(--cyan)">✓ AI-native thinker</span>
+                  <span class="tag" style="color:var(--violet2)">✓ Fast learner</span>
+                  <span class="tag">✓ Problem solver</span>
+                </div>
+              </div>
+              <div>
+                <div class="card" style="margin-bottom:14px">
+                  <div class="card-title">⚡ Currently</div>
+                  <div style="display:flex;flex-direction:column;gap:7px">
+                    <div style="font-size:13px;color:var(--text2)"><span style="color:var(--cyan)">→</span> Building AI-powered web applications</div>
+                    <div style="font-size:13px;color:var(--text2)"><span style="color:var(--cyan)">→</span> Exploring Machine Learning & Deep Learning</div>
+                    <div style="font-size:13px;color:var(--text2)"><span style="color:var(--cyan)">→</span> Looking for internship & full-time opportunities</div>
+                    <div style="font-size:13px;color:var(--text2)"><span style="color:var(--cyan)">→</span> Working on final year project</div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-title">🛠 Skills</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:5px">
+                    <span class="tag">JavaScript</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Python</span><span class="tag">Machine Learning</span><span class="tag">SQL</span><span class="tag">C++</span><span class="tag">LLM / Prompt Eng.</span><span class="tag">Groq API</span><span class="tag">REST APIs</span><span class="tag">MongoDB</span><span class="tag">TensorFlow</span><span class="tag">scikit-learn</span><span class="tag">Git / GitHub</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="margin-bottom:16px;border-color:rgba(0,229,255,.2);background:rgba(0,229,255,.02)">
+              <div style="display:flex;align-items:flex-start;gap:16px">
+                <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🤖</div>
+                <div style="flex:1">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                    <div style="font-family:var(--font-h);font-size:16px;font-weight:700">HireAI — AI Resume Screening Platform</div>
+                    <span class="badge badge-green" style="font-size:9px">Live</span>
+                    <span style="font-size:11px;color:var(--text3);font-style:italic">The app you are looking at right now</span>
+                  </div>
+                  <p style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:12px">A fully functional HR automation SaaS using Groq LLM API. Features dual portals for recruiters and job seekers, AI resume screening, candidate pipeline, interview scheduling, and email campaigns — all in a single HTML file with zero backend.</p>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+                    <span class="tag" style="color:var(--cyan)">Groq API</span><span class="tag" style="color:var(--cyan)">Llama 3.3</span><span class="tag" style="color:var(--cyan)">Chart.js</span><span class="tag" style="color:var(--cyan)">Vanilla JS</span><span class="tag" style="color:var(--cyan)">Vercel</span>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+                    <div style="text-align:center;padding:10px;background:var(--glass);border-radius:8px"><div style="font-family:var(--font-h);font-size:18px;font-weight:800;color:var(--cyan)">1500+</div><div style="font-size:10px;color:var(--text3)">Lines of Code</div></div>
+                    <div style="text-align:center;padding:10px;background:var(--glass);border-radius:8px"><div style="font-family:var(--font-h);font-size:18px;font-weight:800;color:var(--violet2)">2</div><div style="font-size:10px;color:var(--text3)">User Portals</div></div>
+                    <div style="text-align:center;padding:10px;background:var(--glass);border-radius:8px"><div style="font-family:var(--font-h);font-size:18px;font-weight:800;color:var(--green)">0</div><div style="font-size:10px;color:var(--text3)">Frameworks</div></div>
+                    <div style="text-align:center;padding:10px;background:var(--glass);border-radius:8px"><div style="font-family:var(--font-h);font-size:18px;font-weight:800;color:var(--amber)">100%</div><div style="font-size:10px;color:var(--text3)">Browser-Side</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+              <div class="card"><div style="font-size:28px;margin-bottom:10px">🌱</div><div style="font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:6px">Plant Disease Detection</div><p style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px">CNN-based image classification model detecting plant diseases in real-time with Flask REST API.</p><div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="font-size:10px">Python</span><span class="tag" style="font-size:10px">TensorFlow</span><span class="tag" style="font-size:10px">CNN</span><span class="tag" style="font-size:10px">Flask</span></div></div>
+              <div class="card"><div style="font-size:28px;margin-bottom:10px">💰</div><div style="font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:6px">Salary Prediction System</div><p style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px">Random Forest ML model predicting salaries with full pipeline from data cleaning to Flask API.</p><div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="font-size:10px">Python</span><span class="tag" style="font-size:10px">scikit-learn</span><span class="tag" style="font-size:10px">Pandas</span><span class="tag" style="font-size:10px">Flask</span></div></div>
+              <div class="card"><div style="font-size:28px;margin-bottom:10px">🍕</div><div style="font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:6px">Online Food Delivery</div><p style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px">Full-stack food delivery app with restaurant listings, cart management, and order tracking.</p><div style="display:flex;flex-wrap:wrap;gap:4px"><span class="tag" style="font-size:10px">HTML</span><span class="tag" style="font-size:10px">CSS</span><span class="tag" style="font-size:10px">JavaScript</span><span class="tag" style="font-size:10px">React</span></div></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- ===== JOB SEEKER PAGES ===== -->
     <div id="seekPages" style="display:none">
       <div class="js-tabs">
         <div class="js-tab active" id="jstab-browse" onclick="showJSTab('browse')">🔍 Browse Jobs</div>
@@ -855,6 +992,16 @@ select.filter-input{cursor:pointer}
 <div class="toast-container" id="toasts"></div>
 
 <script>
+// ===== MOBILE SIDEBAR =====
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sideOverlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sideOverlay').classList.remove('open');
+}
+
 // ===== GLOBAL STATE =====
 let ROLE = ''; // 'recruiter' | 'jobseeker'
 let currentUser = null;
@@ -889,8 +1036,8 @@ const SAMPLE_JOBS = [
 // ===== STORAGE =====
 function saveR(){ try{localStorage.setItem('hireai_r',JSON.stringify(R))}catch(e){} }
 function loadR(){ try{const d=localStorage.getItem('hireai_r');if(d)Object.assign(R,JSON.parse(d))}catch(e){} }
-function saveUsers(u){ try{localStorage.setItem('hireai_users',JSON.stringify(u))}catch(e){} }
-function loadUsers(){ try{const d=localStorage.getItem('hireai_users');return d?JSON.parse(d):{}}catch(e){return{}} }
+function saveUsers(u){ try{localStorage.setItem('hireai_users',JSON.stringify(u));return true}catch(e){console.error('saveUsers failed',e);return false} }
+function loadUsers(){ try{const d=localStorage.getItem('hireai_users');if(!d||d==='null'||d==='undefined')return{};const p=JSON.parse(d);return(p&&typeof p==='object')?p:{}}catch(e){console.error('loadUsers failed',e);return{}} }
 function saveJSData(){ try{localStorage.setItem('js_apps',JSON.stringify(JS_APPS));localStorage.setItem('js_saved',JSON.stringify(JS_SAVED))}catch(e){} }
 function loadJSData(){ try{const a=localStorage.getItem('js_apps');const s=localStorage.getItem('js_saved');if(a)JS_APPS=JSON.parse(a);if(s)JS_SAVED=JSON.parse(s)}catch(e){} }
 
@@ -1001,12 +1148,12 @@ function showPage(id){
   const p = document.getElementById('page-'+id);
   if(p) p.classList.add('active');
   document.querySelectorAll('#recNav .nav-item').forEach(n=>n.classList.remove('active'));
-  const titles = {dashboard:'Dashboard',screening:'AI Screening',candidates:'Candidates',pipeline:'Pipeline',calendar:'Interviews',email:'Email Campaigns',jobs:'Job Postings',settings:'Settings'};
+  const titles = {dashboard:'Dashboard',screening:'AI Screening',candidates:'Candidates',pipeline:'Pipeline',calendar:'Interviews',email:'Email Campaigns',jobs:'Job Postings',settings:'Settings',portfolio:'My Portfolio'};
   document.getElementById('pageTitle').textContent = titles[id]||id;
-  // highlight nav
   document.querySelectorAll('#recNav .nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
   });
+  closeSidebar();
 }
 function showJSTab(id){
   document.querySelectorAll('.js-content').forEach(c=>c.classList.remove('active'));
@@ -1015,7 +1162,6 @@ function showJSTab(id){
   const t = document.getElementById('jstab-'+id);
   if(c) c.classList.add('active');
   if(t) t.classList.add('active');
-  // highlight sidebar nav
   document.querySelectorAll('#seekNav .nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
     else n.classList.remove('active');
@@ -1024,6 +1170,7 @@ function showJSTab(id){
   document.getElementById('pageTitle').textContent=titles[id]||id;
   if(id==='applications') renderApps();
   if(id==='saved') renderSaved();
+  closeSidebar();
 }
 function settingsTab(t){
   document.querySelectorAll('.settings-sec').forEach(s=>s.classList.remove('active'));
@@ -1178,12 +1325,18 @@ async function startScreening(){
   uploadedFiles=[];renderFileList();refreshAll();showToast('Screening complete!','success');
 }
 async function callGroq(resumeText,jdText,fileName,thresh){
-  const intThresh=thresh-15;
-  const prompt=`You are an expert HR recruiter. Analyze this resume for the job.\n\nJOB:\n${jdText}\n\nRESUME (${fileName}):\n${resumeText.slice(0,3000)}\n\nRespond ONLY with valid JSON:\n{"name":"full name","email":"email or empty","score":<0-100>,"analysis":"2-3 sentence analysis","strengths":["s1","s2","s3"],"improvements":["i1","i2"]}`;
-  const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:600,messages:[{role:'user',content:prompt}]})});
-  if(!res.ok){const e=await res.json();throw new Error(e.error||'API error')}
-  const data=await res.json();
-  return JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+  const prompt=`You are an expert HR recruiter. Analyze this resume for the job.\n\nJOB:\n${jdText}\n\nRESUME (${fileName}):\n${resumeText.slice(0,3000)}\n\nRespond ONLY with valid JSON, no markdown, no extra text:\n{"name":"full name or filename","email":"email or empty string","score":75,"analysis":"2-3 sentence analysis","strengths":["strength 1","strength 2","strength 3"],"improvements":["improvement 1","improvement 2"]}`;
+  try{
+    const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:600,messages:[{role:'user',content:prompt}]})});
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error||`HTTP ${res.status}`);
+    const text=data.content[0].text.replace(/```json|```/g,'').trim();
+    return JSON.parse(text);
+  }catch(e){
+    // Return a structured fallback so screening doesn't crash
+    console.error('Groq error:',e);
+    throw e;
+  }
 }
 
 // ===== CALENDAR =====
@@ -1430,7 +1583,7 @@ async function runChecker(){
     const result=await analyzeResume(text,role,company,exp,jd);
     renderCheckerResult(result,role,company);
   }catch(e){
-    document.getElementById('checkerResult').innerHTML='<div class="empty-state"><p style="color:var(--red)">Analysis failed. Please try again.</p></div>';
+    document.getElementById('checkerResult').innerHTML=`<div class="empty-state"><div style="font-size:32px;margin-bottom:12px">⚠️</div><p style="color:var(--red);margin-bottom:8px">Analysis failed</p><p style="font-size:12px;color:var(--text3)">${e.message||'Unknown error'}</p><p style="font-size:11px;color:var(--text3);margin-top:8px">Make sure GROQ_API_KEY is set in Vercel → Settings → Environment Variables</p></div>`;
   }
   btn.disabled=false;btn.innerHTML='🤖 Analyze My Resume';
 }
@@ -1441,12 +1594,20 @@ ${jd?`\nJob Description:\n${jd.slice(0,600)}`:''}
 Resume:
 ${resumeText.slice(0,3000)}
 
-Respond ONLY with valid JSON (no markdown):
-{"score":<0-100>,"verdict":"one-line verdict","skills_score":<0-100>,"experience_score":<0-100>,"presentation_score":<0-100>,"strengths":["s1","s2","s3"],"improvements":["i1","i2","i3"],"company_fit":"2 sentences on fit for ${company}","missing_keywords":["k1","k2","k3"]}`;
+Respond ONLY with valid JSON, no markdown, no extra text:
+{"score":72,"verdict":"Strong candidate with good fundamentals","skills_score":70,"experience_score":68,"presentation_score":75,"strengths":["strength 1","strength 2","strength 3"],"improvements":["improvement 1","improvement 2","improvement 3"],"company_fit":"2 sentences on fit for ${company}","missing_keywords":["keyword1","keyword2","keyword3"]}`;
   const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:700,messages:[{role:'user',content:prompt}]})});
-  if(!res.ok) throw new Error('API error');
   const data=await res.json();
-  return JSON.parse(data.content[0].text.replace(/```json|```/g,'').trim());
+  if(!res.ok) throw new Error(data.error||`HTTP ${res.status}: Check that GROQ_API_KEY is set in Vercel environment variables`);
+  const text=data.content[0].text.replace(/```json|```/g,'').trim();
+  try{
+    return JSON.parse(text);
+  }catch(e){
+    // Try to extract JSON from response
+    const match=text.match(/\{[\s\S]*\}/);
+    if(match) return JSON.parse(match[0]);
+    throw new Error('Could not parse AI response');
+  }
 }
 function renderCheckerResult(r,role,company){
   const s=Math.max(0,Math.min(100,r.score));
