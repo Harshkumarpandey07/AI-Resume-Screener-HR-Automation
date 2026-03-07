@@ -1,6 +1,18 @@
 {
+  "outputDirectory": "frontend",
+  "functions": {
+    "api/claude.js": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
-    { "source": "/api/proxy", "destination": "/api/proxy.js" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
 }
