@@ -645,23 +645,35 @@ select.filter-input{cursor:pointer}
 
         <!-- Jobs -->
         <div class="page" id="page-jobs">
+          <!-- Header -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
             <div>
               <div style="font-family:var(--font-h);font-size:18px;font-weight:700">Job Postings</div>
-              <div style="font-size:12px;color:var(--text2);margin-top:2px">Post jobs or load real company JDs instantly</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Your posted jobs + live market jobs from top companies</div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn btn-ghost btn-sm" onclick="var p=document.getElementById('presetPanel');p.style.display=p.style.display==='none'?'block':'none'">🏢 Real Company Jobs ▾</button>
-              <button class="btn btn-cyan" onclick="openJobModal()">+ Custom Job</button>
+              <button class="btn btn-ghost btn-sm" id="refreshLiveBtn" onclick="loadLiveJobsIntoPortal()">🔄 Refresh Live Jobs</button>
+              <button class="btn btn-cyan" onclick="openJobModal()">+ Post a Job</button>
             </div>
           </div>
-          <div id="presetPanel" style="display:none;margin-bottom:16px">
-            <div class="card" style="padding:16px;border-color:rgba(124,58,237,.25);background:rgba(124,58,237,.04)">
-              <div style="font-size:11px;font-weight:700;color:var(--violet2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🏢 Click any company to pre-fill the job form</div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px" id="presetGrid"></div>
+
+          <!-- Tabs: My Jobs | Live Market -->
+          <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border)">
+            <button id="jobTabMy" onclick="switchJobTab('my')" style="padding:8px 20px;background:none;border:none;border-bottom:2px solid var(--cyan);color:var(--cyan);font-weight:600;font-size:13px;cursor:pointer">📋 My Posted Jobs</button>
+            <button id="jobTabLive" onclick="switchJobTab('live')" style="padding:8px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text2);font-size:13px;cursor:pointer">🌐 Live Market Jobs <span id="liveJobCount" style="font-size:10px;background:rgba(0,229,255,.15);color:var(--cyan);padding:1px 6px;border-radius:10px;margin-left:4px">0</span></button>
+          </div>
+
+          <!-- My Jobs tab -->
+          <div id="jobPanelMy">
+            <div id="jobsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
+          </div>
+
+          <!-- Live Market Jobs tab -->
+          <div id="jobPanelLive" style="display:none">
+            <div id="liveJobsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">
+              <div class="empty-state"><div class="loader" style="width:28px;height:28px;border-width:2px;margin:0 auto 10px"></div><p>Loading live jobs from market...</p></div>
             </div>
           </div>
-          <div id="jobsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px"></div>
         </div>
 
         <!-- Settings -->
@@ -947,37 +959,25 @@ select.filter-input{cursor:pointer}
     <div class="s-field"><label class="s-label">Job Title *</label>
       <select class="s-input" id="jTitle">
         <option value="">-- Select Role --</option>
-        <optgroup label="Engineering">
-          <option>Software Engineer</option>
-          <option>Frontend Developer</option>
-          <option>Backend Developer</option>
-          <option>Full Stack Developer</option>
-          <option>Mobile Developer</option>
-          <option>Cloud Engineer</option>
-        </optgroup>
-        <optgroup label="Data & AI">
-          <option>Data Scientist</option>
-          <option>ML Engineer</option>
-          <option>Data Analyst</option>
-          <option>AI Engineer</option>
-        </optgroup>
-        <optgroup label="DevOps">
-          <option>DevOps Engineer</option>
-          <option>Site Reliability Engineer</option>
-          <option>Cybersecurity Analyst</option>
-        </optgroup>
-        <optgroup label="Design">
-          <option>UI/UX Designer</option>
-          <option>Graphic Designer</option>
-        </optgroup>
-        <optgroup label="Management">
-          <option>Product Manager</option>
-          <option>Engineering Manager</option>
-          <option>Tech Lead</option>
-        </optgroup>
-        <optgroup label="Other">
-          <option>Custom (type below)</option>
-        </optgroup>
+        <option>Software Engineer</option>
+        <option>Frontend Developer</option>
+        <option>Backend Developer</option>
+        <option>Full Stack Developer</option>
+        <option>Mobile Developer</option>
+        <option>Cloud Engineer</option>
+        <option>Data Scientist</option>
+        <option>ML Engineer</option>
+        <option>Data Analyst</option>
+        <option>AI Engineer</option>
+        <option>DevOps Engineer</option>
+        <option>Site Reliability Engineer</option>
+        <option>Cybersecurity Analyst</option>
+        <option>UI/UX Designer</option>
+        <option>Graphic Designer</option>
+        <option>Product Manager</option>
+        <option>Engineering Manager</option>
+        <option>Tech Lead</option>
+        <option>Custom (type below)</option>
       </select>
     </div>
     <div class="s-field"><label class="s-label">Custom Title (if "Custom" selected above)</label>
@@ -1385,6 +1385,7 @@ function showPage(id){
   if(p) p.classList.add('active');
   document.querySelectorAll('#recNav .nav-item').forEach(n=>n.classList.remove('active'));
   const titles = {dashboard:'Dashboard',screening:'AI Screening',candidates:'Candidates',pipeline:'Pipeline',calendar:'Interviews',email:'Email Campaigns',jobs:'Job Postings',settings:'Settings',portfolio:'My Portfolio'};
+  if(page==='jobs' && !livePortalLoaded){ setTimeout(()=>loadLiveJobsIntoPortal(),300); }
   document.getElementById('pageTitle').textContent = titles[id]||id;
   document.querySelectorAll('#recNav .nav-item').forEach(n=>{
     if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
@@ -1490,23 +1491,110 @@ function renderPipeline(){
       </div>`).join('')}
     </div>`).join('');
 }
+// ── JOB PORTAL TAB SWITCHING ─────────────────────────────────────────────
+function switchJobTab(tab){
+  document.getElementById('jobPanelMy').style.display   = tab==='my'   ? 'block' : 'none';
+  document.getElementById('jobPanelLive').style.display = tab==='live' ? 'block' : 'none';
+  document.getElementById('jobTabMy').style.borderBottomColor   = tab==='my'   ? 'var(--cyan)' : 'transparent';
+  document.getElementById('jobTabLive').style.borderBottomColor = tab==='live' ? 'var(--cyan)' : 'transparent';
+  document.getElementById('jobTabMy').style.color   = tab==='my'   ? 'var(--cyan)' : 'var(--text2)';
+  document.getElementById('jobTabLive').style.color = tab==='live' ? 'var(--cyan)' : 'var(--text2)';
+  if(tab==='live') loadLiveJobsIntoPortal();
+}
+
+let livePortalJobs = [];
+let livePortalLoaded = false;
+
+async function loadLiveJobsIntoPortal(){
+  const grid = document.getElementById('liveJobsGrid');
+  if(!grid) return;
+  const btn = document.getElementById('refreshLiveBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Loading...'; }
+  grid.innerHTML='<div class="empty-state"><div class="loader" style="width:28px;height:28px;border-width:2px;margin:0 auto 10px"></div><p>Fetching live jobs from top companies...</p></div>';
+
+  try{
+    const tags = ['software','react','python','machine-learning','devops','design','javascript','nodejs','data','ai'];
+    const results = await Promise.allSettled(
+      tags.map(tag => fetch(`/api/claude?jobs=1&tag=${tag}&limit=6`).then(r=>safeJson(r)).then(d=>d.jobs||[]))
+    );
+    const all = results.filter(r=>r.status==='fulfilled').flatMap(r=>r.value);
+    // Deduplicate
+    const seen=new Set();
+    livePortalJobs = all.filter(j=>{ if(seen.has(j.id)) return false; seen.add(j.id); return true; });
+
+    const cnt = document.getElementById('liveJobCount');
+    if(cnt) cnt.textContent = livePortalJobs.length;
+
+    if(!livePortalJobs.length){
+      grid.innerHTML='<div class="empty-state"><div class="e-icon">📡</div><p>No live jobs found right now. Try refreshing.</p></div>';
+      return;
+    }
+
+    grid.innerHTML = livePortalJobs.map(j => {
+      const skillTags = (j.skills||[]).slice(0,5).map(s=>`<span class="tag" style="font-size:10px">${s}</span>`).join('');
+      const ago = j.date ? timeAgo(j.date) : 'Recently';
+      return `<div class="card" style="cursor:pointer;transition:all .2s;border-color:rgba(0,229,255,.1)" onmouseover="this.style.borderColor='rgba(0,229,255,.3)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,229,255,.1)';this.style.transform=''">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+          ${j.logo?`<img src="${j.logo}" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#fff;padding:2px;flex-shrink:0" onerror="this.style.display='none'">`:'<div style="width:36px;height:36px;border-radius:8px;background:var(--glass2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🏢</div>'}
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${j.title}</div>
+            <div style="font-size:11px;color:var(--cyan);font-weight:600">${j.company}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:2px">🌍 ${j.location||'Remote'} · ⏰ ${ago}</div>
+          </div>
+          <span class="badge badge-blue" style="font-size:9px;flex-shrink:0">LIVE</span>
+        </div>
+        <p style="font-size:11px;color:var(--text2);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${j.desc||''}</p>
+        <div style="margin-bottom:10px">${skillTags}</div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-sm" style="flex:1;font-size:11px" onclick="importLiveJobToPosting('${j.id}')">📥 Import to My Jobs</button>
+          ${j.url?`<a href="${j.url}" target="_blank" rel="noopener noreferrer" class="btn btn-cyan btn-sm" style="font-size:11px;text-decoration:none">Apply ↗</a>`:''}
+        </div>
+      </div>`;
+    }).join('');
+    livePortalLoaded = true;
+  }catch(e){
+    grid.innerHTML=`<div class="empty-state"><div class="e-icon">⚠️</div><p style="color:var(--red)">Could not load live jobs</p><p style="font-size:12px;color:var(--text3)">${e.message}</p></div>`;
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='🔄 Refresh Live Jobs'; }
+  }
+}
+
+function importLiveJobToPosting(jobId){
+  const j = livePortalJobs.find(x=>x.id===jobId);
+  if(!j) return;
+  // Pre-fill modal with live job data
+  document.getElementById('jTitle').value = 'Custom (type below)';
+  document.getElementById('jTitleCustom').value = j.title + ' @ ' + j.company;
+  document.getElementById('jDept').value = j.domain||'Engineering';
+  document.getElementById('jMode').value = 'Remote';
+  document.getElementById('jLoc').value = j.location||'Remote';
+  document.getElementById('jType').value = j.type||'Full-time';
+  document.getElementById('jExp').value = '1-3 years';
+  document.getElementById('jDesc').value = `${j.title} at ${j.company}
+
+${j.desc||''}
+
+Source: ${j.url||'RemoteOK'}`;
+  document.getElementById('jSkills').value = (j.skills||[]).join(', ');
+  document.getElementById('jSal').value = j.salary||'';
+  openModal('jobModal');
+  showToast('Live job imported — review and save!','success');
+}
+
+function timeAgo(dateStr){
+  if(!dateStr) return 'Recently';
+  const d = new Date(dateStr);
+  const diff = Math.floor((Date.now()-d)/1000);
+  if(diff<3600) return Math.floor(diff/60)+'m ago';
+  if(diff<86400) return Math.floor(diff/3600)+'h ago';
+  if(diff<604800) return Math.floor(diff/86400)+'d ago';
+  return Math.floor(diff/604800)+'w ago';
+}
+
 function renderJobsList(){
   const el=document.getElementById('jobsGrid');
   populateScreenJobDD();
-  // Render real company preset cards
-  const pg=document.getElementById('presetGrid');
-  if(pg&&!pg.dataset.rendered){
-    pg.dataset.rendered='1';
-    const companyColors={'Google':'#4285f4','Microsoft':'#00a4ef','Amazon':'#ff9900','Flipkart':'#2874f0','Persistent Systems':'#7c3aed','Nagarro':'#e91e63','Fractal Analytics':'#10b981','Josh Technology Group':'#f59e0b','Startups (General)':'#00e5ff','Startups (AI/ML)':'#a855f7'};
-    pg.innerHTML=REAL_JOB_PRESETS.map((j,i)=>{
-      const col=companyColors[j.company]||'#7c3aed';
-      return `<button onclick="loadRealJobPreset(${i});openJobModal()" style="text-align:left;padding:10px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;transition:all .2s;color:var(--text)" onmouseover="this.style.borderColor='${col}';this.style.background='rgba(255,255,255,.06)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)';this.style.background='rgba(255,255,255,.03)'">
-        <div style="font-size:11px;font-weight:700;color:${col};margin-bottom:2px">${j.company}</div>
-        <div style="font-size:12px;font-weight:600;color:var(--text)">${j.title}</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">${j.salary} · ${j.exp}</div>
-      </button>`;
-    }).join('');
-  }
+  // Live jobs loaded via loadLiveJobsIntoPortal()
   if(!R.jobs.length){el.innerHTML='<div class="empty-state"><div class="e-icon">💼</div><p>No jobs posted yet. Click "+ New Job" to add one.</p></div>';return}
   el.innerHTML=R.jobs.map(j=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px"><div><div style="font-family:var(--font-h);font-size:14px;font-weight:700">${j.title}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">${j.dept||''} · ${j.location||''}</div></div><button class="btn btn-danger btn-sm" onclick="delJob('${j.id}')">✕</button></div><p style="font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px">${(j.desc||'').slice(0,100)}...</p><div>${(j.skills||[]).slice(0,4).map(s=>`<span class="tag">${s}</span>`).join('')}</div><div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--text3)"><span>${j.exp||''}</span><span style="color:var(--green);font-weight:600">${j.salary||''}</span></div></div>`).join('');
 }
