@@ -1137,12 +1137,12 @@ function recruiterJobToDisplay(j) {
   };
 }
 
-// ── safe JSON helper: never throws on HTML error pages ──
+// safe JSON helper: never throws on HTML error pages
 async function safeJson(res) {
   const raw = await res.text();
   try { return JSON.parse(raw); }
   catch(_) {
-    if (!res.ok) throw new Error(\`Server error (\${res.status}). Please try again shortly.\`);
+    if (!res.ok) throw new Error(`Server error (${res.status}). Please try again shortly.`);
     throw new Error('Unexpected response from server. Please try again.');
   }
 }
@@ -1152,7 +1152,7 @@ async function fetchLiveJobs() {
     const tags = ['software', 'react', 'python', 'devops', 'design'];
     const results = await Promise.allSettled(
       tags.map(tag =>
-        fetch(\`/api/claude?jobs=1&tag=\${tag}&limit=8\`)
+        fetch(`/api/claude?jobs=1&tag=${tag}&limit=8`)
           .then(r => safeJson(r))
           .then(d => d.jobs || [])
       )
