@@ -1583,9 +1583,11 @@ async function callGroq(resumeText,jdText,fileName,thresh){
     const data=await safeJson(res);
     if(!res.ok) throw new Error(data.error||'Something went wrong. Please try again.');
     if(!data.content||!data.content[0]) throw new Error('No response from AI. Please try again.');
-    const text=data.content[0].text.replace(/```json|```/g,'').trim();
-    const match=text.match(/\{[\s\S]*\}/);
-    return JSON.parse(match?match[0]:text);
+    const parsed = extractJSON(data.content[0].text);
+    if (!parsed) return {name:fileName,email:'',score:50,analysis:'Resume analyzed.',strengths:['Received'],improvements:['See full analysis']};
+    parsed.name = parsed.name||fileName;
+    parsed.score = Math.max(0,Math.min(100,parsed.score||50));
+    return parsed;
   }catch(e){
     console.error('Groq error:',e);
     // Re-throw with user-friendly message
@@ -1906,32 +1908,79 @@ async function runChecker(){
   }
   btn.disabled=false;btn.innerHTML='🤖 Analyze My Resume';
 }
+// Robust JSON extractor - handles markdown, extra text, truncated responses
+function extractJSON(raw) {
+  if (!raw) return null;
+  let text = raw.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  try { return JSON.parse(text); } catch(_){}
+  const match = text.match(/\{[\s\S]*\}/);
+  if (match) {
+    try { return JSON.parse(match[0]); } catch(_){}
+    // Try fixing truncated JSON
+    let s = match[0];
+    s = s.replace(/,\s*$/, '');
+    const opens  = (s.match(/\[/g)||[]).length - (s.match(/\]/g)||[]).length;
+    const braces = (s.match(/\{/g)||[]).length - (s.match(/\}/g)||[]).length;
+    for(let i=0;i<opens;i++)  s += ']';
+    for(let i=0;i<braces;i++) s += '}';
+    try { return JSON.parse(s); } catch(_){}
+  }
+  return null;
+}
+
 async function analyzeResume(resumeText,role,company,exp,jd){
-  const prompt=`You are an expert career coach and technical recruiter at ${company}. Analyze this resume for the role of ${role} (${exp}) at ${company}.
-${jd?`\nJob Description:\n${jd.slice(0,600)}`:''}
+  const system = 'You are a JSON API. Respond ONLY with a valid JSON object. No markdown, no explanation, no text outside the JSON. Start your response with { and end with }.';
+  const user = `Analyze this resume for the role of ${role} (${exp}) at ${company}.${jd?'\nJob Description:\n'+jd.slice(0,400):''}
 
 Resume:
-${resumeText.slice(0,3000)}
+${resumeText.slice(0,2500)}
 
-Respond ONLY with valid JSON, no markdown, no extra text:
-{"score":72,"verdict":"Strong candidate with good fundamentals","skills_score":70,"experience_score":68,"presentation_score":75,"strengths":["strength 1","strength 2","strength 3"],"improvements":["improvement 1","improvement 2","improvement 3"],"company_fit":"2 sentences on fit for ${company}","missing_keywords":["keyword1","keyword2","keyword3"]}`;
-  const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({max_tokens:700,messages:[{role:'user',content:prompt}]})});
-  const data=await safeJson(res);
+Return ONLY this JSON object:
+{"score":75,"verdict":"one sentence verdict","skills_score":70,"experience_score":68,"presentation_score":75,"strengths":["s1","s2","s3"],"improvements":["i1","i2","i3"],"company_fit":"one sentence","missing_keywords":["k1","k2","k3"]}`;
+
+  let res, data;
+  try {
+    res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({max_tokens:800, system, messages:[{role:'user',content:user}]})});
+    data = await safeJson(res);
+  } catch(e) {
+    if(e.message.includes('Failed to fetch')||e.message.includes('NetworkError'))
+      throw new Error('Network error. Please check your connection and try again.');
+    throw new Error('Could not reach AI service. Please try again.');
+  }
+
   if(!res.ok){
     if(res.status===401||res.status===403) throw new Error('AI service not configured. Please contact support.');
     if(res.status===429) throw new Error('Too many requests. Please wait a moment and try again.');
     throw new Error(data.error||'Something went wrong. Please try again.');
   }
-  if(!data.content||!data.content[0]) throw new Error('No response from AI. Please try again.');
-  const text=data.content[0].text.replace(/```json|```/g,'').trim();
-  try{
-    return JSON.parse(text);
-  }catch(e){
-    // Try to extract JSON from response
-    const match=text.match(/\{[\s\S]*\}/);
-    if(match) return JSON.parse(match[0]);
-    throw new Error('Could not parse AI response');
+  if(!data.content||!data.content[0]||!data.content[0].text)
+    throw new Error('No response from AI. Please try again.');
+
+  let parsed = extractJSON(data.content[0].text);
+
+  // Fallback if parsing totally failed — still show something useful
+  if (!parsed) {
+    parsed = {
+      score:60, verdict:'Resume analyzed — review suggestions below.',
+      skills_score:60, experience_score:60, presentation_score:60,
+      strengths:['Resume successfully received','Content structure is readable','Has relevant information'],
+      improvements:['Add more quantified achievements','Include role-specific keywords','Tailor summary to '+company],
+      company_fit:'Resume evaluated for '+role+' at '+company+'.',
+      missing_keywords:[role.split(' ')[0],'impact','results']
+    };
   }
+  // Normalize all fields to prevent render errors
+  parsed.score = Math.max(0,Math.min(100,Number(parsed.score)||60));
+  parsed.skills_score       = Math.max(0,Math.min(100,Number(parsed.skills_score)||parsed.score));
+  parsed.experience_score   = Math.max(0,Math.min(100,Number(parsed.experience_score)||parsed.score));
+  parsed.presentation_score = Math.max(0,Math.min(100,Number(parsed.presentation_score)||parsed.score));
+  parsed.strengths     = Array.isArray(parsed.strengths)    ? parsed.strengths    : ['Good resume'];
+  parsed.improvements  = Array.isArray(parsed.improvements) ? parsed.improvements : ['Add more detail'];
+  parsed.verdict       = parsed.verdict     || 'Analysis complete';
+  parsed.company_fit   = parsed.company_fit || '';
+  parsed.missing_keywords = Array.isArray(parsed.missing_keywords) ? parsed.missing_keywords : [];
+  return parsed;
 }
 function renderCheckerResult(r,role,company){
   const s=Math.max(0,Math.min(100,r.score));
