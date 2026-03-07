@@ -2474,19 +2474,95 @@ function extractJSON(raw) {
 }
 
 async function analyzeResume(resumeText,role,company,exp,jd){
-  const system = 'You are a senior career coach and technical recruiter with 15 years of experience. You read every word of a resume and give specific, actionable feedback. You MUST respond with ONLY a valid JSON object. No markdown, no explanation, no text outside JSON. Start with { end with }.';
-  const user = `Analyze this resume for the role of ${role} (${exp}) at ${company}.${jd?'\nJob Description:\n'+jd.slice(0,400):''}
+  const system = `You are a brutally honest senior technical recruiter and career coach at ${company} with 15 years of experience. You have hired hundreds of ${role}s. You read every single word of this resume and give SPECIFIC, DETAILED, AUTHENTIC feedback referencing exact lines from the resume. Generic advice is useless — everything you say must be tied to what you actually see in the resume. You MUST respond with ONLY a valid JSON object. No markdown, no explanation, no text outside JSON.`;
 
-Resume:
-${resumeText.slice(0,2500)}
+  const user = `DEEP RESUME ANALYSIS REQUEST
 
-Return ONLY this JSON object:
-{"score":75,"verdict":"one sentence verdict","skills_score":70,"experience_score":68,"presentation_score":75,"strengths":["s1","s2","s3"],"improvements":["i1","i2","i3"],"company_fit":"one sentence","missing_keywords":["k1","k2","k3"]}`;
+Target Role: ${role}
+Target Company: ${company}  
+Experience Level: ${exp}
+${jd ? 'Job Description Provided:\n'+jd.slice(0,600) : 'No JD provided — use standard industry requirements for '+role+' at '+company+'.'}
+
+RESUME TO ANALYZE (read every word):
+---
+${resumeText.slice(0,4500)}
+---
+
+Analyze this resume section by section. For every point you make, reference something SPECIFIC you see (or don't see) in the resume above.
+
+Return ONLY this JSON (no other text):
+{
+  "score": 72,
+  "verdict": "One honest sentence summarizing overall candidacy for this role at this company",
+  "shortlist_chance": "High / Medium / Low",
+  "shortlist_reason": "Specific one sentence reason why recruiter would or would not shortlist",
+
+  "skills_score": 70,
+  "experience_score": 65,
+  "presentation_score": 75,
+  "impact_score": 60,
+  "keyword_score": 68,
+
+  "section_analysis": {
+    "summary": "Analyze the summary/objective section — is it tailored to this role? Does it mention the company? Is it generic? What specific line works or doesn't work?",
+    "skills": "Analyze the skills section — which skills match the JD perfectly, which are missing, which are listed but vague. Be specific about what you see.",
+    "experience": "Analyze each job/project — do they show impact with numbers? Are action verbs used? Is the relevance to this role clear? Reference specific bullet points.",
+    "education": "Analyze education relevance — CGPA, college tier, relevant courses, certifications. Does it meet this company's bar?",
+    "projects": "Analyze projects — are they relevant to this role? Do they show real skills or are they basic tutorial projects? Are live links or GitHub mentioned?",
+    "formatting": "Analyze formatting — length appropriate? ATS friendly? Consistent formatting? Easy to scan in 6 seconds?"
+  },
+
+  "strengths": [
+    "Specific strength with exact evidence from resume text",
+    "Second specific strength with evidence",
+    "Third specific strength with evidence"
+  ],
+
+  "critical_improvements": [
+    {
+      "issue": "Exact problem found in resume",
+      "fix": "Exact actionable fix — what to write, add, or change",
+      "priority": "High"
+    },
+    {
+      "issue": "Second problem",
+      "fix": "Exact fix",
+      "priority": "High"
+    },
+    {
+      "issue": "Third problem",
+      "fix": "Exact fix",
+      "priority": "Medium"
+    },
+    {
+      "issue": "Fourth problem",
+      "fix": "Exact fix",
+      "priority": "Medium"
+    },
+    {
+      "issue": "Fifth problem",
+      "fix": "Exact fix",
+      "priority": "Low"
+    }
+  ],
+
+  "missing_keywords": ["keyword from JD not in resume", "another missing keyword", "third missing keyword", "fourth", "fifth"],
+  "matched_keywords": ["keyword present in resume that matches role", "another match", "third match"],
+
+  "ats_issues": ["Specific ATS problem if any — tables, images, special chars, missing sections", "second ATS issue if any"],
+
+  "company_fit": "2 sentences on how well this resume fits ${company}'s culture and bar specifically — reference what ${company} looks for",
+
+  "what_to_add": ["Specific thing to add to resume — not generic", "Second specific addition", "Third specific addition"],
+  "what_to_remove": ["Specific thing that weakens the resume", "Second thing to remove or rephrase"],
+
+  "interview_readiness": "One sentence on whether this resume would get past the initial screen and why"
+}`;
 
   let res, data;
   try {
     res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({max_tokens:800, system, messages:[{role:'user',content:user}]})});
+      body: JSON.stringify({max_tokens:2000, system, messages:[{role:'user',content:user}]})});
     data = await safeJson(res);
   } catch(e) {
     if(e.message.includes('Failed to fetch')||e.message.includes('NetworkError'))
@@ -2503,50 +2579,132 @@ Return ONLY this JSON object:
     throw new Error('No response from AI. Please try again.');
 
   let parsed = extractJSON(data.content[0].text);
+  if(!parsed) throw new Error('Could not parse analysis. Please try again.');
 
-  // Fallback if parsing totally failed — still show something useful
-  if (!parsed) {
-    parsed = {
-      score:60, verdict:'Resume analyzed — review suggestions below.',
-      skills_score:60, experience_score:60, presentation_score:60,
-      strengths:['Resume successfully received','Content structure is readable','Has relevant information'],
-      improvements:['Add more quantified achievements','Include role-specific keywords','Tailor summary to '+company],
-      company_fit:'Resume evaluated for '+role+' at '+company+'.',
-      missing_keywords:[role.split(' ')[0],'impact','results']
-    };
-  }
-  // Normalize all fields to prevent render errors
-  parsed.score = Math.max(0,Math.min(100,Number(parsed.score)||60));
-  parsed.skills_score       = Math.max(0,Math.min(100,Number(parsed.skills_score)||parsed.score));
-  parsed.experience_score   = Math.max(0,Math.min(100,Number(parsed.experience_score)||parsed.score));
-  parsed.presentation_score = Math.max(0,Math.min(100,Number(parsed.presentation_score)||parsed.score));
-  parsed.strengths     = Array.isArray(parsed.strengths)    ? parsed.strengths    : ['Good resume'];
-  parsed.improvements  = Array.isArray(parsed.improvements) ? parsed.improvements : ['Add more detail'];
-  parsed.verdict       = parsed.verdict     || 'Analysis complete';
-  parsed.company_fit   = parsed.company_fit || '';
+  // Normalize scores
+  ['score','skills_score','experience_score','presentation_score','impact_score','keyword_score'].forEach(k=>{
+    parsed[k] = Math.max(0,Math.min(100,Number(parsed[k])||60));
+  });
+  parsed.strengths = Array.isArray(parsed.strengths) ? parsed.strengths : [];
+  parsed.critical_improvements = Array.isArray(parsed.critical_improvements) ? parsed.critical_improvements : [];
   parsed.missing_keywords = Array.isArray(parsed.missing_keywords) ? parsed.missing_keywords : [];
+  parsed.matched_keywords = Array.isArray(parsed.matched_keywords) ? parsed.matched_keywords : [];
+  parsed.ats_issues = Array.isArray(parsed.ats_issues) ? parsed.ats_issues : [];
+  parsed.what_to_add = Array.isArray(parsed.what_to_add) ? parsed.what_to_add : [];
+  parsed.what_to_remove = Array.isArray(parsed.what_to_remove) ? parsed.what_to_remove : [];
+  parsed.section_analysis = parsed.section_analysis || {};
   return parsed;
 }
 function renderCheckerResult(r,role,company){
-  const s=Math.max(0,Math.min(100,r.score));
-  const cls=s>=70?'rsc-great':s>=50?'rsc-good':'rsc-fair';
-  document.getElementById('checkerResult').innerHTML=`
-    <div class="result-hero">
-      <div class="rsc-circle ${cls}">${s}</div>
-      <div style="font-family:var(--font-h);font-size:18px;font-weight:700;margin-bottom:4px">${r.verdict||'Analysis complete'}</div>
-      <div style="font-size:13px;color:var(--text2)">${r.company_fit||''}</div>
+  const s = r.score;
+  const cls = s>=75?'rsc-great':s>=55?'rsc-good':'rsc-fair';
+  const chanceCls = r.shortlist_chance==='High'?'var(--green)':r.shortlist_chance==='Medium'?'var(--amber)':'var(--red)';
+  const prioColor = p => p==='High'?'var(--red)':p==='Medium'?'var(--amber)':'var(--text3)';
+  const prioBg    = p => p==='High'?'rgba(239,68,68,.1)':p==='Medium'?'rgba(245,158,11,.1)':'rgba(255,255,255,.04)';
+
+  const sectionIcons = {summary:'📝',skills:'⚡',experience:'💼',education:'🎓',projects:'🚀',formatting:'🎨'};
+
+  const scoreBar = (val,label,col) => `
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="font-size:12px;color:var(--text2)">${label}</span>
+        <span style="font-size:12px;font-weight:700;color:${col}">${val}/100</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden">
+        <div style="height:100%;width:${val}%;background:${col};border-radius:4px;transition:width .8s ease"></div>
+      </div>
+    </div>`;
+
+  document.getElementById('checkerResult').innerHTML = `
+    <!-- HERO SCORE -->
+    <div style="text-align:center;padding:28px 20px 20px;background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(0,229,255,.05));border-radius:14px;margin-bottom:16px;border:1px solid rgba(124,58,237,.15)">
+      <div class="rsc-circle ${cls}" style="margin:0 auto 12px">${s}</div>
+      <div style="font-family:var(--font-h);font-size:17px;font-weight:700;margin-bottom:6px">${r.verdict||'Analysis complete'}</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);padding:6px 14px;border-radius:20px;border:1px solid ${chanceCls}40">
+        <span style="font-size:12px;color:var(--text2)">Shortlist Chance:</span>
+        <span style="font-size:13px;font-weight:700;color:${chanceCls}">${r.shortlist_chance||'Medium'}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px;max-width:380px;margin-left:auto;margin-right:auto">${r.shortlist_reason||''}</div>
     </div>
-    <div class="metrics-grid">
-      <div class="metric-card"><div class="metric-val" style="color:${scoreCol(r.skills_score||s)}">${r.skills_score||s}</div><div class="metric-label">Skills Match</div></div>
-      <div class="metric-card"><div class="metric-val" style="color:${scoreCol(r.experience_score||s)}">${r.experience_score||s}</div><div class="metric-label">Experience</div></div>
-      <div class="metric-card"><div class="metric-val" style="color:${scoreCol(r.presentation_score||s)}">${r.presentation_score||s}</div><div class="metric-label">Presentation</div></div>
+
+    <!-- SCORE BREAKDOWN -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">📊 Score Breakdown</div>
+      ${scoreBar(r.skills_score,'Skills Match',scoreCol(r.skills_score))}
+      ${scoreBar(r.experience_score,'Experience Relevance',scoreCol(r.experience_score))}
+      ${scoreBar(r.presentation_score,'Resume Presentation',scoreCol(r.presentation_score))}
+      ${scoreBar(r.impact_score||r.score,'Impact & Achievements',scoreCol(r.impact_score||r.score))}
+      ${scoreBar(r.keyword_score||r.score,'Keyword Optimization',scoreCol(r.keyword_score||r.score))}
     </div>
-    <div class="tips-grid">
-      <div class="tips-col"><h5 style="color:var(--green)">✓ Strengths</h5>${(r.strengths||[]).map(s=>`<div class="tip">✓ ${s}</div>`).join('')}</div>
-      <div class="tips-col"><h5 style="color:var(--amber)">→ Action Items</h5>${(r.improvements||[]).map(i=>`<div class="tip">→ ${i}</div>`).join('')}</div>
+
+    <!-- SECTION-BY-SECTION ANALYSIS -->
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">🔍 Section-by-Section Analysis</div>
+      ${Object.entries(r.section_analysis||{}).map(([key,val])=>`
+        <div style="margin-bottom:12px;padding:12px;background:rgba(255,255,255,.03);border-radius:8px;border-left:3px solid rgba(124,58,237,.4)">
+          <div style="font-size:12px;font-weight:700;color:var(--violet2);margin-bottom:5px;text-transform:capitalize">${sectionIcons[key]||'•'} ${key.charAt(0).toUpperCase()+key.slice(1)}</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.65">${val}</div>
+        </div>`).join('')}
     </div>
-    ${r.missing_keywords?.length?`<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:var(--r-sm);padding:12px;margin-bottom:12px"><div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Missing Keywords</div><div>${r.missing_keywords.map(k=>`<span class="tag" style="border-color:rgba(239,68,68,.3);color:var(--red)">${k}</span>`).join('')}</div></div>`:''}
-    <button class="btn btn-green btn-sm" onclick="showJSTab('browse')">Browse Matching Jobs →</button>`;
+
+    <!-- STRENGTHS -->
+    ${r.strengths.length ? `<div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">✅ What's Working</div>
+      ${r.strengths.map(s=>`<div style="display:flex;gap:8px;margin-bottom:7px"><span style="color:var(--green);flex-shrink:0;margin-top:1px">✓</span><span style="font-size:12px;color:var(--text2);line-height:1.6">${s}</span></div>`).join('')}
+    </div>` : ''}
+
+    <!-- CRITICAL IMPROVEMENTS -->
+    ${r.critical_improvements.length ? `<div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">⚠️ Critical Improvements Needed</div>
+      ${r.critical_improvements.map((item,i)=>`
+        <div style="margin-bottom:10px;padding:12px;background:${prioBg(item.priority)};border-radius:8px;border:1px solid ${prioColor(item.priority)}20">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+            <span style="font-size:10px;font-weight:700;color:${prioColor(item.priority)};background:${prioBg(item.priority)};border:1px solid ${prioColor(item.priority)}40;padding:1px 7px;border-radius:10px">${item.priority||'Medium'}</span>
+            <span style="font-size:12px;font-weight:600;color:var(--text)">${item.issue||''}</span>
+          </div>
+          <div style="font-size:12px;color:var(--cyan);padding-left:4px">→ ${item.fix||''}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    <!-- KEYWORDS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      ${r.matched_keywords.length ? `<div style="background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:12px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">✓ Keywords Matched</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${r.matched_keywords.map(k=>`<span style="font-size:10px;background:rgba(0,229,255,.1);color:var(--cyan);padding:3px 8px;border-radius:12px;border:1px solid rgba(0,229,255,.2)">${k}</span>`).join('')}</div>
+      </div>` : '<div></div>'}
+      ${r.missing_keywords.length ? `<div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:12px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">✗ Missing Keywords</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">${r.missing_keywords.map(k=>`<span style="font-size:10px;background:rgba(239,68,68,.1);color:var(--red);padding:3px 8px;border-radius:12px;border:1px solid rgba(239,68,68,.2)">${k}</span>`).join('')}</div>
+      </div>` : '<div></div>'}
+    </div>
+
+    <!-- WHAT TO ADD / REMOVE -->
+    ${(r.what_to_add?.length||r.what_to_remove?.length) ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      ${r.what_to_add?.length ? `<div style="background:rgba(16,185,129,.05);border:1px solid rgba(16,185,129,.15);border-radius:12px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">➕ Add to Resume</div>
+        ${r.what_to_add.map(x=>`<div style="font-size:11px;color:var(--text2);margin-bottom:5px;padding-left:8px;border-left:2px solid var(--green)">+ ${x}</div>`).join('')}
+      </div>` : '<div></div>'}
+      ${r.what_to_remove?.length ? `<div style="background:rgba(239,68,68,.05);border:1px solid rgba(239,68,68,.15);border-radius:12px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">➖ Remove / Fix</div>
+        ${r.what_to_remove.map(x=>`<div style="font-size:11px;color:var(--text2);margin-bottom:5px;padding-left:8px;border-left:2px solid var(--red)">× ${x}</div>`).join('')}
+      </div>` : '<div></div>'}
+    </div>` : ''}
+
+    <!-- ATS ISSUES -->
+    ${r.ats_issues?.length ? `<div style="background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">🤖 ATS Compatibility Issues</div>
+      ${r.ats_issues.map(x=>`<div style="font-size:12px;color:var(--text2);margin-bottom:5px;padding-left:8px;border-left:2px solid var(--amber)">⚠ ${x}</div>`).join('')}
+    </div>` : ''}
+
+    <!-- COMPANY FIT + INTERVIEW READINESS -->
+    <div style="background:rgba(124,58,237,.06);border:1px solid rgba(124,58,237,.2);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--violet2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">🏢 ${company} Fit</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:10px">${r.company_fit||''}</div>
+      ${r.interview_readiness ? `<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Interview Screen</div><div style="font-size:12px;color:var(--text2)">${r.interview_readiness}</div>` : ''}
+    </div>
+
+    <button class="btn btn-green btn-sm" style="width:100%;justify-content:center" onclick="showJSTab('browse')">Browse Matching Jobs for ${role} →</button>
+  `;
 }
 
 // ===== HELPERS =====
