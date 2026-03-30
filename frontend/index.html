@@ -2554,9 +2554,8 @@ async function runChecker(){
     return;
   }
   // Detect if text is garbled binary (PDF read as plain text)
-  const garbled = (text.match(/[^	
+  const garbled = (text.match(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\uFFFF]/g)||[]).length / text.length;
 
- -~ -￿]/g)||[]).length / text.length;
   if(garbled > 0.15){
     showToast('Resume text looks garbled. Try saving as .txt first.','error');
     return;
@@ -2858,4 +2857,9 @@ if(dz){
 
 // ===== CLOSE MODALS ON BACKDROP =====
 document.querySelectorAll('.modal-overlay').forEach(m=>{
-  m.addEventLis
+  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')});
+});
+document.getElementById('authModal').addEventListener('click',e=>{if(e.target===document.getElementById('authModal'))closeAuth()});
+</script>
+</body>
+</html>
