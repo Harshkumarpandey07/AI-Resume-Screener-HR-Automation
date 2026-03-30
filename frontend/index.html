@@ -6,6 +6,14 @@
 <title>HireAI — Intelligent Hiring Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+// Configure PDF.js worker
+if(typeof pdfjsLib !== 'undefined'){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{color-scheme:dark}
@@ -410,7 +418,7 @@ select.filter-input{cursor:pointer}
       <div class="f-group"><label class="f-label">Password</label><input class="f-input" id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <div class="auth-err" id="loginErr"></div>
       <button class="btn-auth" id="loginBtn" onclick="doLogin()">Sign In →</button>
-      <div class="auth-demo" id="demoHint">Demo: <strong>demo@hireai.com</strong> / <strong>demo123</strong></div>
+      <div class="auth-demo" id="demoHint">Demo: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="056160686a456d6c7760646c2b666a68">[email&#160;protected]</a></strong> / <strong>demo123</strong></div>
     </div>
     <div id="registerForm" style="display:none">
       <div class="auth-title">Create account</div>
@@ -1095,7 +1103,7 @@ select.filter-input{cursor:pointer}
 <!-- Toast -->
 <div class="toast-container" id="toasts"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ===== MOBILE SIDEBAR =====
 function toggleSidebar(){
   document.getElementById('sidebar').classList.toggle('open');
@@ -2046,11 +2054,89 @@ function renderFileList(){
   el.innerHTML=uploadedFiles.map((f,i)=>`<div class="file-item"><span style="font-size:14px">${f.name.endsWith('.pdf')?'📄':'📝'}</span><span class="file-item-name">${f.name}</span><span style="font-size:10px;color:var(--text3)">${(f.size/1024).toFixed(0)}KB</span><button class="file-remove" onclick="removeFile(${i})">✕</button></div>`).join('');
 }
 function removeFile(i){uploadedFiles.splice(i,1);renderFileList()}
-async function extractText(file){
-  return new Promise(res=>{
-    const r=new FileReader();
-    r.onload=e=>res(e.target.result||'');
-    r.onerror=()=>res('');
+// ── REAL TEXT EXTRACTION ─────────────────────────────────────────────────
+async function extractText(file) {
+  const name = file.name.toLowerCase();
+  try {
+    if (name.endsWith('.pdf')) {
+      return await extractPDF(file);
+    } else if (name.endsWith('.docx') || name.endsWith('.doc')) {
+      return await extractDOCX(file);
+    } else {
+      return await extractPlainText(file);
+    }
+  } catch(e) {
+    console.error('extractText error:', e);
+    // Fallback to plain text read
+    return await extractPlainText(file);
+  }
+}
+
+async function extractPDF(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        // Ensure PDF.js is loaded
+        if (typeof pdfjsLib === 'undefined') {
+          resolve(await extractPlainText(file));
+          return;
+        }
+        const typedArray = new Uint8Array(e.target.result);
+        const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          // Join text items preserving line structure
+          let pageText = '';
+          let lastY = null;
+          for (const item of content.items) {
+            if (lastY !== null && Math.abs(item.transform[5] - lastY) > 5) {
+              pageText += '\n';
+            }
+            pageText += item.str + ' ';
+            lastY = item.transform[5];
+          }
+          fullText += pageText.trim() + '\n\n';
+        }
+        resolve(fullText.trim());
+      } catch(err) {
+        console.error('PDF parse error:', err);
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractDOCX(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        if (typeof mammoth === 'undefined') {
+          resolve(await extractPlainText(file));
+          return;
+        }
+        const result = await mammoth.extractRawText({ arrayBuffer: e.target.result });
+        resolve(result.value || '');
+      } catch(err) {
+        console.error('DOCX parse error:', err);
+        reject(err);
+      }
+    };
+    reader.onerror = () => reject(new Error('File read failed'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function extractPlainText(file) {
+  return new Promise((resolve) => {
+    const r = new FileReader();
+    r.onload = e => resolve(e.target.result || '');
+    r.onerror = () => resolve('');
     r.readAsText(file);
   });
 }
@@ -2075,7 +2161,18 @@ async function startScreening(){
     document.getElementById('progressFill').style.width=`${Math.round((i/total)*100)}%`;
     document.getElementById('progressText').textContent=`Analyzing ${f.name} (${i+1}/${total})...`;
     try{
-      const text=await extractText(f);
+      let text = await extractText(f);
+      if(!text || text.length < 30){
+        showToast(`Could not extract text from ${f.name}. Skipping.`,'error');
+        continue;
+      }
+      // Detect garbled binary
+      const garbled = (text.match(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\uFFFF]/g)||[]).length / text.length;
+      if(garbled > 0.15){
+        showToast(`${f.name}: could not read text properly. Try .txt format.`,'error');
+        continue;
+      }
+      document.getElementById('progressText').textContent=`Analyzing ${f.name} (${i+1}/${total}) — ${text.length} chars extracted...`;
       const result=await callGroq(text,jdText,f.name,thresh);
       const decision=result.score>=thresh?'Accepted':result.score>=(thresh-15)?'Interview':'Rejected';
       const cand={id:'c'+Date.now()+i,name:result.name||f.name.replace(/\.[^.]+$/,''),email:result.email||'',position:document.getElementById('screenJob').options[document.getElementById('screenJob').selectedIndex]?.text||'Custom JD',score:result.score,decision,analysis:result.analysis,strengths:result.strengths||[],improvements:result.improvements||[],date:new Date().toISOString()};
@@ -2428,23 +2525,56 @@ function toggleInput(type){
   document.getElementById('pasteToggle').className='file-toggle-btn'+(type==='paste'?' active':'');
   document.getElementById('uploadToggle').className='file-toggle-btn'+(type==='upload'?' active':'');
 }
-function handleChkFile(input){
-  const file=input.files[0];if(!file)return;
-  document.getElementById('chkFileName').style.display='block';
-  document.getElementById('chkFileName').textContent='📎 '+file.name;
-  const r=new FileReader();r.onload=e=>{chkFileText=e.target.result};r.readAsText(file);
+async function handleChkFile(input){
+  const file = input.files[0]; if(!file) return;
+  const nameEl = document.getElementById('chkFileName');
+  nameEl.style.display = 'block';
+  nameEl.textContent = '⏳ Reading ' + file.name + '...';
+  nameEl.style.color = 'var(--amber)';
+  try {
+    chkFileText = await extractText(file);
+    if (!chkFileText || chkFileText.length < 30) {
+      nameEl.textContent = '⚠️ Could not read text from ' + file.name + '. Try a .txt version.';
+      nameEl.style.color = 'var(--red)';
+      return;
+    }
+    nameEl.textContent = '✅ ' + file.name + ' — ' + chkFileText.length + ' characters extracted';
+    nameEl.style.color = 'var(--green)';
+  } catch(e) {
+    nameEl.textContent = '❌ Failed to read file: ' + e.message;
+    nameEl.style.color = 'var(--red)';
+  }
 }
 async function runChecker(){
   const useUpload=document.getElementById('uploadToggle').classList.contains('active');
-  const text=useUpload?chkFileText:(document.getElementById('chkResume').value.trim());
-  if(!text||text.length<50){showToast('Please paste or upload your resume','error');return}
+  let text = useUpload ? chkFileText : (document.getElementById('chkResume').value.trim());
+  if(!text || text.length < 50){
+    if(useUpload) showToast('Upload a resume file first (PDF, DOCX, or TXT)','error');
+    else showToast('Paste your resume text (at least 50 characters)','error');
+    return;
+  }
+  // Detect if text is garbled binary (PDF read as plain text)
+  const garbled = (text.match(/[^	
+
+ -~ -￿]/g)||[]).length / text.length;
+  if(garbled > 0.15){
+    showToast('Resume text looks garbled. Try saving as .txt first.','error');
+    return;
+  }
   const role=document.getElementById('chkRole').value;
   const company=document.getElementById('chkCompany').value;
   const exp=document.getElementById('chkExp').value;
   const jd=document.getElementById('chkJD').value.trim();
   const btn=document.getElementById('chkBtn');
   btn.disabled=true;btn.innerHTML='<span class="loader"></span> Analyzing...';
-  document.getElementById('checkerResult').innerHTML='<div class="empty-state"><div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div><p>AI is analyzing your resume...</p></div>';
+  // Show what text was extracted so user knows it's real
+  const preview = text.slice(0,300).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  document.getElementById('checkerResult').innerHTML=`
+    <div style="margin-bottom:16px;padding:12px;background:rgba(0,229,255,.05);border:1px solid rgba(0,229,255,.15);border-radius:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--cyan);margin-bottom:6px">✅ Resume text extracted (${text.length} characters) — AI is reading every word...</div>
+      <div style="font-size:11px;color:var(--text3);font-family:monospace;line-height:1.5;max-height:80px;overflow:hidden">${preview}...</div>
+    </div>
+    <div class="empty-state"><div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div><p>Deep analysis in progress — this takes ~15 seconds...</p></div>`;
   try{
     const result=await analyzeResume(text,role,company,exp,jd);
     renderCheckerResult(result,role,company);
@@ -2728,9 +2858,4 @@ if(dz){
 
 // ===== CLOSE MODALS ON BACKDROP =====
 document.querySelectorAll('.modal-overlay').forEach(m=>{
-  m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')});
-});
-document.getElementById('authModal').addEventListener('click',e=>{if(e.target===document.getElementById('authModal'))closeAuth()});
-</script>
-</body>
-</html>
+  m.addEventLis
