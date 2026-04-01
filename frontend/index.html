@@ -189,6 +189,52 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .land-footer a:hover{color:var(--text2)}
 @media(max-width:700px){.steps-grid,.features-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr}.land-stats{flex-direction:column}.land-nav{padding:12px 20px}.land-nav-links{display:none}}
 
+/* ===== CHATBOT ===== */
+.chatbot-fab{position:fixed;bottom:24px;right:24px;z-index:500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:all .2s}
+.chatbot-fab:hover{transform:scale(1.1)}
+.fab-badge{position:absolute;top:0;right:0;width:16px;height:16px;border-radius:50%;background:var(--red);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;display:none}
+.chatbot-window{position:fixed;bottom:88px;right:24px;z-index:500;width:360px;height:500px;background:var(--card);border:1px solid var(--border);border-radius:18px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.chatbot-window.open{display:flex}
+.chatbot-header{padding:14px 16px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(0,229,255,.1));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.chatbot-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.chatbot-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:82%;padding:9px 13px;border-radius:14px;font-size:12px;line-height:1.55}
+.chat-msg.bot{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.15);color:var(--text);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-msg.user{background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(0,229,255,.15));color:var(--text);align-self:flex-end;border-bottom-right-radius:4px}
+.chat-msg.typing{background:rgba(255,255,255,.05);color:var(--text3)}
+.chatbot-suggestions{padding:8px 12px;display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border)}
+.chat-suggestion{padding:5px 10px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:20px;font-size:11px;color:var(--violet2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.chat-suggestion:hover{background:rgba(124,58,237,.18)}
+.chatbot-input-row{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.chatbot-input{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text);outline:none;resize:none}
+.chatbot-input:focus{border-color:rgba(124,58,237,.4)}
+.chatbot-send{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;flex-shrink:0;transition:opacity .2s}
+.chatbot-send:hover{opacity:.85}
+.chat-layout{display:grid;grid-template-columns:280px 1fr;gap:0;height:calc(100vh - 120px);min-height:500px}
+.chat-sidebar{border-right:1px solid var(--border);overflow-y:auto}
+.chat-thread-item{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .15s;display:flex;gap:10px;align-items:center}
+.chat-thread-item:hover,.chat-thread-item.active{background:rgba(124,58,237,.08)}
+.chat-thread-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.chat-thread-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.chat-thread-preview{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-main{display:flex;flex-direction:column}
+.chat-main-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.chat-main-messages{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.chat-bubble{max-width:70%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.6}
+.chat-bubble.me{background:linear-gradient(135deg,rgba(124,58,237,.25),rgba(0,229,255,.1));align-self:flex-end;border-bottom-right-radius:4px}
+.chat-bubble.them{background:rgba(255,255,255,.06);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.chat-bubble-meta{font-size:10px;color:var(--text3);margin-top:3px}
+.chat-input-row{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:10px}
+.chat-input-main{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text);outline:none;resize:none;max-height:100px}
+.chat-input-main:focus{border-color:rgba(124,58,237,.4)}
+.chat-send-btn{padding:10px 18px;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;border-radius:10px;color:#fff;font-weight:600;font-size:13px;cursor:pointer;transition:opacity .2s}
+.chat-send-btn:hover{opacity:.88}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0}
+.verify-banner{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.verify-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.verify-badge.verified{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.verify-badge.unverified{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid rgba(245,158,11,.3)}
+@media(max-width:700px){.chat-layout{grid-template-columns:1fr}.chat-sidebar{display:none}.chatbot-window{width:calc(100vw - 32px);right:16px}}
 /* ===== AUTH MODAL ===== */
 #authModal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);backdrop-filter:blur(8px);padding:16px;overflow-y:auto}
 #authModal.open{display:flex;animation:fadeIn .2s ease}
@@ -679,7 +725,7 @@ select.filter-input{cursor:pointer}
         <div class="price-name">Free</div>
         <div class="price-val">₹0</div>
         <div class="price-period">forever</div>
-        <div class="price-desc">Perfect to get started and see if HireAI fits your workflow.</div>
+        <div class="price-desc">Job seekers use HireAI completely free — forever. No credit card ever.</div>
         <ul class="price-features">
           <li>10 resume screens/month</li>
           <li>3 job seeker analyses/month</li>
@@ -798,6 +844,25 @@ select.filter-input{cursor:pointer}
   </div>
 </div>
 
+<!-- ===== CHATBOT FAB ===== -->
+<button class="chatbot-fab" id="chatbotFab" onclick="toggleChatbot()" style="display:none" title="Ask HireAI Assistant">🤖<span class="fab-badge" id="fabBadge"></span></button>
+<div class="chatbot-window" id="chatbotWindow">
+  <div class="chatbot-header">
+    <div class="chatbot-avatar">🤖</div>
+    <div style="flex:1">
+      <div style="font-size:13px;font-weight:700">HireAI Assistant</div>
+      <div style="font-size:10px;color:var(--text3)">Powered by Llama 3.3 AI</div>
+    </div>
+    <button onclick="toggleChatbot()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:16px">✕</button>
+  </div>
+  <div class="chatbot-messages" id="chatbotMessages"></div>
+  <div class="chatbot-suggestions" id="chatbotSuggestions"></div>
+  <div class="chatbot-input-row">
+    <textarea class="chatbot-input" id="chatbotInput" rows="1" placeholder="Ask anything..."></textarea>
+    <button class="chatbot-send" onclick="sendChatbotMsg()">↑</button>
+  </div>
+</div>
+
 <!-- ===== PRICING MODAL ===== -->
 <div class="modal-overlay" id="pricingModal">
   <div class="modal" style="max-width:680px">
@@ -883,6 +948,15 @@ select.filter-input{cursor:pointer}
       <div class="f-group"><label class="f-label">Email</label><input class="f-input" id="regEmail" type="email" placeholder="you@email.com"></div>
       <div class="f-group"><label class="f-label">Password</label><input class="f-input" id="regPass" type="password" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doRegister()"></div>
       <div class="auth-err" id="regErr"></div>
+      <div id="recruiterVerifyFields" style="display:none">
+        <div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:12px;margin-bottom:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--violet2);margin-bottom:8px">🏢 Recruiter Verification Required</div>
+          <div class="f-group"><label class="f-label">Company Name *</label><input class="f-input" id="regCompany" type="text" placeholder="e.g. Google, Persistent Systems"></div>
+          <div class="f-group"><label class="f-label">Your Job Role *</label><input class="f-input" id="regJobRole" type="text" placeholder="e.g. HR Manager, Talent Acquisition Lead"></div>
+          <div class="f-group"><label class="f-label">Work Email (company email preferred)</label><input class="f-input" id="regWorkEmail" type="email" placeholder="you@yourcompany.com"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">A unique Company ID will be generated for your account. False info may result in removal.</div>
+        </div>
+      </div>
       <button class="btn-auth" id="regBtn" onclick="doRegister()">Create Account →</button>
     </div>
   </div>
@@ -910,6 +984,7 @@ select.filter-input{cursor:pointer}
       <div class="nav-item" onclick="showPage('calendar')"><span class="nav-icon">📅</span>Interviews</div>
       <div class="nav-section">Communication</div>
       <div class="nav-item" onclick="showPage('email')"><span class="nav-icon">✉️</span>Email Campaigns</div>
+      <div class="nav-item" onclick="showPage('chat')"><span class="nav-icon">💬</span>Messages<span class="nav-badge" id="chatBadgeRec" style="display:none">0</span></div>
       <div class="nav-section">System</div>
       <div class="nav-item" onclick="showPage('jobs')"><span class="nav-icon">💼</span>Job Postings</div>
       <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⚙️</span>Settings</div>
@@ -923,6 +998,8 @@ select.filter-input{cursor:pointer}
       <div class="nav-section">My Activity</div>
       <div class="nav-item" onclick="showJSTab('applications')"><span class="nav-icon">📋</span>My Applications</div>
       <div class="nav-item" onclick="showJSTab('saved')"><span class="nav-icon">🔖</span>Saved Jobs</div>
+      <div class="nav-section">Connect</div>
+      <div class="nav-item" onclick="showJSTab('chat')"><span class="nav-icon">💬</span>Chat Recruiters<span class="nav-badge" id="chatBadgeSeek" style="display:none">0</span></div>
     </div>
     <div class="sidebar-user">
       <div class="u-avatar" id="sideAvatar" style="width:32px;height:32px;font-size:12px">?</div>
@@ -1305,12 +1382,50 @@ select.filter-input{cursor:pointer}
 
       </div>
     </div>
+        <!-- Chat Page -->
+        <div class="page" id="page-chat">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+            <div>
+              <div style="font-family:var(--font-h);font-size:18px;font-weight:700">Messages</div>
+              <div style="font-size:12px;color:var(--text2)">Chat with job seekers who applied to your roles</div>
+            </div>
+            <div class="verify-banner" style="flex:1;max-width:400px">
+              <div style="font-size:14px">🏢</div>
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:600;color:var(--amber)">Recruiter verification</div>
+                <div style="font-size:11px;color:var(--text3)" id="recCompanyDisplay">Loading...</div>
+              </div>
+              <span id="recVerifyBadge" class="verify-badge unverified">Pending</span>
+            </div>
+          </div>
+          <div class="chat-layout card" style="padding:0;overflow:hidden">
+            <div class="chat-sidebar">
+              <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
+                <input placeholder="Search..." style="width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--text);outline:none">
+              </div>
+              <div id="recChatThreads">
+                <div style="padding:30px;text-align:center;color:var(--text3);font-size:12px">No conversations yet.<br>Candidates can message you after applying.</div>
+              </div>
+            </div>
+            <div class="chat-main" id="recChatMain">
+              <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text3)">
+                <div style="font-size:32px">💬</div>
+                <div style="font-size:13px">Select a conversation</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <div id="seekPages" style="display:none">
       <div class="js-tabs">
         <div class="js-tab active" id="jstab-browse" onclick="showJSTab('browse')">🔍 Browse Jobs</div>
         <div class="js-tab" id="jstab-checker" onclick="showJSTab('checker')">📊 Resume Checker</div>
         <div class="js-tab" id="jstab-applications" onclick="showJSTab('applications')">📋 My Applications</div>
         <div class="js-tab" id="jstab-saved" onclick="showJSTab('saved')">🔖 Saved Jobs</div>
+                <div class="js-tab" id="jstab-chat" onclick="showJSTab('chat')">💬 Chat</div>
       </div>
 
       <!-- Browse Jobs -->
@@ -1419,6 +1534,34 @@ select.filter-input{cursor:pointer}
             <thead><tr><th>Job Title</th><th>Company</th><th>Applied</th><th>Status</th><th>Action</th></tr></thead>
             <tbody id="appsTbl"></tbody>
           </table>
+        </div>
+      </div>
+
+
+      <!-- Chat (Job Seeker) -->
+      <div class="js-content" id="js-chat">
+        <div style="margin-bottom:16px">
+          <div style="font-family:var(--font-h);font-size:16px;font-weight:700;margin-bottom:4px">Chat with Recruiters</div>
+          <div style="font-size:12px;color:var(--text2)">Connect directly with verified recruiters from companies hiring now</div>
+        </div>
+        <div class="chat-layout card" style="padding:0;overflow:hidden">
+          <div class="chat-sidebar">
+            <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Verified Recruiters</div>
+              <div id="seekRecruiterList"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">Loading...</div></div>
+            </div>
+            <div style="padding:10px 14px">
+              <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">My Conversations</div>
+              <div id="seekChatThreads"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">No conversations yet</div></div>
+            </div>
+          </div>
+          <div class="chat-main" id="seekChatMain">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text3)">
+              <div style="font-size:32px">💬</div>
+              <div style="font-size:13px">Select a recruiter to start chatting</div>
+              <div style="font-size:11px">Messages stored securely</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1764,6 +1907,8 @@ function authTab(t){
   document.getElementById('registerForm').style.display = t==='register'?'block':'none';
   document.getElementById('loginTab').className = 'auth-tab'+(t==='login'?' active':'');
   document.getElementById('registerTab').className = 'auth-tab'+(t==='register'?' active':'');
+  const rf=document.getElementById('recruiterVerifyFields');
+  if(rf) rf.style.display=(t==='register'&&pendingRole==='recruiter')?'block':'none';
 }
 async function doLogin(){
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
@@ -1802,7 +1947,8 @@ async function doLogin(){
   const key   = pendingRole+'_'+email;
   if(!users[key]){err.textContent='Account not found. Please register first.';err.style.display='block';return}
   if(users[key].pass !== pass){err.textContent='Incorrect password.';err.style.display='block';return}
-  enterApp({name:users[key].name,email,role:pendingRole});
+  const u=users[key];
+  enterApp({name:u.name,email,role:pendingRole,company:u.company||'',jobRole:u.jobRole||'',workEmail:u.workEmail||'',uid:u.uid||'',verified:u.verified||false});
 }
 
 async function doRegister(){
@@ -1837,19 +1983,36 @@ async function doRegister(){
     }finally{ btn.disabled=false; btn.textContent='Create Account →'; }
   }
 
+  // Recruiter extra verification data
+  let company='',jobRole='',workEmail='';
+  if(pendingRole==='recruiter'){
+    company=(document.getElementById('regCompany')?.value||'').trim();
+    jobRole=(document.getElementById('regJobRole')?.value||'').trim();
+    workEmail=(document.getElementById('regWorkEmail')?.value||'').trim();
+    if(!company||!jobRole){err.textContent='Please fill Company Name and Job Role.';err.style.display='block';return;}
+  }
   // localStorage fallback
   const users = loadUsers();
   const key   = pendingRole+'_'+email;
   if(users[key]){err.textContent='Account already exists. Please sign in.';err.style.display='block';return}
-  users[key]={name,pass};
+  const uid='uid_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  users[key]={name,pass,company,jobRole,workEmail,uid,verified:!!company,createdAt:new Date().toISOString()};
   saveUsers(users);
-  enterApp({name,email,role:pendingRole});
+  enterApp({name,email,role:pendingRole,company,jobRole,workEmail,uid,verified:!!company});
 }
 function enterApp(user){
   // Set globals FIRST so userKey() works correctly
   currentUser = user;
   ROLE = user.role; // 'recruiter' or 'jobseeker'
   closeAuth();
+  const fab=document.getElementById('chatbotFab');
+  if(fab) fab.style.display='flex';
+  if(user.role==='recruiter'){
+    const d=document.getElementById('recCompanyDisplay');
+    if(d) d.textContent=(user.company||'Not specified')+' · '+(user.jobRole||'Recruiter');
+    const b=document.getElementById('recVerifyBadge');
+    if(b){b.textContent=user.verified?'✓ Verified':'Pending';b.className='verify-badge '+(user.verified?'verified':'unverified');}
+  }
 
   // Reset state cleanly before loading this user's data
   R = {candidates:[],jobs:[],interviews:[],campaigns:[],settings:{company:'HireAI Corp',threshold:70,lang:'English'}};
@@ -1937,6 +2100,7 @@ function showPage(id){
   closeSidebar();
 }
 function showJSTab(id){
+  if(id==='chat') setTimeout(populateSeekRecruiterList,100);
   document.querySelectorAll('.js-content').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.js-tab').forEach(t=>t.classList.remove('active'));
   const c = document.getElementById('js-'+id);
@@ -3639,6 +3803,140 @@ function showToast(msg,type='info'){
   const c=document.getElementById('toasts');
   const t=document.createElement('div');t.className=`toast toast-${type}`;t.textContent=msg;
   c.appendChild(t);setTimeout(()=>t.remove(),3000);
+}
+
+
+// ===== CHATBOT =====
+let chatbotOpen=false, chatbotHistory=[], chatbotTyping=false;
+const CHATBOT_CTX={
+  recruiter:'You are HireAI HR Assistant. Help recruiters with: job descriptions, interview questions, candidate evaluation, AI screening scores, hiring best practices, salary benchmarks, HireAI features. Be concise under 100 words. Refuse off-topic questions.',
+  jobseeker:'You are HireAI Career Coach. Help job seekers with: resume improvement, interview prep, rejection feedback, salary negotiation, career paths, skill gaps, HireAI features. Be encouraging and concise under 100 words. Refuse off-topic questions.'
+};
+const CHATBOT_SUGG={
+  recruiter:['How do I write a good JD?','What score should I shortlist at?','How to reduce hiring bias?','Best interview questions for developers?'],
+  jobseeker:['How do I improve my resume score?','What skills to add for ML Engineer?','How to prepare for technical interview?','Why do I keep getting rejected?']
+};
+function toggleChatbot(){
+  chatbotOpen=!chatbotOpen;
+  document.getElementById('chatbotWindow').classList.toggle('open',chatbotOpen);
+  if(chatbotOpen&&chatbotHistory.length===0) initChatbot();
+}
+function initChatbot(){
+  const r=ROLE||'jobseeker';
+  const nm=currentUser?.name?.split(' ')[0]||'there';
+  const greeting=r==='recruiter'
+    ?'Hi '+nm+'! I'm your recruiting assistant. I can help with JDs, candidate evaluation, interview questions, and using HireAI. What do you need?'
+    :'Hi '+nm+'! I'm your career assistant. I can help improve your resume, prep for interviews, and guide your job search. What's on your mind?';
+  addCBMsg(greeting,'bot');
+  renderCBSuggs();
+}
+function renderCBSuggs(){
+  const el=document.getElementById('chatbotSuggestions');
+  if(!el) return;
+  const suggs=CHATBOT_SUGG[ROLE||'jobseeker']||[];
+  el.innerHTML=suggs.map(s=>'<button class="chat-suggestion" onclick="sendChatbotMsg(this.textContent)">'+s+'</button>').join('');
+}
+function addCBMsg(text,from){
+  const msgs=document.getElementById('chatbotMessages');if(!msgs)return;
+  const d=document.createElement('div');d.className='chat-msg '+from;d.textContent=text;
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+  chatbotHistory.push({role:from==='bot'?'assistant':'user',content:text});
+}
+function showCBTyping(){
+  const msgs=document.getElementById('chatbotMessages');
+  const d=document.createElement('div');d.className='chat-msg bot typing';d.id='cbTyping';d.textContent='typing...';
+  msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;
+}
+function hideCBTyping(){document.getElementById('cbTyping')?.remove();}
+async function sendChatbotMsg(text){
+  const input=document.getElementById('chatbotInput');
+  const msg=text||(input?.value||'').trim();
+  if(!msg||chatbotTyping)return;
+  if(input)input.value='';
+  addCBMsg(msg,'user');
+  document.getElementById('chatbotSuggestions').innerHTML='';
+  chatbotTyping=true;showCBTyping();
+  try{
+    const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:200,system:CHATBOT_CTX[ROLE||'jobseeker'],
+        messages:chatbotHistory.slice(-6)})});
+    const data=await safeJson(res);
+    hideCBTyping();chatbotTyping=false;
+    const reply=data?.content?.[0]?.text||'Sorry, I could not connect. Try again.';
+    addCBMsg(reply,'bot');renderCBSuggs();
+  }catch(e){hideCBTyping();chatbotTyping=false;addCBMsg('Network error. Please try again.','bot');}
+}
+// chatbot input enter key
+document.addEventListener('DOMContentLoaded',()=>{
+  const ci=document.getElementById('chatbotInput');
+  if(ci) ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatbotMsg();}});
+});
+
+// ===== LIVE CHAT =====
+let activePeer=null, chatMsgs={}, sbRealtime=null;
+function openChatWith(peerEmail,peerName,peerRole){
+  activePeer={email:peerEmail,name:peerName,role:peerRole};
+  if(!chatMsgs[peerEmail]){
+    const k='hireai_chat_'+[currentUser?.email,peerEmail].sort().join('__');
+    chatMsgs[peerEmail]=JSON.parse(localStorage.getItem(k)||'[]');
+  }
+  if(supabaseConfigured()&&!sbRealtime) initSBRealtime();
+  const isRec=ROLE==='recruiter';
+  const mainEl=document.getElementById(isRec?'recChatMain':'seekChatMain');
+  if(!mainEl)return;
+  const col=peerRole==='recruiter'?'#7c3aed':'#10b981';
+  mainEl.innerHTML='<div class="chat-main-header"><div style="width:36px;height:36px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">'+getInit(peerName)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:700">'+peerName+'</div><div style="font-size:11px;color:var(--text3)">'+peerEmail+'</div></div><div class="online-dot"></div></div><div class="chat-main-messages" id="liveChatMsgs"></div><div class="chat-input-row"><textarea class="chat-input-main" id="liveChatInput" rows="2" placeholder="Type a message..."></textarea><button class="chat-send-btn" onclick="sendLiveMsg()">Send →</button></div>';
+  const ci2=document.getElementById('liveChatInput');
+  if(ci2) ci2.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendLiveMsg();}});
+  renderLiveMsgs(peerEmail);
+  ci2?.focus();
+}
+function renderLiveMsgs(peer){
+  const el=document.getElementById('liveChatMsgs');if(!el)return;
+  const hist=chatMsgs[peer]||[];
+  if(!hist.length){el.innerHTML='<div style="text-align:center;color:var(--text3);font-size:12px;padding:20px">Start the conversation</div>';return;}
+  el.innerHTML=hist.map(m=>{
+    const isMe=m.from===currentUser?.email;
+    const t=new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return '<div><div class="chat-bubble '+(isMe?'me':'them')+'">'+m.text+'</div><div class="chat-bubble-meta" style="text-align:'+(isMe?'right':'left')+'">'+(isMe?'You':m.fromName)+' · '+t+'</div></div>';
+  }).join('');
+  el.scrollTop=el.scrollHeight;
+}
+function sendLiveMsg(){
+  if(!activePeer)return;
+  const input=document.getElementById('liveChatInput');
+  const text=(input?.value||'').trim();if(!text)return;
+  if(input)input.value='';
+  const msg={from:currentUser?.email,fromName:currentUser?.name,to:activePeer.email,text,ts:new Date().toISOString()};
+  if(!chatMsgs[activePeer.email])chatMsgs[activePeer.email]=[];
+  chatMsgs[activePeer.email].push(msg);
+  const k='hireai_chat_'+[msg.from,msg.to].sort().join('__');
+  const stored=JSON.parse(localStorage.getItem(k)||'[]');
+  stored.push(msg);localStorage.setItem(k,JSON.stringify(stored.slice(-200)));
+  if(supabaseConfigured()&&sbRealtime) sbRealtime.send({type:'broadcast',event:'msg',payload:msg}).catch(()=>{});
+  renderLiveMsgs(activePeer.email);
+}
+function initSBRealtime(){
+  try{
+    const sb=getSB();
+    sbRealtime=sb.channel('hireai_'+currentUser?.email?.replace(/[^a-z0-9]/gi,'_'));
+    sbRealtime.on('broadcast',{event:'msg'},({payload:m})=>{
+      if(!chatMsgs[m.from])chatMsgs[m.from]=[];
+      chatMsgs[m.from].push(m);
+      if(activePeer?.email===m.from)renderLiveMsgs(m.from);
+      const b=document.getElementById(ROLE==='recruiter'?'chatBadgeRec':'chatBadgeSeek');
+      if(b){b.style.display='inline-flex';b.textContent='new';}
+    }).subscribe();
+  }catch(e){console.warn('Realtime init:',e);}
+}
+function populateSeekRecruiterList(){
+  const el=document.getElementById('seekRecruiterList');if(!el)return;
+  const users=loadUsers();
+  const recs=Object.entries(users)
+    .filter(([k,v])=>k.startsWith('recruiter_')&&v.company)
+    .map(([k,v])=>({email:k.replace('recruiter_',''),name:v.name,company:v.company,role:v.jobRole,verified:v.verified}));
+  if(!recs.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px">No recruiters registered yet. Share HireAI with recruiters!</div>';return;}
+  el.innerHTML=recs.map(r=>'<div class="chat-thread-item" onclick="openChatWith(''+r.email+'',''+r.name.replace(/'/g,'`')+'','recruiter')"><div class="chat-thread-avatar" style="background:linear-gradient(135deg,#7c3aed,#00e5ff)">'+getInit(r.name)+'</div><div style="flex:1;min-width:0"><div class="chat-thread-name">'+r.name+(r.verified?'<span style="font-size:9px;color:var(--green);margin-left:4px">✓ Verified</span>':'')+'</div><div class="chat-thread-preview">'+r.company+' · '+(r.role||'Recruiter')+'</div></div></div>').join('');
 }
 
 // ===== DRAG & DROP =====
