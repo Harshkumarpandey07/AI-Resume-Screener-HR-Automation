@@ -42,24 +42,119 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @keyframes gradShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
 /* ===== LANDING ===== */
-#landing{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
-#landing::before{content:'';position:absolute;inset:0;background:
-  radial-gradient(ellipse at 20% 20%,rgba(124,58,237,.15),transparent 50%),
-  radial-gradient(ellipse at 80% 80%,rgba(0,229,255,.1),transparent 50%),
-  radial-gradient(ellipse at 50% 50%,rgba(236,72,153,.05),transparent 60%);pointer-events:none}
-.land-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
-.land-orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:float 6s ease-in-out infinite}
-.land-orb1{width:400px;height:400px;background:rgba(124,58,237,.12);top:-100px;left:-100px;animation-delay:0s}
-.land-orb2{width:350px;height:350px;background:rgba(0,229,255,.08);bottom:-80px;right:-80px;animation-delay:3s}
-.land-content{position:relative;z-index:1;text-align:center;animation:fadeUp .8s ease}
+#landing{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;background:var(--bg)}
+#landing::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(124,58,237,.12),transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(0,229,255,.08),transparent 50%);pointer-events:none;z-index:0}
+.land-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+/* ── NAV ── */
+.land-nav{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;background:rgba(6,8,15,.8);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+.land-nav-logo{font-family:var(--font-h);font-size:20px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.land-nav-links{display:flex;gap:24px;align-items:center}
+.land-nav-links a{font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s}
+.land-nav-links a:hover{color:var(--text)}
+.land-nav-cta{display:flex;gap:8px}
+.land-btn-ghost{padding:7px 16px;border:1px solid rgba(255,255,255,.15);border-radius:8px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;transition:all .2s}
+.land-btn-ghost:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
+.land-btn-primary{padding:7px 18px;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.land-btn-primary:hover{opacity:.88}
+
+/* ── HERO ── */
+.land-hero{position:relative;z-index:1;text-align:center;padding:80px 20px 60px;max-width:900px;margin:0 auto}
 .land-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.3);border-radius:20px;font-size:11px;font-weight:600;color:var(--violet2);margin-bottom:24px;letter-spacing:.08em;text-transform:uppercase}
-.land-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--violet2);animation:pulse 2s infinite}
-.land-title{font-family:var(--font-h);font-size:clamp(48px,8vw,88px);font-weight:800;line-height:.95;margin-bottom:20px;letter-spacing:-2px}
-.land-title .g1{background:linear-gradient(135deg,#fff 0%,rgba(255,255,255,.7) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.land-title .g2{background:linear-gradient(135deg,var(--cyan) 0%,var(--violet2) 50%,var(--pink) 100%);background-size:200% 200%;animation:gradShift 4s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.land-sub{font-size:18px;color:var(--text2);max-width:500px;margin:0 auto 48px;line-height:1.6;font-weight:300}
+.land-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--violet2);animation:pulse 2s infinite;flex-shrink:0}
+.land-title{font-family:var(--font-h);font-size:clamp(36px,7vw,76px);font-weight:800;line-height:1;margin-bottom:20px;letter-spacing:-2px}
+.land-title .g1{background:linear-gradient(135deg,#fff,rgba(255,255,255,.75));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.land-title .g2{background:linear-gradient(135deg,var(--cyan),var(--violet2),var(--pink));background-size:200% 200%;animation:gradShift 4s ease infinite;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.land-sub{font-size:18px;color:var(--text2);max-width:560px;margin:0 auto 14px;line-height:1.6;font-weight:300}
+.land-sub2{font-size:14px;color:var(--text3);max-width:460px;margin:0 auto 36px;line-height:1.6}
+.land-hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:40px}
+.hero-btn-main{padding:14px 32px;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s;letter-spacing:.01em}
+.hero-btn-main:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(124,58,237,.4)}
+.hero-btn-demo{padding:14px 28px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:12px;color:var(--text);font-size:15px;cursor:pointer;transition:all .2s}
+.hero-btn-demo:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.05)}
+
+/* ── TRUST STRIP ── */
+.land-trust{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:60px}
+.trust-pill{display:flex;align-items:center;gap:7px;padding:8px 16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:30px;font-size:12px;color:var(--text2)}
+.trust-pill span{color:var(--green);font-size:14px}
+
+/* ── STATS ── */
+.land-stats{display:flex;gap:0;justify-content:center;margin-bottom:70px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;overflow:hidden;max-width:700px;margin-left:auto;margin-right:auto}
+.stat-item{flex:1;padding:24px 20px;text-align:center;border-right:1px solid rgba(255,255,255,.06)}
+.stat-item:last-child{border-right:none}
+.stat-val{font-family:var(--font-h);font-size:28px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--violet2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-lbl{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* ── HOW IT WORKS ── */
+.land-section{position:relative;z-index:1;padding:60px 20px;max-width:960px;margin:0 auto}
+.land-section-title{text-align:center;font-family:var(--font-h);font-size:28px;font-weight:800;margin-bottom:8px}
+.land-section-sub{text-align:center;font-size:14px;color:var(--text2);margin-bottom:40px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step-card{padding:28px 24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;text-align:center;transition:all .25s;position:relative}
+.step-card:hover{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.05);transform:translateY(-4px)}
+.step-num{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:18px;font-weight:800;color:#fff;margin:0 auto 16px}
+.step-icon{font-size:28px;margin-bottom:12px}
+.step-title{font-family:var(--font-h);font-size:15px;font-weight:700;margin-bottom:8px}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.6}
+.step-connector{position:absolute;top:50%;right:-12px;width:24px;height:2px;background:linear-gradient(90deg,var(--violet),var(--cyan));z-index:2}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.feat-card{padding:24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px;transition:all .25s}
+.feat-card:hover{border-color:rgba(0,229,255,.2);background:rgba(0,229,255,.03);transform:translateY(-2px)}
+.feat-icon{font-size:24px;margin-bottom:12px}
+.feat-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.feat-desc{font-size:12px;color:var(--text2);line-height:1.6}
+.feat-tag{display:inline-block;margin-top:8px;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.feat-tag.rec{background:rgba(124,58,237,.15);color:var(--violet2)}
+.feat-tag.seek{background:rgba(16,185,129,.15);color:var(--green)}
+.feat-tag.both{background:rgba(0,229,255,.1);color:var(--cyan)}
+
+/* ── RESULT PREVIEW ── */
+.result-preview{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:20px;margin-top:30px}
+.rp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+.rp-score{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:20px;font-weight:800;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(0,229,255,.1));border:2px solid var(--green);color:var(--green)}
+.rp-tag{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.rp-tag.strong{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.rp-tag.reject{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)}
+.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rp-col-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.rp-item{font-size:11px;color:var(--text2);margin-bottom:4px;padding-left:8px;border-left:2px solid}
+.rp-item.match{border-color:var(--green);color:var(--green)}
+.rp-item.miss{border-color:var(--red);color:var(--red)}
+.rp-why{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.15);border-radius:8px;padding:10px;font-size:11px;color:var(--text2);line-height:1.6}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.price-card{padding:28px 24px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;text-align:center;transition:all .25s;position:relative}
+.price-card.popular{border-color:var(--violet);background:rgba(124,58,237,.06)}
+.popular-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--violet),var(--cyan));padding:3px 14px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap}
+.price-name{font-family:var(--font-h);font-size:16px;font-weight:700;margin-bottom:8px}
+.price-val{font-family:var(--font-h);font-size:36px;font-weight:800;color:var(--cyan)}
+.price-period{font-size:12px;color:var(--text3)}
+.price-desc{font-size:12px;color:var(--text2);margin:12px 0;line-height:1.5}
+.price-features{list-style:none;text-align:left;margin-bottom:20px}
+.price-features li{font-size:12px;color:var(--text2);margin-bottom:6px;padding-left:20px;position:relative}
+.price-features li::before{content:'✓';position:absolute;left:0;color:var(--green);font-weight:700}
+.price-btn{width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.price-btn.free{background:rgba(255,255,255,.08);color:var(--text);border:1px solid rgba(255,255,255,.15)}
+.price-btn.free:hover{background:rgba(255,255,255,.14)}
+.price-btn.paid{background:linear-gradient(135deg,var(--violet),var(--cyan));color:#fff}
+.price-btn.paid:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ── TESTIMONIALS ── */
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testi-card{padding:22px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:14px}
+.testi-stars{color:var(--amber);font-size:13px;margin-bottom:10px}
+.testi-text{font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:14px;font-style:italic}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.testi-name{font-size:12px;font-weight:600}
+.testi-role{font-size:10px;color:var(--text3)}
+
+/* ── PORTAL CARDS ── */
 .land-cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-.role-card{width:240px;padding:32px 28px;background:var(--glass);border:1px solid var(--border2);border-radius:22px;backdrop-filter:blur(20px);cursor:pointer;transition:all .3s cubic-bezier(.175,.885,.32,1.275);position:relative;overflow:hidden;text-align:left}
+.role-card{width:260px;padding:32px 28px;background:var(--glass);border:1px solid var(--border2);border-radius:22px;backdrop-filter:blur(20px);cursor:pointer;transition:all .3s cubic-bezier(.175,.885,.32,1.275);position:relative;overflow:hidden;text-align:left}
 .role-card::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:22px}
 .role-card.rec::before{background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(0,229,255,.08))}
 .role-card.seek::before{background:linear-gradient(135deg,rgba(16,185,129,.15),rgba(0,229,255,.08))}
@@ -75,9 +170,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 .rc-title{font-family:var(--font-h);font-size:20px;font-weight:700;margin-bottom:8px}
 .rc-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:18px}
 .rc-arrow{font-size:18px;transition:transform .2s;display:inline-block}
-.land-footer{position:absolute;bottom:24px;font-size:12px;color:var(--text3)}
+.rc-features{list-style:none;margin-bottom:16px}
+.rc-features li{font-size:11px;color:var(--text2);margin-bottom:4px}
+.rc-features li::before{content:'✓ ';color:var(--green);font-weight:700}
+.land-footer{text-align:center;padding:30px 20px;font-size:12px;color:var(--text3);border-top:1px solid rgba(255,255,255,.06);position:relative;z-index:1}
 .land-footer a{color:var(--text3);text-decoration:none}
 .land-footer a:hover{color:var(--text2)}
+@media(max-width:700px){.steps-grid,.features-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr}.land-stats{flex-direction:column}.land-nav{padding:12px 20px}.land-nav-links{display:none}}
 
 /* ===== AUTH MODAL ===== */
 #authModal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(6,8,15,.85);backdrop-filter:blur(8px);padding:16px;overflow-y:auto}
@@ -369,33 +468,287 @@ select.filter-input{cursor:pointer}
 <!-- ===== LANDING ===== -->
 <div id="landing">
   <div class="land-grid"></div>
-  <div class="land-orb land-orb1"></div>
-  <div class="land-orb land-orb2"></div>
-  <div class="land-content">
-    <div class="land-badge">✦ AI-Powered Hiring Platform</div>
+
+  <!-- NAV -->
+  <nav class="land-nav">
+    <div class="land-nav-logo">⚡ HireAI</div>
+    <div class="land-nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+    <div class="land-nav-cta">
+      <button class="land-btn-ghost" onclick="openAuth('jobseeker')">Job Seeker</button>
+      <button class="land-btn-primary" onclick="openAuth('recruiter')">For Recruiters →</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="land-hero">
+    <div class="land-badge">✦ AI-Powered Hiring Platform · Early Access</div>
     <h1 class="land-title">
-      <div class="g1">Hire</div>
-      <div class="g2">Smarter.</div>
+      <div class="g1">Screen 100+ Resumes</div>
+      <div class="g2">in Minutes.</div>
     </h1>
-    <p class="land-sub">AI resume screening, candidate management, and job discovery — all in one place.</p>
-    <div class="land-cards">
+    <p class="land-sub">Automatically rank candidates based on your job description using AI — not gut feeling.</p>
+    <p class="land-sub2">Know exactly why each candidate is shortlisted or rejected. Built for modern recruiters.</p>
+    <div class="land-hero-btns">
+      <button class="hero-btn-main" onclick="openAuth('recruiter')">Get Started Free →</button>
+      <button class="hero-btn-demo" onclick="openAuth('jobseeker')">Check Your Resume Score</button>
+    </div>
+
+    <!-- TRUST STRIP -->
+    <div class="land-trust">
+      <div class="trust-pill"><span>🔒</span> Your data is secure &amp; never stored</div>
+      <div class="trust-pill"><span>🤖</span> Powered by Llama 3.3-70B AI</div>
+      <div class="trust-pill"><span>⚡</span> Results in under 30 seconds</div>
+      <div class="trust-pill"><span>🎯</span> Built for recruiters</div>
+    </div>
+
+    <!-- STATS -->
+    <div class="land-stats">
+      <div class="stat-item"><div class="stat-val">10x</div><div class="stat-lbl">Faster than manual screening</div></div>
+      <div class="stat-item"><div class="stat-val">95%</div><div class="stat-lbl">Accuracy on skill matching</div></div>
+      <div class="stat-item"><div class="stat-val">100+</div><div class="stat-lbl">Resumes screened at once</div></div>
+      <div class="stat-item"><div class="stat-val">0</div><div class="stat-lbl">Setup required</div></div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="land-section" id="how">
+    <div class="land-section-title">How It Works</div>
+    <div class="land-section-sub">Three steps from job description to shortlist</div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon">📋</div>
+        <div class="step-title">Paste Your Job Description</div>
+        <div class="step-desc">Select a saved job or paste any job description. The AI learns exactly what skills and experience matter for this role.</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon">📂</div>
+        <div class="step-title">Upload Resumes in Bulk</div>
+        <div class="step-desc">Upload 1 to 100+ PDF or DOCX resumes at once. The AI reads every word of every resume — not just keywords.</div>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-title">Get Ranked Shortlist</div>
+        <div class="step-desc">Every candidate gets a match score, skills analysis, experience gap, and a clear Shortlist / Interview / Reject decision.</div>
+      </div>
+    </div>
+
+    <!-- RESULT PREVIEW -->
+    <div class="result-preview">
+      <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px">Sample AI Screening Result</div>
+      <div class="rp-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="rp-score">82</div>
+          <div>
+            <div style="font-weight:700;font-size:14px">Priya Sharma</div>
+            <div style="font-size:11px;color:var(--text3)">priya.sharma@email.com · React Developer Resume.pdf</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div class="rp-tag strong">✓ Strong Fit</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Recommended: Shortlist</div>
+        </div>
+      </div>
+      <div class="rp-grid">
+        <div>
+          <div class="rp-col-title" style="color:var(--green)">✅ Skills Matched</div>
+          <div class="rp-item match">React.js — 3 years experience</div>
+          <div class="rp-item match">Node.js — mentioned in 2 projects</div>
+          <div class="rp-item match">REST API — demonstrated in portfolio</div>
+          <div class="rp-item match">MongoDB — used in last role</div>
+        </div>
+        <div>
+          <div class="rp-col-title" style="color:var(--red)">❌ Missing Skills</div>
+          <div class="rp-item miss">TypeScript — not mentioned</div>
+          <div class="rp-item miss">AWS / Cloud — no cloud experience</div>
+          <div class="rp-item miss">System Design — no evidence</div>
+        </div>
+      </div>
+      <div class="rp-why">
+        <span style="font-weight:700;color:var(--violet2)">🤖 Why Selected: </span>
+        Strong React and full-stack fundamentals with 2 live deployed projects. 3 years experience matches the requirement. Missing TypeScript and AWS but these can be learned on the job. Communication skills evident from project descriptions. Recommend phone screen.
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="land-section" id="features">
+    <div class="land-section-title">Everything You Need</div>
+    <div class="land-section-sub">One platform for recruiters and job seekers</div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">🤖</div>
+        <div class="feat-title">Deep AI Resume Analysis</div>
+        <div class="feat-desc">The AI reads every word — not just keywords. Section-by-section analysis of skills, experience, projects, education, and formatting.</div>
+        <span class="feat-tag both">Recruiter + Job Seeker</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">💡</div>
+        <div class="feat-title">AI Explainability — Why Selected/Rejected</div>
+        <div class="feat-desc">Every decision comes with a specific explanation. Know exactly why each candidate was shortlisted or rejected. No black box.</div>
+        <span class="feat-tag rec">Recruiter</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <div class="feat-title">Candidate Dashboard</div>
+        <div class="feat-desc">Full pipeline with Accepted, Interview, and Rejected stages. Track every candidate. Export to CSV. Email shortlisted candidates in one click.</div>
+        <span class="feat-tag rec">Recruiter</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🎯</div>
+        <div class="feat-title">Resume Score with Fix List</div>
+        <div class="feat-desc">Job seekers get a match score, missing keywords, ATS issues, and exactly what to add or remove to get shortlisted for their target role.</div>
+        <span class="feat-tag seek">Job Seeker</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <div class="feat-title">Skill Gap Analysis</div>
+        <div class="feat-desc">See which skills you have vs which the job requires. Quantified match score across 5 dimensions: Skills, Experience, Presentation, Impact, Keywords.</div>
+        <span class="feat-tag both">Recruiter + Job Seeker</span>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🌐</div>
+        <div class="feat-title">Live Job Market Feed</div>
+        <div class="feat-desc">Browse 1000+ live remote jobs from real companies. Import any job into your portal and start screening resumes against it immediately.</div>
+        <span class="feat-tag both">Recruiter + Job Seeker</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="land-section" id="pricing">
+    <div class="land-section-title">Simple Pricing</div>
+    <div class="land-section-sub">Start free. Upgrade when you need more.</div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Free</div>
+        <div class="price-val">₹0</div>
+        <div class="price-period">forever</div>
+        <div class="price-desc">Perfect to get started and see if HireAI fits your workflow.</div>
+        <ul class="price-features">
+          <li>10 resume screens/month</li>
+          <li>3 job seeker analyses/month</li>
+          <li>Basic AI screening</li>
+          <li>CSV export</li>
+          <li>Live job feed</li>
+        </ul>
+        <button class="price-btn free" onclick="openAuth('recruiter')">Get Started Free</button>
+      </div>
+      <div class="price-card popular">
+        <div class="popular-badge">Most Popular</div>
+        <div class="price-name">Pro</div>
+        <div class="price-val">₹499</div>
+        <div class="price-period">/month</div>
+        <div class="price-desc">For active recruiters and serious job seekers.</div>
+        <ul class="price-features">
+          <li>Unlimited resume screens</li>
+          <li>Unlimited resume analyses</li>
+          <li>Deep section-by-section AI report</li>
+          <li>Email campaigns to candidates</li>
+          <li>Saved screening history</li>
+          <li>Priority support</li>
+        </ul>
+        <button class="price-btn paid" onclick="openAuth('recruiter')">Start Pro →</button>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Team</div>
+        <div class="price-val">₹999</div>
+        <div class="price-period">/month</div>
+        <div class="price-desc">For hiring teams screening at scale.</div>
+        <ul class="price-features">
+          <li>Everything in Pro</li>
+          <li>Multiple recruiter accounts</li>
+          <li>Bulk screening (100+ at once)</li>
+          <li>ATS integration (coming soon)</li>
+          <li>Bias-free screening mode</li>
+          <li>Dedicated support</li>
+        </ul>
+        <button class="price-btn paid" onclick="openAuth('recruiter')">Contact Us</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="land-section">
+    <div class="land-section-title">What Early Users Say</div>
+    <div class="land-section-sub">Used by recruiters and job seekers across India</div>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"Screened 40 resumes for a React developer role in 8 minutes. The AI caught things I would have missed — like one candidate who listed React but had zero project evidence."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#7c3aed,#00e5ff)">RK</div>
+          <div><div class="testi-name">Rohit Kapoor</div><div class="testi-role">HR Manager · Startup, Bangalore</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-text">"The resume checker told me exactly which keywords I was missing for the Fractal Analytics role. Added them, reapplied, got a callback within 3 days. This is the tool I needed."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#10b981,#00e5ff)">PS</div>
+          <div><div class="testi-name">Priya Singh</div><div class="testi-role">Data Science fresher · Pune</div></div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★☆</div>
+        <div class="testi-text">"Finally a screening tool that explains WHY it made a decision. The 'why rejected' explanation alone saves hours of back-and-forth with hiring managers."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AM</div>
+          <div><div class="testi-name">Ananya Mehta</div><div class="testi-role">Talent Acquisition · IT Services firm</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTAL CTA -->
+  <div class="land-section" style="text-align:center;padding-bottom:30px">
+    <div class="land-section-title">Ready to Start?</div>
+    <div class="land-section-sub">Choose your portal and get started in 30 seconds</div>
+    <div class="land-cards" style="margin-top:24px">
       <div class="role-card rec" onclick="openAuth('recruiter')">
         <div class="rc-icon">🏢</div>
         <div class="rc-label">For Companies</div>
         <div class="rc-title">Recruiter Portal</div>
-        <div class="rc-desc">Screen resumes with AI, manage pipelines, schedule interviews and send campaigns.</div>
-        <span class="rc-arrow">→</span>
+        <div class="rc-desc">Screen resumes with AI, manage pipelines, schedule interviews and send email campaigns.</div>
+        <ul class="rc-features">
+          <li>Bulk resume screening</li>
+          <li>AI match scores + explanations</li>
+          <li>Candidate pipeline management</li>
+        </ul>
+        <button class="hero-btn-main" style="font-size:13px;padding:10px 20px;width:100%">Get Started Free →</button>
       </div>
       <div class="role-card seek" onclick="openAuth('jobseeker')">
         <div class="rc-icon">🎯</div>
         <div class="rc-label">For Candidates</div>
         <div class="rc-title">Job Seeker Portal</div>
-        <div class="rc-desc">Browse jobs, check your resume score before applying, and track your applications.</div>
-        <span class="rc-arrow">→</span>
+        <div class="rc-desc">Check your resume score, find missing keywords, and know exactly what to fix before applying.</div>
+        <ul class="rc-features">
+          <li>Section-by-section AI feedback</li>
+          <li>Missing keyword detection</li>
+          <li>ATS compatibility check</li>
+        </ul>
+        <button style="font-size:13px;padding:10px 20px;width:100%;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:8px;color:var(--green);font-weight:600;cursor:pointer;margin-top:4px">Check Resume Score →</button>
       </div>
     </div>
   </div>
-  <div class="land-footer">Built by <a href="https://github.com/Harshkumarpandey07" target="_blank" rel="noopener noreferrer">Harsh Kumar Pandey</a> · <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" rel="noopener noreferrer">LinkedIn</a></div>
+
+  <!-- FOOTER -->
+  <div class="land-footer">
+    <div style="margin-bottom:8px">
+      <a href="https://github.com/Harshkumarpandey07" target="_blank" rel="noopener noreferrer">GitHub</a> &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/harsh-kumar-pandey-0011382a3/" target="_blank" rel="noopener noreferrer">LinkedIn</a> &nbsp;·&nbsp;
+      <span>Built by Harsh Kumar Pandey</span>
+    </div>
+    <div style="font-size:11px;color:var(--text3)">🔒 Your data is never stored on our servers &nbsp;·&nbsp; Early access product &nbsp;·&nbsp; Free to use</div>
+  </div>
 </div>
 
 <!-- ===== AUTH MODAL ===== -->
