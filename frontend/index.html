@@ -190,10 +190,10 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
 @media(max-width:700px){.steps-grid,.features-grid,.pricing-grid,.testi-grid{grid-template-columns:1fr}.land-stats{flex-direction:column}.land-nav{padding:12px 20px}.land-nav-links{display:none}}
 
 /* ===== CHATBOT ===== */
-.chatbot-fab{position:fixed;bottom:24px;right:24px;z-index:500;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:all .2s}
+.chatbot-fab{position:fixed;bottom:24px;right:24px;z-index:9999;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(124,58,237,.4);transition:all .2s}
 .chatbot-fab:hover{transform:scale(1.1)}
 .fab-badge{position:absolute;top:0;right:0;width:16px;height:16px;border-radius:50%;background:var(--red);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;display:none}
-.chatbot-window{position:fixed;bottom:88px;right:24px;z-index:500;width:360px;height:500px;background:var(--card);border:1px solid var(--border);border-radius:18px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+.chatbot-window{position:fixed;bottom:88px;right:24px;z-index:9999;width:380px;height:520px;background:var(--card);border:1px solid rgba(124,58,237,.3);border-radius:18px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.6)}
 .chatbot-window.open{display:flex}
 .chatbot-header{padding:14px 16px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(0,229,255,.1));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
 .chatbot-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
@@ -484,8 +484,8 @@ select.filter-input{cursor:pointer}
 .score-circle-sm.blank{background:var(--glass2);color:var(--text3);border-color:var(--border)}
 .apply-form{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-top:14px}
 .apply-form h4{font-family:var(--font-h);font-size:14px;font-weight:700;margin-bottom:14px}
-.checker-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.checker-panel{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.checker-layout{display:grid;grid-template-columns:380px 1fr;gap:20px;align-items:start}
+.checker-panel{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:20px;align-self:start}
 .result-hero{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:14px;text-align:center}
 .rsc-circle{width:100px;height:100px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:32px;font-weight:800;border:4px solid}
 .rsc-great{background:rgba(16,185,129,.1);color:var(--green);border-color:rgba(16,185,129,.4)}
@@ -998,8 +998,9 @@ select.filter-input{cursor:pointer}
       <div class="nav-section">My Activity</div>
       <div class="nav-item" onclick="showJSTab('applications')"><span class="nav-icon">📋</span>My Applications</div>
       <div class="nav-item" onclick="showJSTab('saved')"><span class="nav-icon">🔖</span>Saved Jobs</div>
-      <div class="nav-section">Connect</div>
-      <div class="nav-item" onclick="showJSTab('chat')"><span class="nav-icon">💬</span>Chat Recruiters<span class="nav-badge" id="chatBadgeSeek" style="display:none">0</span></div>
+      <div class="nav-section">Connect & Grow</div>
+      <div class="nav-item" onclick="showSeekPage('chat')"><span class="nav-icon">💬</span>Messages<span class="nav-badge" id="chatBadgeSeek" style="display:none">0</span></div>
+      <div class="nav-item" onclick="showSeekPage('interview')"><span class="nav-icon">🎤</span>AI Interview Prep</div>
     </div>
     <div class="sidebar-user">
       <div class="u-avatar" id="sideAvatar" style="width:32px;height:32px;font-size:12px">?</div>
@@ -1425,7 +1426,7 @@ select.filter-input{cursor:pointer}
         <div class="js-tab" id="jstab-checker" onclick="showJSTab('checker')">📊 Resume Checker</div>
         <div class="js-tab" id="jstab-applications" onclick="showJSTab('applications')">📋 My Applications</div>
         <div class="js-tab" id="jstab-saved" onclick="showJSTab('saved')">🔖 Saved Jobs</div>
-                <div class="js-tab" id="jstab-chat" onclick="showJSTab('chat')">💬 Chat</div>
+
       </div>
 
       <!-- Browse Jobs -->
@@ -1538,37 +1539,104 @@ select.filter-input{cursor:pointer}
       </div>
 
 
-      <!-- Chat (Job Seeker) -->
-      <div class="js-content" id="js-chat">
+
+
+      <!-- Saved -->
+      <div class="js-content" id="js-saved">
+        <div id="savedGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+      </div>
+      <!-- Seek Chat Page (standalone, outside tabs) -->
+      <div class="page" id="seek-page-chat" style="display:none">
         <div style="margin-bottom:16px">
-          <div style="font-family:var(--font-h);font-size:16px;font-weight:700;margin-bottom:4px">Chat with Recruiters</div>
-          <div style="font-size:12px;color:var(--text2)">Connect directly with verified recruiters from companies hiring now</div>
+          <div style="font-family:var(--font-h);font-size:18px;font-weight:700">Messages</div>
+          <div style="font-size:12px;color:var(--text2)">Chat directly with verified recruiters</div>
         </div>
-        <div class="chat-layout card" style="padding:0;overflow:hidden">
+        <div class="chat-layout card" style="padding:0;overflow:hidden;height:calc(100vh - 160px)">
           <div class="chat-sidebar">
-            <div style="padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.04)">
+            <div style="padding:12px 14px;border-bottom:1px solid var(--border)">
               <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Verified Recruiters</div>
               <div id="seekRecruiterList"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">Loading...</div></div>
             </div>
             <div style="padding:10px 14px">
               <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">My Conversations</div>
-              <div id="seekChatThreads"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">No conversations yet</div></div>
+              <div id="seekChatThreads"><div style="text-align:center;padding:16px;color:var(--text3);font-size:11px">No chats yet</div></div>
             </div>
           </div>
           <div class="chat-main" id="seekChatMain">
             <div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:var(--text3)">
               <div style="font-size:32px">💬</div>
               <div style="font-size:13px">Select a recruiter to start chatting</div>
-              <div style="font-size:11px">Messages stored securely</div>
+              <div style="font-size:11px;color:var(--text3)">Messages stored securely in your browser</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Saved -->
-      <div class="js-content" id="js-saved">
-        <div id="savedGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px"></div>
+      <!-- AI Interview Page (Job Seeker) -->
+      <div class="page" id="seek-page-interview" style="display:none">
+        <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div style="font-family:var(--font-h);font-size:18px;font-weight:700">AI Interview Practice</div>
+            <div style="font-size:12px;color:var(--text2)">Practice with AI — real questions based on your target role and company</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:300px 1fr;gap:16px">
+          <!-- Setup -->
+          <div class="card" style="align-self:start">
+            <div class="card-title">⚙️ Interview Setup</div>
+            <div class="s-field"><label class="s-label">Target Role</label>
+              <select class="s-input" id="intRole">
+                <option>Software Engineer</option><option>Full Stack Developer</option>
+                <option>Frontend Developer</option><option>Backend Developer</option>
+                <option>Data Scientist</option><option>ML Engineer</option>
+                <option>DevOps Engineer</option><option>Product Manager</option>
+                <option>AI Engineer</option><option>Data Analyst</option>
+              </select>
+            </div>
+            <div class="s-field"><label class="s-label">Target Company</label>
+              <select class="s-input" id="intCompany">
+                <option>Google</option><option>Amazon</option><option>Microsoft</option>
+                <option>Flipkart</option><option>Persistent Systems</option>
+                <option>Nagarro</option><option>Fractal Analytics</option>
+                <option>Josh Technology Group</option><option>Startup (General)</option>
+                <option>Any Company</option>
+              </select>
+            </div>
+            <div class="s-field"><label class="s-label">Experience Level</label>
+              <select class="s-input" id="intExp">
+                <option>Fresher (0 years)</option><option>1-2 years</option>
+                <option>2-4 years</option><option>5+ years</option>
+              </select>
+            </div>
+            <div class="s-field"><label class="s-label">Interview Type</label>
+              <select class="s-input" id="intType">
+                <option value="technical">Technical Round</option>
+                <option value="hr">HR Round</option>
+                <option value="system_design">System Design</option>
+                <option value="behavioral">Behavioral (STAR)</option>
+                <option value="coding">Coding/DSA</option>
+              </select>
+            </div>
+            <div class="s-field"><label class="s-label">Number of Questions</label>
+              <select class="s-input" id="intCount">
+                <option value="5">5 questions</option>
+                <option value="10" selected>10 questions</option>
+                <option value="15">15 questions</option>
+              </select>
+            </div>
+            <button class="btn btn-cyan" style="width:100%;justify-content:center;margin-top:8px" onclick="startAIInterview()" id="intStartBtn">🎯 Start Interview</button>
+          </div>
+          <!-- Interview Session -->
+          <div id="intSession">
+            <div class="card" style="text-align:center;padding:60px 20px">
+              <div style="font-size:48px;margin-bottom:16px">🎤</div>
+              <div style="font-family:var(--font-h);font-size:18px;font-weight:700;margin-bottom:8px">Ready to Practice?</div>
+              <div style="font-size:13px;color:var(--text2);max-width:400px;margin:0 auto">Set your role, company, and experience level then click Start Interview. The AI will ask you real interview questions and evaluate your answers.</div>
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -2100,7 +2168,8 @@ function showPage(id){
   closeSidebar();
 }
 function showJSTab(id){
-  if(id==='chat') setTimeout(populateSeekRecruiterList,100);
+  // Hide standalone seek pages when switching tabs
+  document.querySelectorAll('[id^="seek-page-"]').forEach(p=>p.style.display='none');
   document.querySelectorAll('.js-content').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.js-tab').forEach(t=>t.classList.remove('active'));
   const c = document.getElementById('js-'+id);
@@ -3213,9 +3282,19 @@ function delInterview(id){R.interviews=R.interviews.filter(i=>i.id!==id);saveR()
 
 // ===== EMAIL =====
 const TMPLS={
-  accept:{subj:'Congratulations! You\'ve been selected — {position}',body:'Dear {name},\n\nWe are thrilled to inform you that you have been selected for the {position} role at {company}.\n\nYour skills and experience stood out among a competitive pool of candidates.\n\nWe will be in touch shortly with next steps.\n\nBest regards,\n{recruiter}'},
-  interview:{subj:'Interview Invitation — {position}',body:'Dear {name},\n\nThank you for applying for the {position} position at {company}.\n\nWe were impressed with your profile and would like to invite you for an interview.\n\nPlease reply to confirm your availability.\n\nBest regards,\n{recruiter}'},
-  reject:{subj:'Update on your application — {position}',body:'Dear {name},\n\nThank you for applying for the {position} role at {company}.\n\nAfter careful consideration, we have decided to move forward with other candidates whose experience more closely matches our current needs.\n\nWe wish you all the best in your job search.\n\nBest regards,\n{recruiter}'}
+  accept:{
+    subj:"Congratulations! You've been selected — {position}",
+    body:"Dear {name},\n\nCongratulations! We are delighted to inform you that after reviewing your application and profile, you have been selected for the {position} role.\n\nYour skills and experience stood out among a competitive pool of candidates.\n\nWe will be in touch shortly with next steps including offer details and joining formalities.\n\nBest regards,\n{recruiter}\nHireAI Recruitment Platform"
+  },
+  interview:{
+    subj:"Interview Invitation — {position} at {company}",
+    body:"Dear {name},\n\nThank you for applying for the {position} role.\n\nWe are pleased to invite you for an interview. Please reply to this email with your availability for the coming week.\n\nThe interview will cover technical skills, problem-solving, and a brief discussion about your background.\n\nPlease bring:\n• Updated resume\n• Portfolio / GitHub links\n• Any relevant work samples\n\nLooking forward to speaking with you.\n\nBest regards,\n{recruiter}\nHireAI Recruitment Platform"
+  },
+  reject:{
+    subj:"Update on your application — {position}",
+    body:"Dear {name},\n\nThank you for taking the time to apply for the {position} role and for your interest in our company.\n\nAfter careful consideration of all applications, we regret to inform you that we will not be moving forward with your application at this time.\n\nThis decision was not easy — we received many strong applications. We encourage you to apply for future opportunities that match your profile.\n\nWe wish you the very best in your career journey.\n\nBest regards,\n{recruiter}\nHireAI Recruitment Platform"
+  },
+  custom:{subj:"",body:""}
 };
 function loadTemplate(){
   const t=document.getElementById('emailTemplate').value;
@@ -3245,10 +3324,19 @@ async function sendEmails(){
   const noEmail   = list.length - withEmail.length;
 
   if(EMAILJS_KEY==='YOUR_PUBLIC_KEY'){
-    // Demo mode — show what would be sent
-    showToast(`Demo mode: would send to ${list.length} candidates. Configure EmailJS for real sending.`,'info');
-    R.campaigns.push({id:'e'+Date.now(),subj,count:list.length,date:new Date().toISOString(),mode:'demo'});
+    // Smart fallback: open mailto for each candidate with real data
+    const withEmail = list.filter(c=>c.email&&c.email.includes('@'));
+    if(!withEmail.length){
+      showToast('No candidates have email addresses. Add emails when screening.','error');
+      return;
+    }
+    // Open mailto with all recipients in BCC
+    const bcc = withEmail.map(c=>c.email).join(',');
+    const mailto = 'mailto:?bcc='+encodeURIComponent(bcc)+'&subject='+encodeURIComponent(subj)+'&body='+encodeURIComponent(body);
+    window.open(mailto);
+    R.campaigns.push({id:'e'+Date.now(),subj,count:withEmail.length,date:new Date().toISOString(),mode:'mailto'});
     saveR();updateEmailCnts();
+    showToast('Opening email client with '+withEmail.length+' recipients — configure EmailJS for automated sending','success');
     return;
   }
 
@@ -3949,6 +4037,176 @@ function initSBRealtime(){
     }).subscribe();
   }catch(e){console.warn('Realtime init:',e);}
 }
+// ── SEEK PAGE NAVIGATION (for standalone pages outside tab system) ────────
+function showSeekPage(pageName){
+  // Hide tab-based content
+  document.querySelectorAll('.js-content').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.js-tab').forEach(t=>t.classList.remove('active'));
+  // Hide other seek standalone pages
+  document.querySelectorAll('[id^="seek-page-"]').forEach(p=>p.style.display='none');
+  // Show this page
+  const pg = document.getElementById('seek-page-'+pageName);
+  if(pg) pg.style.display='block';
+  // Update sidebar active state
+  document.querySelectorAll('#seekNav .nav-item').forEach(n=>n.classList.remove('active'));
+  const clickedNav = [...document.querySelectorAll('#seekNav .nav-item')]
+    .find(n=>n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+pageName+"'"));
+  if(clickedNav) clickedNav.classList.add('active');
+  // Scroll to top
+  document.querySelector('.main').scrollTop = 0;
+  // Load data for page
+  if(pageName==='chat') setTimeout(populateSeekRecruiterList, 100);
+}
+
+// ── AI INTERVIEW PREP ─────────────────────────────────────────────────────
+let intQuestions = [];
+let intCurrentQ = 0;
+let intAnswers = [];
+let intActive = false;
+
+async function startAIInterview(){
+  const role    = document.getElementById('intRole').value;
+  const company = document.getElementById('intCompany').value;
+  const exp     = document.getElementById('intExp').value;
+  const type    = document.getElementById('intType').value;
+  const count   = parseInt(document.getElementById('intCount').value)||10;
+  const btn     = document.getElementById('intStartBtn');
+  const session = document.getElementById('intSession');
+
+  btn.disabled=true; btn.innerHTML='<span class="loader"></span> Generating questions...';
+  session.innerHTML='<div class="card" style="text-align:center;padding:40px"><div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div><p style="color:var(--text2)">AI is crafting '+count+' real interview questions for '+role+' at '+company+'...</p></div>';
+
+  const typeLabels = {technical:'Technical',hr:'HR',system_design:'System Design',behavioral:'Behavioral (STAR method)',coding:'Coding & DSA'};
+  const system = 'You are a senior interviewer at '+company+' with 10 years experience. You conduct '+typeLabels[type]+' interviews for '+role+' roles. Generate exactly '+count+' interview questions appropriate for '+exp+' experience. Return ONLY valid JSON, no markdown.';
+  const prompt = 'Generate '+count+' '+typeLabels[type]+' interview questions for '+role+' ('+exp+') at '+company+'. Return ONLY this JSON: {"questions":[{"id":1,"question":"Full question","hint":"hint text","difficulty":"Easy/Medium/Hard","category":"category"},...]}';
+
+  try{
+    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:1500, system, messages:[{role:'user',content:prompt}]})});
+    const data = await safeJson(res);
+    if(!res.ok||!data.content?.[0]?.text) throw new Error('No response from AI');
+    const parsed = extractJSON(data.content[0].text);
+    if(!parsed||!parsed.questions?.length) throw new Error('Could not parse questions');
+    intQuestions = parsed.questions;
+    intCurrentQ = 0; intAnswers = []; intActive = true;
+    renderInterviewSession(role, company, type, typeLabels[type]);
+  }catch(e){
+    session.innerHTML='<div class="card"><div style="color:var(--red);font-size:14px;font-weight:600;margin-bottom:8px">Could not generate questions</div><div style="font-size:12px;color:var(--text2)">'+e.message+'</div><button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="startAIInterview()">Try Again</button></div>';
+  }finally{
+    btn.disabled=false; btn.innerHTML='🎯 Start Interview';
+  }
+}
+
+function renderInterviewSession(role, company, type, typeLabel){
+  const session = document.getElementById('intSession');
+  const total = intQuestions.length;
+  const q = intQuestions[intCurrentQ];
+  const diffCol = q.difficulty==='Hard'?'var(--red)':q.difficulty==='Medium'?'var(--amber)':'var(--green)';
+  const progress = Math.round((intCurrentQ/total)*100);
+
+  session.innerHTML = '<div class="card" style="margin-bottom:12px">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+      +'<div style="font-size:12px;color:var(--text3)">'+role+' · '+company+' · '+typeLabel+'</div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--cyan)">Q '+(intCurrentQ+1)+' / '+total+'</div>'
+    +'</div>'
+    +'<div style="height:4px;background:rgba(255,255,255,.08);border-radius:4px;margin-bottom:16px;overflow:hidden">'
+      +'<div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:4px;transition:width .4s"></div>'
+    +'</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+      +'<span style="font-size:10px;font-weight:700;color:'+diffCol+';background:rgba(255,255,255,.06);padding:2px 8px;border-radius:10px">'+q.difficulty+'</span>'
+      +'<span style="font-size:10px;color:var(--text3)">'+q.category+'</span>'
+    +'</div>'
+    +'<div style="font-size:16px;font-weight:600;color:var(--text);line-height:1.6;margin-bottom:16px">'+q.question+'</div>'
+    +'<textarea id="intAnswer" placeholder="Type your answer here... (take your time, think out loud)" rows="5" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;color:var(--text);outline:none;resize:vertical;font-family:inherit;line-height:1.6"></textarea>'
+    +'<div style="display:flex;gap:8px;margin-top:12px">'
+      +'<button id="intHintBtn" class="btn btn-ghost btn-sm" onclick="toggleHint('+intCurrentQ+')" style="font-size:11px">💡 Show Hint</button>'
+      +'<div style="flex:1"></div>'
+      +(intCurrentQ>0?'<button class="btn btn-ghost btn-sm" onclick="intGoBack()" style="font-size:11px">← Back</button>':'')
+      +'<button class="btn btn-cyan" onclick="submitIntAnswer()" id="intSubmitBtn" style="font-size:13px">'
+        +(intCurrentQ<total-1?'Submit & Next →':'Submit & Get Feedback')
+      +'</button>'
+    +'</div>'
+    +'<div id="intHint" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:8px;font-size:12px;color:var(--amber)">💡 '+q.hint+'</div>'
+    +'<div id="intFeedbackBox" style="display:none;margin-top:12px"></div>'
+    +'</div>';
+  // Restore previous answer if going back
+  if(intAnswers[intCurrentQ]) document.getElementById('intAnswer').value = intAnswers[intCurrentQ];
+}
+
+function toggleHint(idx){
+  const h=document.getElementById('intHint');
+  if(h) h.style.display = h.style.display==='none'?'block':'none';
+}
+
+function intGoBack(){
+  if(intCurrentQ>0){ intCurrentQ--; renderInterviewSession('','','',''); }
+}
+
+async function submitIntAnswer(){
+  const answer = (document.getElementById('intAnswer')?.value||'').trim();
+  if(!answer){showToast('Please write your answer first','error');return;}
+  intAnswers[intCurrentQ] = answer;
+
+  const total = intQuestions.length;
+  const q = intQuestions[intCurrentQ];
+  const btn = document.getElementById('intSubmitBtn');
+  btn.disabled=true; btn.textContent='Evaluating...';
+
+  // Get AI feedback on this answer
+  const system = 'You are a senior interviewer. Evaluate this interview answer briefly. Be specific and constructive. Return ONLY valid JSON.';
+  const prompt = 'Question: '+q.question+' Answer: '+answer+' Return ONLY JSON: {"score":75,"verdict":"one sentence","what_was_good":"specific good","what_to_improve":"specific improvement","sample_stronger_answer":"stronger 2-3 sentence answer"}';
+
+  try{
+    const res = await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:400,system,messages:[{role:'user',content:prompt}]})});
+    const data = await safeJson(res);
+    const fb = extractJSON(data?.content?.[0]?.text||'');
+    if(fb){
+      const sc = Math.max(0,Math.min(100,Number(fb.score)||60));
+      const col = sc>=70?'var(--green)':sc>=50?'var(--amber)':'var(--red)';
+      const fbBox = document.getElementById('intFeedbackBox');
+      if(fbBox){
+        fbBox.style.display='block';
+        fbBox.innerHTML = '<div style="background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:10px;padding:14px">'
+          +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+            +'<div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.06);border:2px solid '+col+';display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:16px;font-weight:800;color:'+col+'">'+sc+'</div>'
+            +'<div style="font-size:13px;font-weight:600">'+fb.verdict+'</div>'
+          +'</div>'
+          +'<div style="font-size:12px;color:var(--green);margin-bottom:6px">✓ '+fb.what_was_good+'</div>'
+          +'<div style="font-size:12px;color:var(--amber);margin-bottom:8px">→ '+fb.what_to_improve+'</div>'
+          +'<div style="font-size:11px;color:var(--text3);font-style:italic;border-top:1px solid rgba(255,255,255,.06);padding-top:8px">Stronger answer: '+fb.sample_stronger_answer+'</div>'
+        +'</div>';
+      }
+    }
+  }catch(e){ console.warn('Feedback error:',e); }
+
+  btn.disabled=false;
+  if(intCurrentQ < total-1){
+    intCurrentQ++;
+    setTimeout(()=>renderInterviewSession('','','',''), 1500);
+    btn.textContent='Next Question →';
+  } else {
+    btn.textContent='View Results';
+    btn.onclick = showInterviewResults;
+  }
+}
+
+function goToChecker(){ showJSTab('checker'); }
+function showInterviewResults(){
+  const session = document.getElementById('intSession');
+  const total = intQuestions.length;
+  const answered = intAnswers.filter(Boolean).length;
+  session.innerHTML = '<div class="card" style="text-align:center;padding:40px">'
+    +'<div style="font-size:48px;margin-bottom:16px">🎉</div>'
+    +'<div style="font-family:var(--font-h);font-size:20px;font-weight:800;margin-bottom:8px">Interview Complete!</div>'
+    +'<div style="font-size:14px;color:var(--text2);margin-bottom:20px">You answered '+answered+' of '+total+' questions</div>'
+    +'<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
+      +'<button class="btn btn-cyan" onclick="startAIInterview()" style="font-size:13px">Practice Again 🔄</button>'
+      +'<button class="btn btn-ghost" onclick="goToChecker()" style="font-size:13px">Check Your Resume</button>'
+    +'</div>'
+  +'</div>';
+}
+
 function populateSeekRecruiterList(){
   const el=document.getElementById('seekRecruiterList');if(!el)return;
   const users=loadUsers();
