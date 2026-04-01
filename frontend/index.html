@@ -5,7 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HireAI — Intelligent Hiring Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-XXXXXXXXXX');
+function trackEvent(action,category,label){gtag('event',action,{event_category:category,event_label:label});}
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script>
@@ -304,7 +315,43 @@ tr:hover td{background:var(--glass)}
 .file-remove{background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 2px;transition:color .15s}
 .file-remove:hover{color:var(--red)}
 .screen-layout{display:grid;grid-template-columns:380px 1fr;gap:16px}
-.result-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:all .2s}
+.result-card:hover{border-color:rgba(124,58,237,.3);transform:translateY(-1px)}
+.result-card-header{display:flex;align-items:center;gap:14px;padding:16px 16px 12px}
+.result-score-ring{position:relative;width:64px;height:64px;flex-shrink:0}
+.result-score-ring svg{transform:rotate(-90deg)}
+.result-score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:17px;font-weight:800}
+.result-card-body{padding:0 16px 16px}
+.result-verdict-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:10px;margin-bottom:12px}
+.verdict-strong{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25)}
+.verdict-maybe{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25)}
+.verdict-reject{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25)}
+.verdict-label{font-size:13px;font-weight:700}
+.verdict-label.strong{color:var(--green)}
+.verdict-label.maybe{color:var(--amber)}
+.verdict-label.reject{color:var(--red)}
+.skills-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.skills-col-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;align-items:center;gap:4px}
+.skill-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border-radius:6px;margin:2px;font-weight:500}
+.skill-chip.match{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.skill-chip.miss{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.why-box{background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.18);border-radius:8px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.65;margin-top:8px}
+.why-box-label{font-size:10px;font-weight:700;color:var(--violet2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px}
+.score-bar-mini{height:4px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin-top:4px}
+.score-bar-mini-fill{height:100%;border-radius:4px;transition:width .6s ease}
+/* Sorting / filtering controls */
+.screen-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.sort-btn{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;transition:all .15s}
+.sort-btn.active{background:rgba(124,58,237,.15);border-color:var(--violet);color:var(--violet2)}
+.filter-badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .15s}
+.filter-badge.all{background:rgba(255,255,255,.08);color:var(--text2)}
+.filter-badge.all.active{background:rgba(124,58,237,.15);color:var(--violet2);border-color:var(--violet)}
+.filter-badge.acc{background:rgba(16,185,129,.08);color:var(--green)}
+.filter-badge.acc.active{background:rgba(16,185,129,.18);border-color:var(--green)}
+.filter-badge.int{background:rgba(245,158,11,.08);color:var(--amber)}
+.filter-badge.int.active{background:rgba(245,158,11,.18);border-color:var(--amber)}
+.filter-badge.rej{background:rgba(239,68,68,.08);color:var(--red)}
+.filter-badge.rej.active{background:rgba(239,68,68,.18);border-color:var(--red)}
 .result-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .result-score{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-h);font-size:18px;font-weight:800;flex-shrink:0}
 .result-score.great{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.25)}
@@ -751,6 +798,62 @@ select.filter-input{cursor:pointer}
   </div>
 </div>
 
+<!-- ===== PRICING MODAL ===== -->
+<div class="modal-overlay" id="pricingModal">
+  <div class="modal" style="max-width:680px">
+    <button class="modal-close" onclick="closeModal('pricingModal')" style="position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;color:var(--text2);cursor:pointer">✕</button>
+    <div style="text-align:center;margin-bottom:24px">
+      <div style="font-family:var(--font-h);font-size:22px;font-weight:800;margin-bottom:6px">Upgrade HireAI</div>
+      <div style="font-size:13px;color:var(--text2)">Choose the plan that fits your hiring needs</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <!-- Free -->
+      <div style="padding:20px;background:var(--glass);border:1px solid var(--border);border-radius:14px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Free</div>
+        <div style="font-family:var(--font-h);font-size:30px;font-weight:800;color:var(--text)">₹0</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px">forever</div>
+        <ul style="list-style:none;text-align:left;margin-bottom:16px">
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ 10 screens/month</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ 3 resume analyses</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Basic AI screening</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ CSV export</li>
+        </ul>
+        <button class="btn btn-ghost btn-sm" style="width:100%" onclick="closeModal('pricingModal')">Current Plan</button>
+      </div>
+      <!-- Pro -->
+      <div style="padding:20px;background:rgba(124,58,237,.08);border:1.5px solid var(--violet);border-radius:14px;text-align:center;position:relative">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--violet),var(--cyan));padding:2px 12px;border-radius:20px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap">Most Popular</div>
+        <div style="font-size:12px;font-weight:700;color:var(--violet2);text-transform:uppercase;margin-bottom:8px">Pro</div>
+        <div style="font-family:var(--font-h);font-size:30px;font-weight:800;color:var(--cyan)">₹499</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px">/month</div>
+        <ul style="list-style:none;text-align:left;margin-bottom:16px">
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Unlimited screens</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Deep AI analysis</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Email campaigns</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Screening history</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Priority support</li>
+        </ul>
+        <button class="btn btn-cyan btn-sm" style="width:100%" onclick="startPayment(499,'Pro Monthly')">Upgrade to Pro →</button>
+      </div>
+      <!-- Team -->
+      <div style="padding:20px;background:var(--glass);border:1px solid var(--border);border-radius:14px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:8px">Team</div>
+        <div style="font-family:var(--font-h);font-size:30px;font-weight:800;color:var(--text)">₹999</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px">/month</div>
+        <ul style="list-style:none;text-align:left;margin-bottom:16px">
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Everything in Pro</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ 5 recruiter accounts</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Bulk 100+ screens</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ Bias-free mode</li>
+          <li style="font-size:11px;color:var(--text2);margin-bottom:5px">✓ ATS integration</li>
+        </ul>
+        <button class="btn btn-ghost btn-sm" style="width:100%" onclick="startPayment(999,'Team Monthly')">Upgrade Team →</button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:11px;color:var(--text3)">🔒 Secure payment via Razorpay · Cancel anytime · Instant activation</div>
+  </div>
+</div>
+
 <!-- ===== AUTH MODAL ===== -->
 <div id="authModal">
   <div class="auth-card">
@@ -811,6 +914,7 @@ select.filter-input{cursor:pointer}
       <div class="nav-item" onclick="showPage('jobs')"><span class="nav-icon">💼</span>Job Postings</div>
       <div class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⚙️</span>Settings</div>
       <div class="nav-item" onclick="showPage('portfolio')"><span class="nav-icon">🧑‍💻</span>My Portfolio</div>
+      <div class="nav-item" onclick="openPricing()" style="margin-top:8px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.2);border-radius:8px;color:var(--violet2)"><span class="nav-icon">⚡</span>Upgrade Plan</div>
     </div>
     <div id="seekNav" style="display:none">
       <div class="nav-section">Overview</div>
@@ -832,7 +936,10 @@ select.filter-input{cursor:pointer}
     <div class="topbar">
       <button class="hamburger" id="hamburger" onclick="toggleSidebar()">☰</button>
       <div class="topbar-title" id="pageTitle">Dashboard</div>
-      <button class="btn btn-cyan btn-sm" id="topAction" onclick="topActionFn()">+ Screen Resumes</button>
+      <div style="display:flex;gap:8px;align-items:center">
+  <a href="https://forms.gle/HireAIfeedback" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm" style="font-size:11px;text-decoration:none;color:var(--text2)">💬 Feedback</a>
+  <button class="btn btn-cyan btn-sm" id="topAction" onclick="topActionFn()">+ Screen Resumes</button>
+</div>
     </div>
 
     <!-- ===== RECRUITER PAGES ===== -->
@@ -896,6 +1003,17 @@ select.filter-input{cursor:pointer}
                 <div id="screenProgress" style="display:none">
                   <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
                   <div style="font-size:12px;color:var(--text2);text-align:center" id="progressText">Analyzing...</div>
+                </div>
+                <div id="screenControls" style="display:none" class="screen-controls">
+                  <span style="font-size:11px;color:var(--text3);font-weight:600">SORT:</span>
+                  <button class="sort-btn active" onclick="sortResults('score')" id="sortScore">Score ↓</button>
+                  <button class="sort-btn" onclick="sortResults('name')" id="sortName">Name</button>
+                  <span style="font-size:11px;color:var(--text3);font-weight:600;margin-left:6px">FILTER:</span>
+                  <span class="filter-badge all active" onclick="filterResults('all')" id="filtAll">All</span>
+                  <span class="filter-badge acc" onclick="filterResults('Accepted')" id="filtAcc">✓ Accepted</span>
+                  <span class="filter-badge int" onclick="filterResults('Interview')" id="filtInt">⏳ Interview</span>
+                  <span class="filter-badge rej" onclick="filterResults('Rejected')" id="filtRej">✗ Rejected</span>
+                  <button class="btn btn-ghost btn-sm" style="margin-left:auto;font-size:11px" onclick="exportScreeningCSV()">📥 Export CSV</button>
                 </div>
                 <div id="screenResults">
                   <div class="empty-state"><div class="e-icon">🤖</div><p>Upload resumes and click Start AI Screening</p></div>
@@ -1572,6 +1690,21 @@ function loadR(){
     }
   }catch(e){ console.error('loadR failed',e); }
 }
+// ── SUPABASE CONFIG ──────────────────────────────────────────────────────
+// Replace these with your Supabase project URL and anon key
+// Get them free at supabase.com → New Project → Settings → API
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+let _sb = null;
+function getSB(){
+  if(!_sb && SUPABASE_URL !== 'YOUR_SUPABASE_URL'){
+    try{ _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY); }
+    catch(e){ console.warn('Supabase init failed:', e); }
+  }
+  return _sb;
+}
+function supabaseConfigured(){ return SUPABASE_URL !== 'YOUR_SUPABASE_URL'; }
+
 function saveUsers(u){
   try{ localStorage.setItem('hireai_users', JSON.stringify(u)); return true; }
   catch(e){ console.error('saveUsers failed',e); return false; }
@@ -1632,34 +1765,83 @@ function authTab(t){
   document.getElementById('loginTab').className = 'auth-tab'+(t==='login'?' active':'');
   document.getElementById('registerTab').className = 'auth-tab'+(t==='register'?' active':'');
 }
-function doLogin(){
+async function doLogin(){
   const email = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const pass = document.getElementById('loginPass').value;
-  const err = document.getElementById('loginErr');
+  const pass  = document.getElementById('loginPass').value;
+  const err   = document.getElementById('loginErr');
+  const btn   = document.getElementById('loginBtn');
   err.style.display='none';
   if(!email||!pass){err.textContent='Please fill all fields';err.style.display='block';return}
-  // Demo accounts
+
+  // Demo account
   if(pendingRole==='recruiter' && email==='demo@hireai.com' && pass==='demo123'){
-    enterApp({name:'Harsh Pandey',email:email,role:'recruiter'});return;
+    enterApp({name:'Harsh Pandey',email,role:'recruiter'});return;
   }
+
+  // Try Supabase first, fallback to localStorage
+  if(supabaseConfigured()){
+    btn.disabled=true; btn.textContent='Signing in...';
+    try{
+      const sb = getSB();
+      const {data,error} = await sb.auth.signInWithPassword({email,password:pass});
+      if(error) throw error;
+      const meta = data.user.user_metadata;
+      const role = meta?.role || pendingRole;
+      // Save user data to Supabase profiles if not exists
+      enterApp({name: meta?.name||email.split('@')[0], email, role});
+      showToast('Signed in with cloud account ☁️','success');
+      return;
+    }catch(e){
+      // If Supabase fails, try localStorage
+      console.warn('Supabase login failed, trying local:', e.message);
+    }finally{ btn.disabled=false; btn.textContent='Sign In →'; }
+  }
+
+  // localStorage fallback
   const users = loadUsers();
-  const key = pendingRole+'_'+email;
-  if(!users[key]){err.textContent='Account not found. Please register.';err.style.display='block';return}
+  const key   = pendingRole+'_'+email;
+  if(!users[key]){err.textContent='Account not found. Please register first.';err.style.display='block';return}
   if(users[key].pass !== pass){err.textContent='Incorrect password.';err.style.display='block';return}
-  enterApp({name:users[key].name,email:email,role:pendingRole});
+  enterApp({name:users[key].name,email,role:pendingRole});
 }
-function doRegister(){
-  const name = document.getElementById('regName').value.trim();
+
+async function doRegister(){
+  const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim().toLowerCase();
-  const pass = document.getElementById('regPass').value;
-  const err = document.getElementById('regErr');
+  const pass  = document.getElementById('regPass').value;
+  const err   = document.getElementById('regErr');
+  const btn   = document.getElementById('regBtn');
   err.style.display='none';
   if(!name||!email||!pass){err.textContent='Please fill all fields';err.style.display='block';return}
   if(pass.length<6){err.textContent='Password must be at least 6 characters';err.style.display='block';return}
+
+  // Try Supabase first
+  if(supabaseConfigured()){
+    btn.disabled=true; btn.textContent='Creating account...';
+    try{
+      const sb = getSB();
+      const {data,error} = await sb.auth.signUp({
+        email, password:pass,
+        options:{data:{name, role:pendingRole}}
+      });
+      if(error) throw error;
+      showToast('Account created! Check email to verify (if required).','success');
+      enterApp({name,email,role:pendingRole});
+      return;
+    }catch(e){
+      console.warn('Supabase register failed, using local:', e.message);
+      if(e.message.includes('already registered')){
+        err.textContent='Email already registered. Please sign in.';err.style.display='block';
+        btn.disabled=false; btn.textContent='Create Account →'; return;
+      }
+    }finally{ btn.disabled=false; btn.textContent='Create Account →'; }
+  }
+
+  // localStorage fallback
   const users = loadUsers();
-  const key = pendingRole+'_'+email;
+  const key   = pendingRole+'_'+email;
   if(users[key]){err.textContent='Account already exists. Please sign in.';err.style.display='block';return}
-  users[key] = {name,pass};
+  users[key]={name,pass};
   saveUsers(users);
   enterApp({name,email,role:pendingRole});
 }
@@ -2362,7 +2544,174 @@ function saveJob(){
   });
   saveR();renderJobsList();closeModal('jobModal');showToast('Job posted! Job seekers can now see it.','success');
 }
+// ── RAZORPAY PAYMENT ─────────────────────────────────────────────────────
+// Replace RAZORPAY_KEY_ID with your Razorpay test key from razorpay.com
+const RAZORPAY_KEY = 'rzp_test_REPLACE_WITH_YOUR_KEY';
+
+function openPricing(){ openModal('pricingModal'); }
+
+function startPayment(amount, planName){
+  if(!currentUser){ showToast('Please sign in first','error'); return; }
+  if(RAZORPAY_KEY.includes('REPLACE')){
+    showToast('Razorpay not configured yet — get your key at razorpay.com','info');
+    return;
+  }
+  const options = {
+    key: RAZORPAY_KEY,
+    amount: amount * 100, // paise
+    currency: 'INR',
+    name: 'HireAI',
+    description: planName,
+    image: '',
+    prefill: {
+      name: currentUser.name,
+      email: currentUser.email,
+    },
+    theme: { color: '#7c3aed' },
+    handler: function(response){
+      // Payment successful
+      const plan = amount === 499 ? 'pro' : 'team';
+      R.settings = R.settings || {};
+      R.settings.plan = plan;
+      R.settings.planExpiry = new Date(Date.now() + 30*24*3600*1000).toISOString();
+      R.settings.paymentId = response.razorpay_payment_id;
+      saveR();
+      closeModal('pricingModal');
+      showToast(`🎉 ${planName} activated! Payment ID: ${response.razorpay_payment_id}`,'success');
+      if(typeof gtag!=='undefined') trackEvent('payment_success','Revenue', planName);
+      updatePlanBadge();
+    },
+    modal: { ondismiss: ()=>showToast('Payment cancelled','info') }
+  };
+  try{
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', (r)=>showToast('Payment failed: '+r.error.description,'error'));
+    rzp.open();
+  }catch(e){
+    showToast('Could not load Razorpay. Check your key.','error');
+    console.error(e);
+  }
+}
+
+function updatePlanBadge(){
+  const plan = R.settings?.plan;
+  if(!plan || plan==='free') return;
+  const badge = document.getElementById('planBadge');
+  if(badge){ badge.textContent = plan.toUpperCase(); badge.style.display='inline-block'; }
+}
+
+// ── REAL EMAIL via EmailJS ────────────────────────────────────────────────
+// Free at emailjs.com — 200 emails/month free
+// Replace SERVICE_ID, TEMPLATE_ID, PUBLIC_KEY with your EmailJS values
+const EMAILJS_SERVICE  = 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE = 'YOUR_TEMPLATE_ID';
+const EMAILJS_KEY      = 'YOUR_PUBLIC_KEY';
+let _emailjsLoaded = false;
+
+async function loadEmailJS(){
+  if(_emailjsLoaded) return true;
+  if(EMAILJS_KEY==='YOUR_PUBLIC_KEY') return false;
+  return new Promise(res=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+    s.onload=()=>{emailjs.init(EMAILJS_KEY);_emailjsLoaded=true;res(true)};
+    s.onerror=()=>res(false);
+    document.head.appendChild(s);
+  });
+}
+
+async function sendRealEmail(toEmail, toName, subject, body){
+  const loaded = await loadEmailJS();
+  if(!loaded){
+    // Fallback: open mailto
+    const mailto = `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailto);
+    showToast('Opening email client (configure EmailJS for automated sending)','info');
+    return;
+  }
+  try{
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      to_email: toEmail,
+      to_name: toName,
+      from_name: currentUser?.name || 'HireAI',
+      subject,
+      message: body,
+      reply_to: currentUser?.email || ''
+    });
+    showToast(`Email sent to ${toName}!`,'success');
+    if(typeof gtag!=='undefined') trackEvent('email_sent','Communication',subject);
+  }catch(e){
+    showToast('Email failed: '+e.text,'error');
+    console.error('EmailJS error:',e);
+  }
+}
+
 function delJob(id){if(confirm('Delete this job?')){R.jobs=R.jobs.filter(j=>j.id!==id);saveR();renderJobsList()}}
+
+// ── RESULT SORTING & FILTERING ────────────────────────────────────────────
+let _currentFilter = 'all';
+let _currentSort = 'score';
+
+function sortResults(by){
+  _currentSort = by;
+  document.querySelectorAll('.sort-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sort'+by.charAt(0).toUpperCase()+by.slice(1)).classList.add('active');
+  _renderFilteredResults();
+}
+
+function filterResults(filter){
+  _currentFilter = filter;
+  document.querySelectorAll('.filter-badge').forEach(b=>b.classList.remove('active'));
+  const idMap = {all:'filtAll',Accepted:'filtAcc',Interview:'filtInt',Rejected:'filtRej'};
+  document.getElementById(idMap[filter]).classList.add('active');
+  _renderFilteredResults();
+}
+
+function _renderFilteredResults(){
+  const cards = [...document.querySelectorAll('#screenResults .result-card')];
+  cards.forEach(c => {
+    const dec = c.dataset.decision;
+    c.style.display = (_currentFilter==='all' || dec===_currentFilter) ? 'block' : 'none';
+  });
+  const visible = cards.filter(c=>c.style.display!=='none');
+  visible.sort((a,b)=>{
+    if(_currentSort==='score') return Number(b.dataset.score)-Number(a.dataset.score);
+    return (a.querySelector('[style*="font-family:var(--font-h)"]')?.textContent||'')
+      .localeCompare(b.querySelector('[style*="font-family:var(--font-h)"]')?.textContent||'');
+  });
+  const container = document.getElementById('screenResults');
+  visible.forEach(c=>container.appendChild(c));
+}
+
+function exportScreeningCSV(){
+  const cards = [...document.querySelectorAll('#screenResults .result-card')];
+  if(!cards.length){showToast('No results to export','error');return}
+  const rows=[['Rank','Name','Score','Decision','Job']];
+  cards.filter(c=>c.style.display!=='none').forEach((c,i)=>{
+    const name=c.querySelector('.result-score-num')?.parentElement?.parentElement?.querySelector('[style*="font-family"]')?.textContent||'—';
+    rows.push([i+1,name,c.dataset.score,c.dataset.decision,'']);
+  });
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='hireai_screening_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+  showToast('CSV exported!','success');
+}
+
+function emailOneCandidate(candId){
+  const c = R.candidates.find(x=>x.id===candId);
+  if(!c){showToast('Candidate not found','error');return}
+  showPage('email');
+  setTimeout(()=>{
+    document.getElementById('emailSubj').value=`Your application for ${c.position||'the role'} — HireAI`;
+    const body = c.decision==='Accepted'
+      ? `Dear ${c.name},\n\nThank you for applying for ${c.position||'the role'}.\n\nAfter reviewing your resume, we are pleased to inform you that your profile has been shortlisted. Our team will be in touch with next steps shortly.\n\nBest regards,\n${currentUser?.name||'Hiring Team'}`
+      : c.decision==='Interview'
+      ? `Dear ${c.name},\n\nThank you for applying for ${c.position||'the role'}.\n\nWe would like to invite you for an interview. Please reply to this email with your availability.\n\nBest regards,\n${currentUser?.name||'Hiring Team'}`
+      : `Dear ${c.name},\n\nThank you for applying for ${c.position||'the role'}.\n\nAfter careful consideration, we regret to inform you that we will not be moving forward with your application at this time. We encourage you to apply for future opportunities.\n\nBest regards,\n${currentUser?.name||'Hiring Team'}`;
+    document.getElementById('emailBody').value=body;
+    showToast('Email drafted for '+c.name,'success');
+  },300);
+}
 
 function screenForJob(jobId){
   // Navigate to AI Screening and pre-select this job
@@ -2530,41 +2879,100 @@ async function startScreening(){
       const decision=result.score>=thresh?'Accepted':result.score>=(thresh-15)?'Interview':'Rejected';
       const cand={id:'c'+Date.now()+i,name:result.name||f.name.replace(/\.[^.]+$/,''),email:result.email||'',position:document.getElementById('screenJob').options[document.getElementById('screenJob').selectedIndex]?.text||'Custom JD',score:result.score,decision,analysis:result.analysis,strengths:result.strengths||[],improvements:result.improvements||[],date:new Date().toISOString()};
       R.candidates.push(cand);saveR();
-      const recoBadge = result.recommendation||'';
-      const recoCol = recoBadge.toLowerCase().includes('shortlist')||recoBadge.toLowerCase().includes('interview')?'var(--green)':recoBadge.toLowerCase().includes('reject')?'var(--red)':'var(--amber)';
-      const div=document.createElement('div');div.className='result-card';
-      div.innerHTML=`
-        <div class="result-header">
-          <div class="result-score ${cand.score>=70?'great':cand.score>=50?'good':'fair'}">${cand.score}</div>
-          <div style="flex:1">
-            <div style="font-weight:700;font-size:15px">${cand.name}</div>
-            <div style="font-size:12px;color:var(--text2)">${cand.email||f.name}</div>
-            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">${decBadge(decision)}${recoBadge?`<span style="font-size:11px;font-weight:600;color:${recoCol};background:rgba(255,255,255,.05);padding:2px 8px;border-radius:6px;border:1px solid ${recoCol}40">${recoBadge.split(' ')[0]}</span>`:''}</div>
+      // ── Build powerful result card ────────────────────────────────────
+      const sc = cand.score;
+      const isStrong = sc >= (thresh);
+      const isMaybe  = sc >= (thresh - 15) && sc < thresh;
+      const verdictCls = isStrong ? 'strong' : isMaybe ? 'maybe' : 'reject';
+      const verdictText = isStrong ? '✅ Strong Fit' : isMaybe ? '⏳ Possible Fit' : '❌ Not a Fit';
+      const verdictBarCls = isStrong ? 'verdict-strong' : isMaybe ? 'verdict-maybe' : 'verdict-reject';
+      const ringCol = isStrong ? '#10b981' : isMaybe ? '#f59e0b' : '#ef4444';
+      const circumference = 2 * Math.PI * 26;
+      const dashOffset = circumference * (1 - sc/100);
+      const matchedSkills = result.keyword_match || result.strengths?.slice(0,4) || [];
+      const missingSkills = result.missing_skills || [];
+      const whyText = result.recommendation || result.analysis || '';
+
+      const div = document.createElement('div');
+      div.className = 'result-card';
+      div.dataset.score = sc;
+      div.dataset.decision = decision;
+      div.innerHTML = `
+        <div class="result-card-header">
+          <div class="result-score-ring">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="26" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="5"/>
+              <circle cx="32" cy="32" r="26" fill="none" stroke="${ringCol}" stroke-width="5"
+                stroke-dasharray="${circumference.toFixed(1)}" stroke-dashoffset="${dashOffset.toFixed(1)}"
+                stroke-linecap="round"/>
+            </svg>
+            <div class="result-score-num" style="color:${ringCol}">${sc}</div>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:var(--font-h);font-size:16px;font-weight:700;margin-bottom:2px">${cand.name}</div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${cand.email||f.name}</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              ${decBadge(decision)}
+              ${result.experience_gap?`<span style="font-size:10px;color:var(--amber);background:rgba(245,158,11,.1);padding:2px 7px;border-radius:6px">⏱ ${result.experience_gap.slice(0,60)}</span>`:''}
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">Match</div>
+            <div style="font-family:var(--font-h);font-size:22px;font-weight:800;color:${ringCol}">${sc}%</div>
           </div>
         </div>
-        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:10px;padding:10px;background:var(--glass);border-radius:8px">${cand.analysis}</p>
-        ${result.experience_gap?`<p style="font-size:11px;color:var(--amber);margin-bottom:8px">⏱ ${result.experience_gap}</p>`:''}
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <div>
-            <div style="font-size:10px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">✓ Strengths</div>
-            ${(cand.strengths||[]).map(s=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px;padding-left:8px;border-left:2px solid var(--green)">• ${s}</div>`).join('')}
+
+        <div class="result-card-body">
+          <div class="result-verdict-bar ${verdictBarCls}">
+            <div class="verdict-label ${verdictCls}">${verdictText}</div>
+            <div style="font-size:11px;color:var(--text3)">${cand.position}</div>
           </div>
-          <div>
-            <div style="font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">→ Improvements</div>
-            ${(result.improvements||[]).map(i=>`<div style="font-size:11px;color:var(--text2);margin-bottom:3px;padding-left:8px;border-left:2px solid var(--amber)">• ${i}</div>`).join('')}
+
+          <div class="skills-row">
+            <div>
+              <div class="skills-col-title" style="color:var(--green)">✅ Skills Matched</div>
+              <div>${matchedSkills.length
+                ? matchedSkills.slice(0,5).map(s=>`<span class="skill-chip match">✓ ${s}</span>`).join('')
+                : '<span style="font-size:11px;color:var(--text3)">—</span>'
+              }</div>
+            </div>
+            <div>
+              <div class="skills-col-title" style="color:var(--red)">❌ Missing Skills</div>
+              <div>${missingSkills.length
+                ? missingSkills.slice(0,5).map(s=>`<span class="skill-chip miss">✗ ${s}</span>`).join('')
+                : '<span style="font-size:11px;color:var(--green)">No critical gaps</span>'
+              }</div>
+            </div>
+          </div>
+
+          <div class="why-box">
+            <div class="why-box-label">${isStrong?'🤖 Why Selected':'❌ Why Not Selected'}</div>
+            ${whyText}
+          </div>
+
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="showProfile('${cand.id}')">View Full Report</button>
+            <button class="btn btn-ghost btn-sm" style="font-size:11px;color:var(--cyan)" onclick="emailOneCandidate('${cand.id}')">✉️ Email Candidate</button>
           </div>
         </div>
-        ${(result.missing_skills||[]).length?`<div style="margin-bottom:6px"><span style="font-size:10px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.06em">Missing Skills: </span>${result.missing_skills.map(s=>`<span class="tag" style="color:var(--red);border-color:rgba(239,68,68,.3);font-size:10px">${s}</span>`).join('')}</div>`:''}
-        ${(result.keyword_match||[]).length?`<div><span style="font-size:10px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:.06em">Keyword Matches: </span>${result.keyword_match.map(s=>`<span class="tag" style="color:var(--cyan);border-color:rgba(0,229,255,.3);font-size:10px">${s}</span>`).join('')}</div>`:''}
       `;
       document.getElementById('screenResults').appendChild(div);
+      // Show controls once first result is in
+      document.getElementById('screenControls').style.display='flex';
+      // Track in analytics
+      if(typeof gtag!=='undefined') trackEvent('resume_screened','AI_Screening',decision);
     }catch(e){showToast(e.message||'Something went wrong analyzing this resume.','error')}
   }
   document.getElementById('progressFill').style.width='100%';
-  document.getElementById('progressText').textContent='Done!';
-  setTimeout(()=>document.getElementById('screenProgress').style.display='none',1500);
+  const total_processed = document.querySelectorAll('#screenResults .result-card').length;
+  document.getElementById('progressText').textContent=`Done! ${total_processed} resume${total_processed!==1?'s':''} analyzed.`;
+  setTimeout(()=>document.getElementById('screenProgress').style.display='none',2000);
   btn.disabled=false;btn.innerHTML='🤖 Start AI Screening';
-  uploadedFiles=[];renderFileList();refreshAll();showToast('Screening complete!','success');
+  uploadedFiles=[];renderFileList();refreshAll();
+  // Auto-sort by score
+  if(total_processed>1) sortResults('score');
+  showToast(`✅ Screening complete — ${total_processed} candidates analyzed and ranked!`,'success');
+  if(typeof gtag!=='undefined') trackEvent('batch_screened','AI_Screening', total_processed+' resumes');
 }
 async function callGroq(resumeText,jdText,fileName,thresh){
   const system = 'You are a senior HR director with 15 years of hiring experience. You read every word of a resume carefully and give brutally honest, specific, actionable feedback. You MUST respond with ONLY a valid JSON object. No markdown. No text outside the JSON.';
@@ -2658,14 +3066,47 @@ function updateEmailCnts(){
   if(!R.campaigns.length){t.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text3);padding:14px">No campaigns yet</td></tr>';return}
   t.innerHTML=R.campaigns.map(c=>`<tr><td style="font-size:13px">${c.subj.slice(0,30)}...</td><td style="font-size:13px">${c.count}</td><td style="font-size:11px;color:var(--text3)">${fmtDate(c.date)}</td></tr>`).join('');
 }
-function sendEmails(){
-  const target=document.getElementById('emailTarget').value;
-  const map={accepted:'Accepted',interview:'Interview',rejected:'Rejected',all:null};
-  const targetDec=map[target];
-  const list=targetDec?R.candidates.filter(c=>c.decision===targetDec):R.candidates;
+async function sendEmails(){
+  const target  = document.getElementById('emailTarget').value;
+  const subj    = document.getElementById('emailSubj').value.trim();
+  const body    = document.getElementById('emailBody').value.trim();
+  const map     = {accepted:'Accepted',interview:'Interview',rejected:'Rejected',all:null};
+  const targetDec = map[target];
+  const list    = targetDec ? R.candidates.filter(c=>c.decision===targetDec) : R.candidates;
   if(!list.length){showToast('No candidates in this group','error');return}
-  R.campaigns.push({id:'e'+Date.now(),subj:document.getElementById('emailSubj').value,count:list.length,date:new Date().toISOString()});
-  saveR();updateEmailCnts();showToast(`Sent to ${list.length} candidates (demo mode)`,'success');
+  if(!subj||!body){showToast('Please fill subject and body','error');return}
+
+  // Filter to candidates who have emails
+  const withEmail = list.filter(c=>c.email&&c.email.includes('@'));
+  const noEmail   = list.length - withEmail.length;
+
+  if(EMAILJS_KEY==='YOUR_PUBLIC_KEY'){
+    // Demo mode — show what would be sent
+    showToast(`Demo mode: would send to ${list.length} candidates. Configure EmailJS for real sending.`,'info');
+    R.campaigns.push({id:'e'+Date.now(),subj,count:list.length,date:new Date().toISOString(),mode:'demo'});
+    saveR();updateEmailCnts();
+    return;
+  }
+
+  const btn = document.querySelector('[onclick="sendEmails()"]');
+  if(btn){btn.disabled=true;btn.textContent='Sending...';}
+
+  let sent=0, failed=0;
+  for(const cand of withEmail){
+    try{
+      await sendRealEmail(cand.email, cand.name, subj, body);
+      sent++;
+      showToast(`Sent ${sent}/${withEmail.length}...`,'info');
+      await new Promise(r=>setTimeout(r,400)); // rate limit
+    }catch(e){ failed++; }
+  }
+
+  R.campaigns.push({id:'e'+Date.now(),subj,count:sent,date:new Date().toISOString(),mode:'real'});
+  saveR();updateEmailCnts();
+  if(btn){btn.disabled=false;btn.textContent='📤 Send Emails';}
+
+  const msg = `Sent ${sent} emails${failed?`, ${failed} failed`:''}${noEmail?`, ${noEmail} skipped (no email)`:''}`;
+  showToast(msg,'success');
 }
 
 // ===== SETTINGS (RECRUITER) =====
