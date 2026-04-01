@@ -3825,8 +3825,8 @@ function initChatbot(){
   const r=ROLE||'jobseeker';
   const nm=currentUser?.name?.split(' ')[0]||'there';
   const greeting=r==='recruiter'
-    ?'Hi '+nm+'! I'm your recruiting assistant. I can help with JDs, candidate evaluation, interview questions, and using HireAI. What do you need?'
-    :'Hi '+nm+'! I'm your career assistant. I can help improve your resume, prep for interviews, and guide your job search. What's on your mind?';
+    ?'Hi '+nm+'! I am your recruiting assistant. I can help with JDs, candidate evaluation, interview questions, and using HireAI. What do you need?'
+    :'Hi '+nm+'! I am your career assistant. I can help improve your resume, prep for interviews, and guide your job search. What is on your mind?';
   addCBMsg(greeting,'bot');
   renderCBSuggs();
 }
@@ -3885,7 +3885,21 @@ function openChatWith(peerEmail,peerName,peerRole){
   const mainEl=document.getElementById(isRec?'recChatMain':'seekChatMain');
   if(!mainEl)return;
   const col=peerRole==='recruiter'?'#7c3aed':'#10b981';
-  mainEl.innerHTML='<div class="chat-main-header"><div style="width:36px;height:36px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">'+getInit(peerName)+'</div><div style="flex:1"><div style="font-size:14px;font-weight:700">'+peerName+'</div><div style="font-size:11px;color:var(--text3)">'+peerEmail+'</div></div><div class="online-dot"></div></div><div class="chat-main-messages" id="liveChatMsgs"></div><div class="chat-input-row"><textarea class="chat-input-main" id="liveChatInput" rows="2" placeholder="Type a message..."></textarea><button class="chat-send-btn" onclick="sendLiveMsg()">Send →</button></div>';
+  mainEl.innerHTML=[
+    '<div class="chat-main-header">',
+      '<div style="width:36px;height:36px;border-radius:50%;background:'+col+';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">'+getInit(peerName)+'</div>',
+      '<div style="flex:1">',
+        '<div style="font-size:14px;font-weight:700">'+peerName+'</div>',
+        '<div style="font-size:11px;color:var(--text3)">'+peerEmail+'</div>',
+      '</div>',
+      '<div class="online-dot"></div>',
+    '</div>',
+    '<div class="chat-main-messages" id="liveChatMsgs"></div>',
+    '<div class="chat-input-row">',
+      '<textarea class="chat-input-main" id="liveChatInput" rows="2" placeholder="Type a message..."></textarea>',
+      '<button class="chat-send-btn" onclick="sendLiveMsg()">Send →</button>',
+    '</div>'
+  ].join('');
   const ci2=document.getElementById('liveChatInput');
   if(ci2) ci2.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendLiveMsg();}});
   renderLiveMsgs(peerEmail);
@@ -3898,7 +3912,13 @@ function renderLiveMsgs(peer){
   el.innerHTML=hist.map(m=>{
     const isMe=m.from===currentUser?.email;
     const t=new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    return '<div><div class="chat-bubble '+(isMe?'me':'them')+'">'+m.text+'</div><div class="chat-bubble-meta" style="text-align:'+(isMe?'right':'left')+'">'+(isMe?'You':m.fromName)+' · '+t+'</div></div>';
+    const bubbleCls = isMe ? 'me' : 'them';
+    const align = isMe ? 'right' : 'left';
+    return '<div>'
+      + '<div class="chat-bubble ' + bubbleCls + '">' + m.text + '</div>'
+      + '<div class="chat-bubble-meta" style="text-align:' + align + '">'
+      + (isMe ? 'You' : m.fromName) + ' · ' + t
+      + '</div></div>';
   }).join('');
   el.scrollTop=el.scrollHeight;
 }
@@ -3936,7 +3956,16 @@ function populateSeekRecruiterList(){
     .filter(([k,v])=>k.startsWith('recruiter_')&&v.company)
     .map(([k,v])=>({email:k.replace('recruiter_',''),name:v.name,company:v.company,role:v.jobRole,verified:v.verified}));
   if(!recs.length){el.innerHTML='<div style="font-size:11px;color:var(--text3);padding:8px">No recruiters registered yet. Share HireAI with recruiters!</div>';return;}
-  el.innerHTML=recs.map(r=>'<div class="chat-thread-item" onclick="openChatWith(''+r.email+'',''+r.name.replace(/'/g,'`')+'','recruiter')"><div class="chat-thread-avatar" style="background:linear-gradient(135deg,#7c3aed,#00e5ff)">'+getInit(r.name)+'</div><div style="flex:1;min-width:0"><div class="chat-thread-name">'+r.name+(r.verified?'<span style="font-size:9px;color:var(--green);margin-left:4px">✓ Verified</span>':'')+'</div><div class="chat-thread-preview">'+r.company+' · '+(r.role||'Recruiter')+'</div></div></div>').join('');
+  el.innerHTML=recs.map(r=>{
+    const nm=r.name.replace(/'/g,'').replace(/"/g,'');
+    const verBadge=r.verified?'<span style="font-size:9px;color:var(--green);margin-left:4px">&#10003; Verified</span>':'';
+    return '<div class="chat-thread-item" onclick="openChatWith(\'' + r.email + '\',\'' + nm + '\',\'recruiter\')">'
+      + '<div class="chat-thread-avatar" style="background:linear-gradient(135deg,#7c3aed,#00e5ff)">' + getInit(r.name) + '</div>'
+      + '<div style="flex:1;min-width:0">'
+        + '<div class="chat-thread-name">' + r.name + verBadge + '</div>'
+        + '<div class="chat-thread-preview">' + r.company + ' &middot; ' + (r.role||'Recruiter') + '</div>'
+      + '</div></div>';
+  }).join('');
 }
 
 // ===== DRAG & DROP =====
