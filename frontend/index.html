@@ -419,6 +419,7 @@ select.s-input{cursor:pointer}
 .js-tab.active{color:var(--cyan);border-bottom-color:var(--cyan)}
 .js-content{display:none;padding:20px 24px 40px}
 .js-content.active{display:block;animation:fadeUp .3s ease}
+.js-content.active{display:block;animation:fadeUp .3s ease}
 .jobs-layout{display:grid;grid-template-columns:220px 320px 1fr;gap:14px;align-items:start}
 .filter-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--r);padding:16px;position:sticky;top:120px;max-height:calc(100vh - 140px);overflow-y:auto}
 .filter-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:6px;margin-top:12px;display:block}
@@ -1371,6 +1372,9 @@ select.filter-input{cursor:pointer}
 
 
 
+        </div>
+    </div>
+
     <div id="seekPages" style="display:none">
       <div class="js-tabs" style="background:#0a0b14">
         <div class="js-tab active" id="jstab-browse" onclick="showJSTab('browse')">🔍 Browse Jobs</div>
@@ -1543,7 +1547,7 @@ select.filter-input{cursor:pointer}
 
       <!-- Seek Chat Page (standalone, outside tabs) -->
       <!-- AI Interview Page (Job Seeker) -->
-      <div class="page" id="seek-page-interview" style="display:none">
+      <div id="seek-page-interview" style="display:none;padding:20px 24px">
         <div style="margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
           <div>
             <div style="font-family:var(--font-h);font-size:18px;font-weight:700">AI Interview Practice</div>
