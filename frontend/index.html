@@ -3938,6 +3938,41 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(ci) ci.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChatbotMsg();}});
 });
 
+// ── AI INTERVIEW STATE ────────────────────────────────────────────────────
+let intQuestions=[], intCurrentQ=0, intAnswers=[], intActive=false;
+
+async function startAIInterview(){
+  const role    = document.getElementById('intRole')?.value||'Software Engineer';
+  const company = document.getElementById('intCompany')?.value||'Google';
+  const exp     = document.getElementById('intExp')?.value||'Fresher';
+  const type    = document.getElementById('intType')?.value||'technical';
+  const count   = parseInt(document.getElementById('intCount')?.value)||10;
+  const btn     = document.getElementById('intStartBtn');
+  const session = document.getElementById('intSession');
+  const typeLabels={technical:'Technical',hr:'HR',system_design:'System Design',behavioral:'Behavioral (STAR)',coding:'Coding & DSA'};
+
+  btn.disabled=true; btn.innerHTML='<span class="loader"></span> Generating questions...';
+  session.innerHTML='<div class="card" style="text-align:center;padding:40px"><div class="loader" style="width:32px;height:32px;border-width:3px;margin:0 auto 12px"></div><p style="color:var(--text2)">AI is crafting '+count+' real interview questions for '+role+' at '+company+'...</p></div>';
+
+  const system='You are a senior interviewer at '+company+' with 10 years experience. Generate exactly '+count+' '+typeLabels[type]+' interview questions for '+role+' ('+exp+'). Return ONLY valid JSON, no markdown.';
+  const prompt='Generate '+count+' '+typeLabels[type]+' interview questions for '+role+' ('+exp+') at '+company+'. Return ONLY this JSON: {"questions":[{"id":1,"question":"Full question","hint":"What a good answer covers","difficulty":"Easy/Medium/Hard","category":"'+typeLabels[type]+'"}]}';
+
+  try{
+    const res=await fetch('/api/claude',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({max_tokens:1500,system,messages:[{role:'user',content:prompt}]})});
+    const data=await safeJson(res);
+    if(!res.ok||!data.content?.[0]?.text) throw new Error('No AI response');
+    const parsed=extractJSON(data.content[0].text);
+    if(!parsed||!parsed.questions?.length) throw new Error('Could not parse questions');
+    intQuestions=parsed.questions; intCurrentQ=0; intAnswers=[]; intActive=true;
+    renderInterviewSession(role,company,type,typeLabels[type]);
+  }catch(e){
+    session.innerHTML='<div class="card" style="text-align:center;padding:40px"><p style="color:var(--red);margin-bottom:12px">'+e.message+'</p><button class="btn btn-ghost btn-sm" onclick="startAIInterview()">Try Again</button></div>';
+  }finally{
+    btn.disabled=false; btn.innerHTML='🎯 Start Interview';
+  }
+}
+
 function renderInterviewSession(role, company, type, typeLabel){
   const session = document.getElementById('intSession');
   const total = intQuestions.length;
